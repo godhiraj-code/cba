@@ -37,11 +37,19 @@ class CBAHub {
         this.wss.on('connection', (ws) => {
             const id = nanoid();
             ws.on('message', async (data) => {
-                const msg = JSON.parse(data);
-                if (msg.type !== 'HEARTBEAT') {
-                    console.log(`[CBA Hub] RECV: ${msg.type} from ${this.sentinels.get(id)?.layer || 'Unknown'}`);
+                try {
+                    const msg = JSON.parse(data);
+                    if (!this.validateProtocol(msg)) {
+                        console.error(`[CBA Hub] RECV INVALID PROTOCOL from ${id}:`, msg);
+                        return;
+                    }
+                    if (msg.method !== 'starlight.pulse') {
+                        console.log(`[CBA Hub] RECV: ${msg.method} from ${this.sentinels.get(id)?.layer || 'Unknown'}`);
+                    }
+                    await this.handleMessage(id, ws, msg);
+                } catch (e) {
+                    console.error(`[CBA Hub] Parse Error from ${id}:`, e.message);
                 }
-                await this.handleMessage(id, ws, msg);
             });
             ws.on('close', () => this.handleDisconnect(id));
         });
@@ -77,10 +85,14 @@ class CBAHub {
                 });
             });
         });
-
         await this.page.exposeFunction('onMutation', (mutation) => {
             this.broadcastMutation(mutation);
         });
+    }
+
+    validateProtocol(msg) {
+        // Starlight v2.0: JSON-RPC 2.0 Validation
+        return msg.jsonrpc === '2.0' && msg.method && msg.method.startsWith('starlight.') && msg.params;
     }
 
     handleDisconnect(id) {
@@ -94,34 +106,38 @@ class CBAHub {
 
     async handleMessage(id, ws, msg) {
         const sentinel = this.sentinels.get(id);
+        const params = msg.params;
 
-        switch (msg.type) {
-            case 'REGISTRATION':
-                this.sentinels.set(id, { ws, lastSeen: Date.now(), ...msg });
-                console.log(`[CBA Hub] Registered Sentinel: ${msg.layer} (Priority: ${msg.priority})`);
+        switch (msg.method) {
+            case 'starlight.registration':
+                this.sentinels.set(id, { ws, lastSeen: Date.now(), layer: params.layer, priority: params.priority, selectors: params.selectors });
+                console.log(`[CBA Hub] Registered Sentinel: ${params.layer} (Priority: ${params.priority})`);
                 break;
-            case 'HEARTBEAT':
-                if (sentinel) sentinel.lastSeen = Date.now();
+            case 'starlight.pulse':
+                if (sentinel) {
+                    sentinel.lastSeen = Date.now();
+                    sentinel.currentAura = params.data?.currentAura || [];
+                }
                 break;
-            case 'CLEAR':
+            case 'starlight.clear':
                 if (this.pendingRequests.has(id)) {
                     this.pendingRequests.get(id).resolve();
                     this.pendingRequests.delete(id);
                 }
                 break;
-            case 'HIJACK':
-                await this.handleHijack(id, msg);
+            case 'starlight.hijack':
+                await this.handleHijack(id, params);
                 break;
-            case 'RESUME':
-                this.handleResume(id, msg);
+            case 'starlight.resume':
+                this.handleResume(id, params);
                 break;
-            case 'INTENT_COMMAND':
-                this.enqueueCommand(id, msg);
+            case 'starlight.intent':
+                this.enqueueCommand(id, { ...params, id: msg.id }); // Include JSON-RPC id for response correlation
                 break;
-            case 'SENTINEL_ACTION':
-                await this.executeSentinelAction(id, msg);
+            case 'starlight.action':
+                await this.executeSentinelAction(id, params);
                 break;
-            case 'TEST_FINISHED':
+            case 'starlight.finish':
                 await this.shutdown();
                 break;
         }
@@ -263,7 +279,8 @@ class CBAHub {
     }
 
     async broadcastPreCheck(msg) {
-        console.log(`[CBA Hub] Awaiting Handshake for ${msg.cmd}...`);
+        const syncBudget = 200; // The Starlight Speed Limit (200ms - production tunable)
+        console.log(`[CBA Hub] Awaiting Handshake for ${msg.cmd} (Budget: ${syncBudget}ms)...`);
         const relevantSentinels = Array.from(this.sentinels.entries())
             .filter(([id, s]) => s.priority <= 10);
 
@@ -296,12 +313,14 @@ class CBAHub {
             return results;
         }, allSelectors);
 
-        console.log(`[CBA Hub] Handshake Audit Details:`, blockingElements.map(b => `${b.id}: ${b.display} (${b.rect})`));
-
         this.broadcast({
-            type: 'PRE_CHECK',
-            command: msg,
-            blocking: blockingElements
+            jsonrpc: '2.0',
+            method: 'starlight.pre_check',
+            params: {
+                command: msg,
+                blocking: blockingElements
+            },
+            id: nanoid()
         });
 
         const promises = relevantSentinels.map(([id, s]) => {
@@ -313,10 +332,11 @@ class CBAHub {
         try {
             await Promise.race([
                 Promise.all(promises),
-                new Promise((_, r) => setTimeout(() => r('timeout'), 400))
+                new Promise((_, r) => setTimeout(() => r('timeout'), syncBudget))
             ]);
             return true;
         } catch (e) {
+            if (e === 'timeout') console.warn(`[CBA Hub] Handshake TIMEOUT: Sentinel sync exceeded ${syncBudget}ms.`);
             return false;
         } finally {
             this.pendingRequests.clear();
@@ -340,20 +360,20 @@ class CBAHub {
 
     async executeSentinelAction(id, msg) {
         if (this.lockOwner !== id) return;
-        console.log(`[CBA Hub] Sentinel Action: ${msg.cmd} ${msg.selector}`);
+        console.log(`[CBA Hub] Sentinel Action: ${msg.cmd} ${msg.selector} `);
         try {
             if (msg.cmd === 'click') {
-                console.log(`[CBA Hub] Force-clicking Sentinel target: ${msg.selector}`);
+                console.log(`[CBA Hub]Force - clicking Sentinel target: ${msg.selector} `);
                 try {
                     await this.page.click(msg.selector, { timeout: 2000, force: true });
                 } catch (clickErr) {
                     console.warn(`[CBA Hub] Standard click failed, using dispatchEvent fallback...`);
                     await this.page.dispatchEvent(msg.selector, 'click');
                 }
-                console.log(`[CBA Hub] Sentinel Action SUCCESS: ${msg.selector}`);
+                console.log(`[CBA Hub] Sentinel Action SUCCESS: ${msg.selector} `);
             }
         } catch (e) {
-            console.error(`[CBA Hub] Sentinel action failed: ${e.message}`);
+            console.error(`[CBA Hub] Sentinel action failed: ${e.message} `);
         }
 
         // ABSOLUTE SOVEREIGN REMEDIATION: Definitively clear the obstacle via JS
@@ -398,36 +418,36 @@ class CBAHub {
         console.log("[CBA Hub] Generating Hero Story Report...");
         const totalSavedMins = Math.floor(this.totalSavedTime / 60);
         const html = `
-        <!DOCTYPE html>
+    < !DOCTYPE html >
         <html>
-        <head>
-            <title>CBA Hero Story: Navigational Proof</title>
-            <style>
-                body { font-family: 'Inter', sans-serif; background: #0f172a; color: white; padding: 2rem; }
-                .hero-header { text-align: center; padding: 3rem; background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 12px; margin-bottom: 2rem; border: 1px solid #334155; }
-                .card { background: #1e293b; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #334155; position: relative; }
-                .hijack { border-left: 6px solid #f43f5e; background: rgba(244, 63, 94, 0.05); }
-                .command { border-left: 6px solid #3b82f6; background: rgba(59, 130, 246, 0.05); }
-                .tag { position: absolute; top: 1rem; right: 1rem; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
-                .tag-hijack { background: #f43f5e; }
-                .tag-command { background: #3b82f6; }
-                img { max-width: 100%; border-radius: 6px; margin-top: 1rem; border: 1px solid #475569; }
-                .flex { display: flex; gap: 1.5rem; }
-                .roi-dashboard { margin-top: 4rem; padding: 2rem; background: #064e3b; border-radius: 12px; border: 2px solid #10b981; text-align: center; }
-                .roi-value { font-size: 3rem; font-weight: 800; color: #10b981; margin: 1rem 0; }
-                .meta { color: #94a3b8; font-size: 0.85rem; margin-bottom: 0.5rem; font-family: monospace; }
-                h1, h3 { margin: 0; }
-                p { color: #cbd5e1; line-height: 1.6; }
-            </style>
-        </head>
-        <body>
-            <div class="hero-header">
-                <h1>🌠 Starlight Protocol: The Hero's Journey</h1>
-                <p>Proving that your intent is bigger than the environment's noise.</p>
-            </div>
+            <head>
+                <title>CBA Hero Story: Navigational Proof</title>
+                <style>
+                    body {font - family: 'Inter', sans-serif; background: #0f172a; color: white; padding: 2rem; }
+                    .hero-header {text - align: center; padding: 3rem; background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 12px; margin-bottom: 2rem; border: 1px solid #334155; }
+                    .card {background: #1e293b; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #334155; position: relative; }
+                    .hijack {border - left: 6px solid #f43f5e; background: rgba(244, 63, 94, 0.05); }
+                    .command {border - left: 6px solid #3b82f6; background: rgba(59, 130, 246, 0.05); }
+                    .tag {position: absolute; top: 1rem; right: 1rem; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+                    .tag-hijack {background: #f43f5e; }
+                    .tag-command {background: #3b82f6; }
+                    img {max - width: 100%; border-radius: 6px; margin-top: 1rem; border: 1px solid #475569; }
+                    .flex {display: flex; gap: 1.5rem; }
+                    .roi-dashboard {margin - top: 4rem; padding: 2rem; background: #064e3b; border-radius: 12px; border: 2px solid #10b981; text-align: center; }
+                    .roi-value {font - size: 3rem; font-weight: 800; color: #10b981; margin: 1rem 0; }
+                    .meta {color: #94a3b8; font-size: 0.85rem; margin-bottom: 0.5rem; font-family: monospace; }
+                    h1, h3 {margin: 0; }
+                    p {color: #cbd5e1; line-height: 1.6; }
+                </style>
+            </head>
+            <body>
+                <div class="hero-header">
+                    <h1>🌠 Starlight Protocol: The Hero's Journey</h1>
+                    <p>Proving that your intent is bigger than the environment's noise.</p>
+                </div>
 
-            <div id="timeline">
-                ${this.reportData.map(item => `
+                <div id="timeline">
+                    ${this.reportData.map(item => `
                     <div class="card ${item.type.toLowerCase()}">
                         <span class="tag tag-${item.type.toLowerCase()}">${item.type === 'HIJACK' ? 'Sentinel Intervention' : 'Intent Path'}</span>
                         <div class="meta">${item.timestamp}</div>
@@ -444,15 +464,15 @@ class CBAHub {
                         `}
                     </div>
                 `).join('')}
-            </div>
+                </div>
 
-            <div class="roi-dashboard">
-                <h2>📈 Business Value Dashboard</h2>
-                <div class="roi-value">~${totalSavedMins} Minutes Saved</div>
-                <p>By automating obstacle clearance and environment stability, Starlight prevented manual reproduction and debugging efforts for your engineering team.</p>
-                <p class="meta">ROI Calculation: 5 mins triage baseline + actual intervention duration per obstacle.</p>
-            </div>
-        </body>
+                <div class="roi-dashboard">
+                    <h2>📈 Business Value Dashboard</h2>
+                    <div class="roi-value">~${totalSavedMins} Minutes Saved</div>
+                    <p>By automating obstacle clearance and environment stability, Starlight prevented manual reproduction and debugging efforts for your engineering team.</p>
+                    <p class="meta">ROI Calculation: 5 mins triage baseline + actual intervention duration per obstacle.</p>
+                </div>
+            </body>
         </html>`;
         fs.writeFileSync(path.join(process.cwd(), 'report.html'), html);
         console.log("[CBA Hub] Hero Story saved to report.html");

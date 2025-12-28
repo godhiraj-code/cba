@@ -7,7 +7,19 @@ class IntentScript {
         this.ws = new WebSocket(uri);
         this.pending = new Map();
 
-        this.ws.on('open', () => this.run());
+        this.ws.on('open', () => {
+            // Starlight v2.0: Register as Intent Layer
+            this.ws.send(JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'starlight.registration',
+                params: {
+                    layer: 'IntentLayer',
+                    priority: 100 // Intent is low priority, never hijacks
+                },
+                id: nanoid()
+            }));
+            this.run();
+        });
         this.ws.on('message', (data) => this.handleResponse(data));
     }
 
@@ -16,10 +28,12 @@ class IntentScript {
         return new Promise((resolve, reject) => {
             console.log(`[Intent] Executing: ${cmd.cmd}...`);
             this.pending.set(id, { resolve, reject });
+            // Starlight v2.0: JSON-RPC Intent Command
             this.ws.send(JSON.stringify({
-                type: 'INTENT_COMMAND',
-                id,
-                ...cmd
+                jsonrpc: '2.0',
+                method: 'starlight.intent',
+                params: cmd,
+                id
             }));
         });
     }
@@ -60,8 +74,13 @@ class IntentScript {
 
             console.log("[Intent] GOAL ACHIEVED: The stars guided us.");
 
-            // Signal completion to generate report
-            this.ws.send(JSON.stringify({ type: 'TEST_FINISHED' }));
+            // Starlight v2.0: Signal test completion
+            this.ws.send(JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'starlight.finish',
+                params: {},
+                id: nanoid()
+            }));
             await new Promise(r => setTimeout(r, 2000));
         } catch (e) {
             console.error("[Intent] FAILED: Path blocked or system error.");

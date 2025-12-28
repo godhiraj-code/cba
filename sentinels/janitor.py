@@ -13,14 +13,18 @@ class JanitorSentinel:
 
     async def connect(self):
         async with websockets.connect(self.uri) as websocket:
-            print(f"[{self.layer}] Connected to Starlight Hub.")
+            print(f"[{self.layer}] Connected to Starlight Hub (v2.0 Protocol).")
             
-            # Registration
+            # Starlight v2.0: JSON-RPC Registration
             registration = {
-                "type": "REGISTRATION",
-                "layer": self.layer,
-                "priority": self.priority,
-                "selectors": self.blocking_patterns
+                "jsonrpc": "2.0",
+                "method": "starlight.registration",
+                "params": {
+                    "layer": self.layer,
+                    "priority": self.priority,
+                    "selectors": self.blocking_patterns
+                },
+                "id": str(int(time.time() * 1000))
             }
             await websocket.send(json.dumps(registration))
 
@@ -35,35 +39,33 @@ class JanitorSentinel:
 
     async def pulse(self, ws):
         while True:
-            await ws.send(json.dumps({"type": "HEARTBEAT"}))
-            await asyncio.sleep(1)
+            # Starlight v2.0: JSON-RPC Pulse with Aura
+            msg = {
+                "jsonrpc": "2.0",
+                "method": "starlight.pulse",
+                "params": {
+                    "data": {
+                        "currentAura": self.blocking_patterns
+                    }
+                },
+                "id": str(int(time.time() * 1000))
+            }
+            await ws.send(json.dumps(msg))
+            await asyncio.sleep(0.5)  # 500ms heartbeat
 
     async def handle_message(self, ws, data):
-        msg_type = data.get("type")
+        # Starlight v2.0: Check for JSON-RPC method
+        method = data.get("method")
+        params = data.get("params", {})
 
-        if msg_type == "dom_mutation":
-            target = data.get("target", {})
-            for pattern in self.blocking_patterns:
-                if pattern.replace('.', '') in target.get("className", "") or pattern.replace('#', '') == target.get("id", ""):
-                    if target.get("visibility") != "none":
-                        await self.hijack(ws, pattern, f"Mutation: detected visible {pattern}")
-                        return
-        
-        elif msg_type == "PRE_CHECK":
-            print(f"[{self.layer}] PRE_CHECK: Auditing environment for {data['command']['cmd']}...")
+        if method == "starlight.pre_check":
+            cmd = params.get("command", {}).get("cmd", "unknown")
+            print(f"[{self.layer}] PRE_CHECK: Auditing environment for {cmd}...")
             
             # Check for blocking elements sent by Hub
-            blocking = data.get("blocking", [])
+            blocking = params.get("blocking", [])
             if blocking:
                 for b in blocking:
-                    # Target the specific obstacle found during audit
-                    # The original code checked against self.blocking_patterns,
-                    # but the new snippet implies 'b' itself contains the selector.
-                    # Assuming 'b' is an object with 'selector', 'className', 'id'
-                    # and we want to check if it matches any of our known patterns.
-                    # The user's snippet for PRE_CHECK seems to assume 'b' has a 'selector' field
-                    # and that we should pass that specific selector to hijack.
-                    # I'll adapt to pass b['selector'] if it exists and matches our patterns.
                     matched_pattern = None
                     for pattern in self.blocking_patterns:
                         if pattern.replace('.', '') in b.get("className", "") or pattern.replace('#', '') == b.get("id", ""):
@@ -71,48 +73,67 @@ class JanitorSentinel:
                             break
                     
                     if matched_pattern:
-                        # Use the specific selector from 'b' if available, otherwise the matched pattern
                         selector_to_hijack = b.get('selector', matched_pattern)
                         await self.hijack(ws, selector_to_hijack, f"Proactive Audit: detected visible {selector_to_hijack}")
                         return 
             
-            # Fallback to general scan if no blocking provided but path not clear
-            # The user's snippet introduced check_environment, which is not defined.
-            # I'm retaining the original logic for clearing if no hijack occurred.
+            # Path is clear - send CLEAR signal
             if not self.is_hijacking:
-                await ws.send(json.dumps({"type": "CLEAR"}))
+                clear_msg = {
+                    "jsonrpc": "2.0",
+                    "method": "starlight.clear",
+                    "params": {},
+                    "id": str(int(time.time() * 1000))
+                }
+                await ws.send(json.dumps(clear_msg))
 
     async def hijack(self, ws, selector, reason):
-        if self.is_hijacking: return # Keep original guard
-        
+        if self.is_hijacking: return
+
         print(f"[{self.layer}] !!! HIJACKING !!! Reason: {reason}")
         self.is_hijacking = True
         
-        await ws.send(json.dumps({
-            "type": "HIJACK",
-            "reason": reason
-        }))
+        # Starlight v2.0: HIJACK signal
+        hijack_msg = {
+            "jsonrpc": "2.0",
+            "method": "starlight.hijack",
+            "params": {
+                "reason": reason,
+                "obstacleSignature": selector
+            },
+            "id": str(int(time.time() * 1000))
+        }
+        await ws.send(json.dumps(hijack_msg))
 
-        # Robust Clearing: Find the VISIBLE close button or modal
+        # Execute Sovereign Healing
         print(f"[{self.layer}] Executing Sovereign Healing...")
-        
-        # We now use a simpler selector and let the Hub handle the visibility details
-        # We append ' >> visible=true' to ensure Playwright doesn't target hidden zombies
-        # The user's snippet for hijack:
         target_pattern = selector if "close" in selector else ".close-btn"
-        await ws.send(json.dumps({
-            "type": "SENTINEL_ACTION",
-            "cmd": "click",
-            "selector": f"{target_pattern} >> visible=true"
-        }))
         
-        await asyncio.sleep(1.5) # Even more settle time for Chaos Loops
+        # Starlight v2.0: ACTION signal
+        action_msg = {
+            "jsonrpc": "2.0",
+            "method": "starlight.action",
+            "params": {
+                "cmd": "click",
+                "selector": f"{target_pattern} >> visible=true"
+            },
+            "id": str(int(time.time() * 1000))
+        }
+        await ws.send(json.dumps(action_msg))
+        
+        await asyncio.sleep(1.5)
 
+        # Starlight v2.0: RESUME signal
         print(f"[{self.layer}] Requesting RE_CHECK for landscape stability...")
-        await ws.send(json.dumps({
-            "type": "RESUME",
-            "re_check": True
-        }))
+        resume_msg = {
+            "jsonrpc": "2.0",
+            "method": "starlight.resume",
+            "params": {
+                "re_check": True
+            },
+            "id": str(int(time.time() * 1000))
+        }
+        await ws.send(json.dumps(resume_msg))
         self.is_hijacking = False
 
 if __name__ == "__main__":
