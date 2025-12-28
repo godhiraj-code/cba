@@ -15,13 +15,29 @@ Instead of a monolithic library, CBA uses a **Sidecar Architecture** communicati
 | **The Janitor (Sentinel)** | The Ground | Autonomous background process that watches for DOM obstacles (modals, cookie banners) and hijacks control to clear them. |
 | **The Pulse (Sentinel)** | Magnetic Field | Watches network/API traffic and prevents actions until the application is "stable." |
 
-## 🛰️ The Starlight Protocol
+## 🛰️ The Starlight Protocol (v2.0)
 
-The Hub and Sentinels communicate using standardized JSON signals:
-- **`PRE_CHECK`**: Hub broadcasts intent before execution, allowing Sentinels to "Veto" if an obstacle is detected.
-- **`HIJACK`**: A Sentinel pauses the main test queue to perform recovery actions.
-- **`RESUME`**: Sentinel returns control to the Hub after the path is clear.
-- **`TTL`**: Hub enforces a 5-second timeout on all hijacks to prevent "blindness."
+The Hub and Sentinels communicate using **JSON-RPC 2.0** standardized signals:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "starlight.[action]",
+  "params": { ... },
+  "id": "unique-id"
+}
+```
+
+| Method | Initiator | Purpose |
+| :--- | :--- | :--- |
+| `starlight.registration` | Sentinel | Register layer, priority, and selective patterns. |
+| `starlight.pre_check` | Hub | Broadcast intent before execution. Requires response. |
+| `starlight.hijack` | Sentinel | Request absolute browser lock for recovery. |
+| `starlight.resume` | Sentinel | Signal path is clear and return control. |
+| `starlight.pulse` | Sentinel | Async heartbeat (every 500ms). |
+
+### The Starlight Speed Limit
+The Hub enforces a **200ms** handshake budget. If a Sentinel doesn't respond to a `PRE_CHECK` within this window, the Hub proceeds without waiting. This ensures high-performance automation while allowing for defensive recovery.
 
 ## 📊 Visual Proof: Execution Report
 

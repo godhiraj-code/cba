@@ -43,13 +43,16 @@ await path.send({ cmd: 'goto', url: 'https://example.com' });
 await path.send({ cmd: 'click', selector: '#buy-now' });
 ```
 
-## 4. Creating Custom Sentinels
+## 4. Creating Custom Sentinels (Starlight v2.0)
 
-Sentinels are language-agnostic. To create one:
+Sentinels are language-agnostic. To create one using the **JSON-RPC 2.0** protocol:
 1.  Connect to `ws://localhost:8080`.
-2.  Register with a `priority` (1-10 are critical, 11+ are background).
-3.  Listen for `PRE_CHECK` messages.
-4.  If an obstacle is detected, send `HIJACK`, perform your action, and then `RESUME`.
+2.  Register with `starlight.registration`:
+    ```json
+    { "jsonrpc": "2.0", "method": "starlight.registration", "params": { "layer": "MySentinel", "priority": 5, "selectors": [".modal"] }, "id": "1" }
+    ```
+3.  Listen for `starlight.pre_check` messages from the Hub.
+4.  If an obstacle is detected, send `starlight.hijack`, perform your action via `starlight.action`, and then `starlight.resume`.
 
 ## 5. Interpreting Reports
 
