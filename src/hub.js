@@ -279,8 +279,8 @@ class CBAHub {
     }
 
     async broadcastPreCheck(msg) {
-        const syncBudget = 200; // The Starlight Speed Limit (200ms - production tunable)
-        console.log(`[CBA Hub] Awaiting Handshake for ${msg.cmd} (Budget: ${syncBudget}ms)...`);
+        const syncBudget = 30000; // Extended for AI Vision processing (30s for moondream)
+        console.log(`[CBA Hub] Awaiting Handshake for ${msg.cmd} (Budget: ${syncBudget / 1000}s)...`);
         const relevantSentinels = Array.from(this.sentinels.entries())
             .filter(([id, s]) => s.priority <= 10);
 
@@ -313,12 +313,23 @@ class CBAHub {
             return results;
         }, allSelectors);
 
+        // Phase 2: Capture screenshot for Vision Sentinel AI analysis
+        let screenshotB64 = null;
+        try {
+            const screenshotBuffer = await this.page.screenshot({ type: 'jpeg', quality: 50 });
+            screenshotB64 = screenshotBuffer.toString('base64');
+            console.log(`[CBA Hub] Screenshot captured for AI analysis (${Math.round(screenshotB64.length / 1024)}KB)`);
+        } catch (e) {
+            console.warn('[CBA Hub] Screenshot capture failed:', e.message);
+        }
+
         this.broadcast({
             jsonrpc: '2.0',
             method: 'starlight.pre_check',
             params: {
                 command: msg,
-                blocking: blockingElements
+                blocking: blockingElements,
+                screenshot: screenshotB64  // For Vision Sentinel
             },
             id: nanoid()
         });
