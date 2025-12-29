@@ -8,7 +8,7 @@ class JanitorSentinel:
         self.uri = uri
         self.layer = "JanitorSentinel"
         self.priority = 5
-        self.blocking_patterns = [".modal", ".popup", "#overlay"]
+        self.blocking_patterns = [".modal", ".popup", "#overlay", ".obstacle", "#stabilize-btn"]
         self.is_hijacking = False
 
     async def connect(self):

@@ -20,9 +20,10 @@ class CBAHub {
         this.systemHealthy = true;
         this.reportData = [];
         this.screenshotsDir = path.join(process.cwd(), 'screenshots');
-        this.startTime = Date.now();
         this.totalSavedTime = 0; // In seconds
         this.hijackStarts = new Map();
+        this.lastEntropyBroadcast = 0;
+        this.sovereignState = {}; // Phase 4: Shared Mission Context
 
         if (!fs.existsSync(this.screenshotsDir)) fs.mkdirSync(this.screenshotsDir);
 
@@ -30,6 +31,12 @@ class CBAHub {
     }
 
     async init() {
+        // v2.0 Mission Safety Timeout (3 mins)
+        setTimeout(() => {
+            console.warn("[CBA Hub] MISSION TIMEOUT REACHED. Closing browser...");
+            this.shutdown();
+        }, 180000);
+
         console.log(`[CBA Hub] Starting Starlight Hub: The Hero's Journey...`);
         this.browser = await chromium.launch({ headless: false });
         this.page = await this.browser.newPage();
@@ -61,6 +68,11 @@ class CBAHub {
             await dialog.dismiss();
         });
 
+        // v2.0 Phase 3: Network Entropy Tracking
+        this.page.on('request', () => this.broadcastEntropy());
+        this.page.on('requestfinished', () => this.broadcastEntropy());
+        this.page.on('requestfailed', () => this.broadcastEntropy());
+
         await this.page.addInitScript(() => {
             const observer = new MutationObserver((mutations) => {
                 for (const mutation of mutations) {
@@ -86,8 +98,67 @@ class CBAHub {
             });
         });
         await this.page.exposeFunction('onMutation', (mutation) => {
+            // v2.0 Phase 3: Broadcast entropy on mutation
+            this.broadcastEntropy();
             this.broadcastMutation(mutation);
         });
+    }
+
+    broadcastEntropy() {
+        const now = Date.now();
+        if (now - this.lastEntropyBroadcast < 100) return; // v2.0 Starlight Throttling (10hz max)
+        this.lastEntropyBroadcast = now;
+
+        const msg = JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'starlight.entropy_stream',
+            params: { entropy: true },
+            id: nanoid()
+        });
+        for (const ws of this.wss.clients) {
+            if (ws.readyState === WebSocket.OPEN) ws.send(msg);
+        }
+    }
+
+    async resolveSemanticIntent(goal) {
+        // v2.1 Semantic Resolver: Scans for text matches or ARIA labels
+        const target = await this.page.evaluate((goalText) => {
+            const buttons = Array.from(document.querySelectorAll('button, a, input[type="button"]'));
+            const normalizedGoal = goalText.toLowerCase();
+
+            // 1. Exact Match
+            let match = buttons.find(b => b.innerText.toLowerCase().includes(normalizedGoal));
+
+            // 2. Fuzzy ARIA match
+            if (!match) {
+                match = buttons.find(b =>
+                    (b.getAttribute('aria-label') || '').toLowerCase().includes(normalizedGoal) ||
+                    (b.id || '').toLowerCase().includes(normalizedGoal)
+                );
+            }
+
+            if (match) {
+                // Generate a unique CSS selector for the Hub to use
+                if (match.id) return `#${match.id}`;
+                if (match.className) return `.${match.className.split(' ').join('.')}`;
+                return match.tagName.toLowerCase();
+            }
+            return null;
+        }, goal);
+
+        return target;
+    }
+
+    broadcastContextUpdate() {
+        const msg = JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'starlight.sovereign_update',
+            params: { context: this.sovereignState },
+            id: nanoid()
+        });
+        for (const ws of this.wss.clients) {
+            if (ws.readyState === WebSocket.OPEN) ws.send(msg);
+        }
     }
 
     validateProtocol(msg) {
@@ -110,7 +181,14 @@ class CBAHub {
 
         switch (msg.method) {
             case 'starlight.registration':
-                this.sentinels.set(id, { ws, lastSeen: Date.now(), layer: params.layer, priority: params.priority, selectors: params.selectors });
+                this.sentinels.set(id, {
+                    ws,
+                    lastSeen: Date.now(),
+                    layer: params.layer,
+                    priority: params.priority,
+                    selectors: params.selectors,
+                    capabilities: params.capabilities
+                });
                 console.log(`[CBA Hub] Registered Sentinel: ${params.layer} (Priority: ${params.priority})`);
                 break;
             case 'starlight.pulse':
@@ -119,9 +197,23 @@ class CBAHub {
                     sentinel.currentAura = params.data?.currentAura || [];
                 }
                 break;
+            case 'starlight.context_update':
+                // Phase 4: Context Injection from Sentinels
+                if (params.context) {
+                    console.log(`[CBA Hub] Context Injection from ${sentinel?.layer || 'Unknown'}:`, params.context);
+                    this.sovereignState = { ...this.sovereignState, ...params.context };
+                    this.broadcastContextUpdate();
+                }
+                break;
             case 'starlight.clear':
                 if (this.pendingRequests.has(id)) {
-                    this.pendingRequests.get(id).resolve();
+                    this.pendingRequests.get(id).resolve(msg);
+                    this.pendingRequests.delete(id);
+                }
+                break;
+            case 'starlight.wait':
+                if (this.pendingRequests.has(id)) {
+                    this.pendingRequests.get(id).resolve(msg);
                     this.pendingRequests.delete(id);
                 }
                 break;
@@ -132,7 +224,20 @@ class CBAHub {
                 this.handleResume(id, params);
                 break;
             case 'starlight.intent':
-                this.enqueueCommand(id, { ...params, id: msg.id }); // Include JSON-RPC id for response correlation
+                // Phase 5: Handle Semantic Intent (Goal-based)
+                if (msg.params.goal) {
+                    console.log(`[CBA Hub] Resolving Semantic Goal: "${msg.params.goal}"`);
+                    const resolvedSelector = await this.resolveSemanticIntent(msg.params.goal);
+                    if (resolvedSelector) {
+                        msg.params.selector = resolvedSelector;
+                        msg.params.cmd = 'click'; // Default semantic action
+                    } else {
+                        console.error(`[CBA Hub] FAILED to resolve semantic goal: ${msg.params.goal}`);
+                        this.broadcastToClient(id, { type: 'COMMAND_COMPLETE', id: msg.id, success: false });
+                        return;
+                    }
+                }
+                this.enqueueCommand(id, { ...msg.params, id: msg.id });
                 break;
             case 'starlight.action':
                 await this.executeSentinelAction(id, params);
@@ -255,38 +360,63 @@ class CBAHub {
 
         const clear = await this.broadcastPreCheck(msg);
         if (!clear) {
+            console.log(`[CBA Hub] Pre-check failed or timed out for ${msg.cmd}. Retrying in 2s...`);
             this.commandQueue.unshift(msg);
+            setTimeout(() => this.processQueue(), 2000);
             return;
         }
 
+        // v2.1: Robust Screenshot Timing (Wait for settlement)
         const beforeScreenshot = await this.takeScreenshot(`BEFORE_${msg.cmd}`);
         const success = await this.executeCommand(msg);
+
+        // Brief wait for UI to reflect change before "AFTER" capture
+        await new Promise(r => setTimeout(r, 500));
         const afterScreenshot = await this.takeScreenshot(`AFTER_${msg.cmd}`);
 
         this.reportData.push({
             type: 'COMMAND',
             id: msg.id,
             cmd: msg.cmd,
-            selector: msg.selector,
+            selector: msg.selector || msg.goal,
             success,
             timestamp: new Date().toLocaleTimeString(),
             beforeScreenshot,
             afterScreenshot
         });
 
-        this.broadcastToClient(msg.clientId, { type: 'COMMAND_COMPLETE', id: msg.id, success });
+        this.broadcastToClient(msg.clientId, {
+            type: 'COMMAND_COMPLETE',
+            id: msg.id,
+            success,
+            context: this.sovereignState // Phase 4: Return shared context to Intent
+        });
         this.processQueue();
     }
 
     async broadcastPreCheck(msg) {
-        const syncBudget = 30000; // Extended for AI Vision processing (30s for moondream)
+        const syncBudget = 90000; // Deep Vision Budget (90s)
         console.log(`[CBA Hub] Awaiting Handshake for ${msg.cmd} (Budget: ${syncBudget / 1000}s)...`);
+
         const relevantSentinels = Array.from(this.sentinels.entries())
             .filter(([id, s]) => s.priority <= 10);
 
         if (relevantSentinels.length === 0) return true;
 
         const allSelectors = [...new Set(relevantSentinels.flatMap(([id, s]) => s.selectors || []))];
+
+        // v2.0 Phase 2: Add AI context (screenshot) if deep analysis is capability-flagged
+        let screenshotB64 = null;
+        if (relevantSentinels.some(([id, s]) => s.capabilities?.includes('vision'))) {
+            try {
+                const screenshotBuffer = await this.page.screenshot({ type: 'jpeg', quality: 80 });
+                screenshotB64 = screenshotBuffer.toString('base64');
+                console.log(`[CBA Hub] Screenshot captured for AI analysis (${Math.round(screenshotB64.length / 1024)}KB)`);
+            } catch (e) {
+                console.warn('[CBA Hub] Screenshot capture failed:', e.message);
+            }
+        }
+
         const blockingElements = await this.page.evaluate((selectors) => {
             const results = [];
             selectors.forEach(s => {
@@ -313,44 +443,48 @@ class CBAHub {
             return results;
         }, allSelectors);
 
-        // Phase 2: Capture screenshot for Vision Sentinel AI analysis
-        let screenshotB64 = null;
-        try {
-            const screenshotBuffer = await this.page.screenshot({ type: 'jpeg', quality: 50 });
-            screenshotB64 = screenshotBuffer.toString('base64');
-            console.log(`[CBA Hub] Screenshot captured for AI analysis (${Math.round(screenshotB64.length / 1024)}KB)`);
-        } catch (e) {
-            console.warn('[CBA Hub] Screenshot capture failed:', e.message);
-        }
-
+        // Standardize broadcast
         this.broadcast({
             jsonrpc: '2.0',
             method: 'starlight.pre_check',
             params: {
                 command: msg,
                 blocking: blockingElements,
-                screenshot: screenshotB64  // For Vision Sentinel
+                screenshot: screenshotB64
             },
             id: nanoid()
         });
 
+        // Use standard pendingRequests logic
         const promises = relevantSentinels.map(([id, s]) => {
             return new Promise((resolve, reject) => {
-                this.pendingRequests.set(id, { resolve, reject });
+                this.pendingRequests.set(id, { resolve, reject, layer: s.layer });
             });
         });
 
         try {
-            await Promise.race([
+            const results = await Promise.race([
                 Promise.all(promises),
                 new Promise((_, r) => setTimeout(() => r('timeout'), syncBudget))
             ]);
+
+            // Phase 3: Check for Stability Wait requests
+            const waitRequest = results.find(res => res && res.method === 'starlight.wait');
+            if (waitRequest) {
+                const delay = waitRequest.params?.retryAfterMs || 1000;
+                console.log(`[CBA Hub] Stability VETO from Sentinel. Waiting ${delay}ms...`);
+                await new Promise(r => setTimeout(r, delay));
+                return false;
+            }
+
             return true;
         } catch (e) {
-            if (e === 'timeout') console.warn(`[CBA Hub] Handshake TIMEOUT: Sentinel sync exceeded ${syncBudget}ms.`);
+            if (e === 'timeout') {
+                const missing = Array.from(this.pendingRequests.values()).map(r => r.layer).join(', ');
+                console.warn(`[CBA Hub] Handshake TIMEOUT: Missing signals from [${missing}] within ${syncBudget}ms.`);
+                this.pendingRequests.clear();
+            }
             return false;
-        } finally {
-            this.pendingRequests.clear();
         }
     }
 

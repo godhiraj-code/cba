@@ -1,96 +1,78 @@
 # 🛰️ Constellation-Based Automation (CBA)
+## Starlight Protocol v2.5 — The Sovereign Agentic Era
 
 **"Don't look at the ground; look at the Starlight."**
 
-CBA is a philosophical shift in browser automation. Inspired by biological navigation (like the dung beetle using the Milky Way), this framework moves away from linear scripts that handle every possible UI obstacle. Instead, it uses **Autonomous Aspect Layers (Sentinels)** that orient toward the goal using universal state indicators.
+CBA is a philosophical shift in browser automation. Inspired by biological navigation (like the dung beetle using the Milky Way), this framework moves away from linear scripts that handle every possible UI obstacle. Instead, it uses a **Sovereign Constellation** of autonomous agents (Sentinels) that orient toward high-level goals.
 
-## 🏗️ The Hub & Sentinel Architecture
+## 🏗️ The Sovereign Constellation
 
-Instead of a monolithic library, CBA uses a **Sidecar Architecture** communicating over a JSON-RPC message bus (WebSockets).
+![CBA Architecture](architecture.png)
+
+CBA uses a **Decentralized Sidecar Architecture** communicating over a JSON-RPC message bus.
 
 | Layer | Biological Equivalent | Role in CBA |
 | :--- | :--- | :--- |
-| **The Intent Layer** | The Goal | High-level business logic (e.g., "Buy a Shirt"). Zero logic for popups or delays. |
-| **The Hub** | The Brain | Orchestrates Playwright and manages the command queue. Enforces the **Starlight Protocol**. |
-| **The Janitor (Sentinel)** | The Ground | Autonomous background process that watches for DOM obstacles (modals, cookie banners) and hijacks control to clear them. |
-| **The Pulse (Sentinel)** | Magnetic Field | Watches network/API traffic and prevents actions until the application is "stable." |
+| **Intent Layer** | The Goal | High-level business intent. Now **Selector-Less** (e.g., `{ goal: 'Login' }`). |
+| **The Hub** | The Brain | Orchestrates Playwright, resolves semantic goals, and manages the **Sovereign Context**. |
+| **Vision (Sentinel)** | AI Perception | Uses local SLMs (Moondream) to visually detect and heal obstacles without selectors. |
+| **Janitor (Sentinel)** | The Ground | Heuristic background process that clears modals, cookie banners, and overlays. |
+| **Pulse (Sentinel)** | Entropy | Monitors network/DOM jitter to enforce **Wait-Less** temporal stability. |
+| **Data (Sentinel)** | Intelligence | Passively extracts metadata (tokens, links) and injects it into the shared context. |
 
-## 🛰️ The Starlight Protocol (v2.0)
+## 🛰️ The Starlight Protocol (v2.5)
 
-The Hub and Sentinels communicate using **JSON-RPC 2.0** standardized signals:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "starlight.[action]",
-  "params": { ... },
-  "id": "unique-id"
-}
-```
+Standardized signals for zero-wait, selector-less autonomy:
 
 | Method | Initiator | Purpose |
 | :--- | :--- | :--- |
-| `starlight.registration` | Sentinel | Register layer, priority, and selective patterns. |
-| `starlight.pre_check` | Hub | Broadcast intent before execution. Requires response. |
-| `starlight.hijack` | Sentinel | Request absolute browser lock for recovery. |
-| `starlight.resume` | Sentinel | Signal path is clear and return control. |
-| `starlight.pulse` | Sentinel | Async heartbeat (every 500ms). |
+| `starlight.intent` | Intent | Issues a high-level `goal` or `cmd`. |
+| `starlight.pre_check` | Hub | Handshake broadcast with screenshot for **AI Vision** analysis. |
+| `starlight.wait` | Sentinel | Veto due to environmental instability (Temporal Stability). |
+| `starlight.hijack` | Sentinel | Request absolute browser lock for recovery/healing. |
+| `starlight.context_update`| Sentinel | Inject intelligence into the Hub’s shared mission state. |
 
-### The Starlight Speed Limit
-The Hub enforces a **200ms** handshake budget. If a Sentinel doesn't respond to a `PRE_CHECK` within this window, the Hub proceeds without waiting. This ensures high-performance automation while allowing for defensive recovery.
+## 🛠️ The Starlight SDK (Python)
+Build a sentinel in minutes using the provided base class:
+```python
+from sdk.starlight_sdk import SentinelBase
 
-## 📊 Visual Proof: Execution Report
+class MySentinel(SentinelBase):
+    async def on_pre_check(self, params, msg_id):
+        # Your custom healing logic here
+        await self.send_clear()
+```
 
-CBA doesn't just work; it proves it. Every execution generates a `report.html` with:
-- **Timeline**: Integrated history of user intents and sentinel interventions.
-- **Evidence**: Screenshots of every `HIJACK` event (the "Before" and "After" of path clearing).
-- **Status**: Live heartbeat monitoring of system health.
-
-## 📚 Documentation
-- [Technical Guide](file:///c:/cba/technical_guide.md): Protocol specs and architecture.
-- [User Guide](file:///c:/cba/user_guide.md): Setup and test development.
-- [Execution Report](file:///c:/cba/report.html): Sample output from the latest run.
+## 📊 Visual Proof: Hero Story Reports
+CBA generates a comprehensive `report.html` for every mission:
+- **ROI Dashboard**: Automatically calculates minutes saved per automated intervention.
+- **Sentinel Interventions**: Proof of work with "Before" and "After" screenshots of every healed obstacle.
+- **Context Awareness**: Logs shared metadata discovered by the constellation.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v18+)
-- Python (3.9+)
+- Node.js (v18+) & Python (3.9+)
+- [Ollama](https://ollama.ai/) (for Vision Sentinel)
 - Playwright
 
-### Installation
+### Setup
 ```bash
-# Clone the repository
 git clone <repo-url>
-cd cba
-
-# Install Node dependencies
-npm install ws playwright nanoid
+npm install
+pip install websockets httpx
 npx playwright install chromium
-
-# Install Python dependencies
-pip install websockets
 ```
 
-### Running the Prototype
-1. **Start the Hub**:
-   ```bash
-   node src/hub.js
-   ```
-2. **Start the Janitor (Background)**:
-   ```bash
-   python sentinels/janitor.py
-   ```
-3. **Run the Intent Script**:
-   ```bash
-   node src/intent.js
-   ```
-
-## 🛠️ Why this is Unique
-
-1. **Language-Agnostic**: The Hub is Node.js, but your Janitor can be C++, and your Data layer can be Python. They just need to talk JSON.
-2. **Non-Linear**: Your test script doesn't have `if (popup) { click }`. It assumes the environment is being filtered for noise.
-3. **Maintenance-Free**: When a developer adds a new "Newsletter Popup," you don't update 100 test scripts; you just update the **Janitor Sentinel**.
+### The "Full Constellation" Demo
+Run the world-class **Cosmic Challenge** (Dynamic IDs, Jitter, Modals):
+1. **Start Hub**: `node src/hub.js`
+2. **Start Constellation**:
+   - `python sentinels/pulse_sentinel.py`
+   - `python sentinels/janitor.py`
+   - `python sentinels/vision_sentinel.py`
+   - `python sentinels/data_sentinel.py`
+3. **Run Intent**: `node src/intent.js`
 
 ---
 *Built with ❤️ by [Dhiraj Das](https://www.dhirajdas.dev)*

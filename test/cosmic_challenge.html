@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBA Cosmic Challenge - The Final Frontier</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.1) 0%, transparent 50%);
+        }
+
+        .container {
+            text-align: center;
+            z-index: 1;
+            padding: 2rem;
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 600px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+
+        .btn-orbit {
+            position: relative;
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            background: var(--primary);
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-orbit:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.6);
+        }
+
+        /* The Obstacles */
+        .obstacle {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 100;
+            display: none;
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .modal-content {
+            background: var(--card);
+            padding: 3rem;
+            border-radius: 24px;
+            border: 1px solid var(--secondary);
+            text-align: center;
+            animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-btn {
+            margin-top: 1.5rem;
+            padding: 0.8rem 2rem;
+            background: var(--secondary);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .status-badge {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #6366f1;
+        }
+
+        /* Entropy Simulation */
+        .jitter {
+            animation: jitter 0.1s infinite;
+        }
+
+        @keyframes jitter {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(1px, -1px);
+            }
+
+            100% {
+                transform: translate(-1px, 1px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="status-badge" id="system-status">AURA: STABLE</div>
+
+    <div class="container">
+        <h1>Cosmic Challenge</h1>
+        <p>This mission requires total environmental awareness. No manual waits. No hardcoded selectors. Only Intent.
+        </p>
+
+        <!-- The Target Button has a dynamic ID that changes every load -->
+        <button id="goal-btn-temp" class="btn-orbit" onclick="reachGoal()">INITIATE MISSION</button>
+    </div>
+
+    <!-- Dynamic Obstacles -->
+    <div id="obstacle-layer" class="obstacle">
+        <div class="modal-content">
+            <h2>⚠️ Gravity Well Detected</h2>
+            <p>Your intent is being pulled away. You must stabilize the core.</p>
+            <button class="close-btn" id="stabilize-btn" onclick="clearObstacle()">STABILIZE CORE</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. Dynamic ID Generation
+        const dynamicId = "star-" + Math.floor(Math.random() * 10000);
+        document.getElementById('goal-btn-temp').id = dynamicId;
+        console.log("CBA Debug: Mission Target ID set to " + dynamicId);
+
+        // 2. High Entropy Simulation (Pulse Sentinel Test)
+        function triggerJitter() {
+            document.body.classList.add('jitter');
+            document.getElementById('system-status').innerText = "AURA: HIGH_ENTROPY";
+            setTimeout(() => {
+                document.body.classList.remove('jitter');
+                document.getElementById('system-status').innerText = "AURA: STABLE";
+            }, 3000);
+        }
+
+        // 3. Random Obstacle (AI Vision / Janitor Test)
+        setTimeout(() => {
+            document.getElementById('obstacle-layer').style.display = 'flex';
+            triggerJitter();
+        }, 500);
+
+        function clearObstacle() {
+            document.getElementById('obstacle-layer').style.display = 'none';
+            document.getElementById('system-status').innerText = "AURA: CALIBRATED";
+            // Extra network activity
+            fetch('https://jsonplaceholder.typicode.com/posts/1').then(r => r.json());
+        }
+
+        function reachGoal() {
+            alert("🌠 STARLIGHT: MISSION SUCCESS. Semantic Goal Achieved.");
+            window.missionComplete = true;
+        }
+
+        // Invisible metadata for Context Injection test
+        window.starlightContext = {
+            missionID: "COSMOS-X9",
+            securityLevel: "OMEGA"
+        };
+    </script>
+</body>
+
+</html>

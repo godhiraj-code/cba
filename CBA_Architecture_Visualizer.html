@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBA Architecture Visualizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({ startOnLoad: true, theme: 'dark' });</script>
+    <style>
+        body {
+            background-color: #0d1117;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            padding: 2rem;
+            background: #161b22;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #30363d;
+        }
+
+        h1 {
+            color: #58a6ff;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🌠 Starlight Protocol: CBA Architecture</h1>
+        <div class="mermaid">
+            graph TD
+            subgraph Intent Layer
+            T["Intent Script (Goal)"]
+            end
+
+            subgraph Sovereign Layer
+            H{"CBA Hub (Orchestrator)"}
+            end
+
+            subgraph Sentinel Layer
+            V["Vision Sentinel (AI)"]
+            J["Janitor Sentinel (Heuristic)"]
+            end
+
+            subgraph Environment
+            B["Browser (Chaos)"]
+            end
+
+            T -->|Goal| H
+            H -->|Handshake| V
+            H -->|Handshake| J
+            V -->|AI Detection| H
+            J -->|DOM Detection| H
+            H -->|Hijack & Heal| B
+            B -->|Path Clear| H
+            H -->|Resume Intent| B
+            B -->|Success| T
+
+            style H fill:#1e293b,stroke:#3b82f6,color:#fff,stroke-width:4px
+            style V fill:#064e3b,stroke:#10b981,color:#fff
+            style J fill:#064e3b,stroke:#10b981,color:#fff
+            style T fill:#161b22,stroke:#58a6ff,color:#fff
+            style B fill:#161b22,stroke:#f43f5e,color:#fff
+        </div>
+    </div>
+</body>
+
+</html>
