@@ -144,7 +144,7 @@ An **Aura** is a temporal window of high environment entropy. By learning these 
 
 ---
 
-## 7. Troubleshooting
+## 10. Troubleshooting
 
 - **AI Analysis Timed Out**: Ensure [Ollama](https://ollama.ai/) is running with the `moondream` model.
 - **Goal Resolution Failed**: Ensure the button or link has visible text or aria-labels that match your goal.
