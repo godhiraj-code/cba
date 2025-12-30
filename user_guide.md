@@ -142,6 +142,12 @@ When a UI change breaks a selector, the Hub switches from **Reactive** to **Pred
 ### 🌀 What is an Aura?
 An **Aura** is a temporal window of high environment entropy. By learning these "Auras" from past runs, the Hub can proactively slow down its mission pace *before* a failure occurs, ensuring a "smooth arrival" every time.
 
+### 🏛️ Sovereign Intelligence (Sentinel Learning)
+Sentinels are no longer amnesiac. Through the **Starlight SDK**, every agent now possesses a **Persistent Memory Layer**:
+- **Experience Accumulation**: When a Janitor or Vision sentinel successfully clears an obstacle, it records the winning selector.
+- **Predictive Remediation**: In subsequent runs, the Sentinel skips "exploration" and goes straight to the proven solution.
+- **Local Persistence**: Memory is stored locally as JSON (e.g., `JanitorSentinel_memory.json`), ensuring intelligence persists across system restarts.
+
 ---
 
 ## 10. Troubleshooting

@@ -496,7 +496,7 @@ class CBAHub {
                 afterScreenshot
             });
 
-            this.broadcastToClient(msg.clientId, {
+            this.broadcastToClient(null, {
                 type: 'COMMAND_COMPLETE',
                 id: msg.id,
                 success,
@@ -581,6 +581,7 @@ class CBAHub {
                 Promise.all(promises),
                 new Promise((_, r) => setTimeout(() => r('timeout'), syncBudget))
             ]);
+            console.log(`[CBA Hub] Handshake COMPLETED for ${msg.cmd}.`);
 
             // Phase 3: Check for Stability Wait requests
             const waitRequest = results.find(res => res && res.method === 'starlight.wait');

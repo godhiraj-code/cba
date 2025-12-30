@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Starlight Learning Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 2rem;
+            background: #0f172a;
+            color: white;
+        }
+
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e293b;
+            padding: 2rem;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 999;
+        }
+
+        #custom-close {
+            background: #f43f5e;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #secret-button {
+            padding: 1rem 2rem;
+            background: #10b981;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Phase 7.3: Sentinel Learning</h1>
+    <p>The Janitor must find the custom close button and remember it.</p>
+
+    <div id="modal-container">
+        <div class="overlay"></div>
+        <div class="modal">
+            <h2>Obstacle Detected!</h2>
+            <p>I am a stubborn modal with a custom close button.</p>
+            <button id="custom-close">DESTROY MODAL</button>
+        </div>
+    </div>
+
+    <button id="secret-button">MISSION GOAL: COLLECT DATA</button>
+
+    <script>
+        document.getElementById('custom-close').onclick = () => {
+            document.getElementById('modal-container').style.display = 'none';
+        };
+
+        document.getElementById('secret-button').onclick = () => {
+            document.body.style.background = '#064e3b';
+            document.getElementById('secret-button').innerText = 'DATA COLLECTED';
+        };
+    </script>
+</body>
+
+</html>

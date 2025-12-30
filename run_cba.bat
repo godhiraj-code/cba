@@ -6,8 +6,9 @@ echo [Options]
 echo 1. Standard Mission (intent.js)
 echo 2. Self-Healing Demo (intent_self_heal.js) - Phase 7.1
 echo 3. Aura Pacing Demo (intent_aura.js) - Phase 7.2
+echo 4. Sentinel Learning Demo (intent_learning.js) - Phase 7.3
 echo --------------------------------------------------
-set /p choice="Select Mission [1-3]: "
+set /p choice="Select Mission [1-4]: "
 
 :: NOTE: Ensure Ollama is running 'moondream' for the Vision Sentinel.
 
@@ -48,6 +49,8 @@ if "%choice%"=="2" (
     node test/intent_self_heal.js
 ) else if "%choice%"=="3" (
     node test/intent_aura.js
+) else if "%choice%"=="4" (
+    node test/intent_learning.js
 ) else (
     node src/intent.js
 )

@@ -7,6 +7,7 @@ import asyncio
 import websockets
 import json
 import time
+import os
 from abc import ABC, abstractmethod
 
 class SentinelBase(ABC):
@@ -18,9 +19,31 @@ class SentinelBase(ABC):
         self.capabilities = []
         self._websocket = None
         self._running = False
+        self.memory = {}
+        self.last_action = None # Track for success learning
+        self.memory_file = f"{self.layer}_memory.json"
+
+    def _load_memory(self):
+        """Phase 7.3: Load persistent Sentinel experience."""
+        try:
+            if os.path.exists(self.memory_file):
+                with open(self.memory_file, 'r') as f:
+                    self.memory = json.load(f)
+                print(f"[{self.layer}] Phase 7: Loaded {len(self.memory)} persistent patterns.")
+        except Exception as e:
+            print(f"[{self.layer}] Failed to load memory: {e}")
+
+    def _save_memory(self):
+        """Phase 7.3: Persist Sentinel experience."""
+        try:
+            with open(self.memory_file, 'w') as f:
+                json.dump(self.memory, f, indent=4)
+        except Exception as e:
+            print(f"[{self.layer}] Failed to save memory: {e}")
 
     async def start(self):
         """Main entry point for the sentinel."""
+        self._load_memory()
         self._running = True
         while self._running:
             try:
@@ -34,7 +57,7 @@ class SentinelBase(ABC):
                     
                     async for message in websocket:
                         data = json.loads(message)
-                        await self._handle_protocol(data)
+                        asyncio.create_task(self._handle_protocol(data))
                         
             except Exception as e:
                 print(f"[{self.layer}] Connection error: {e}. Retrying in 3s...")
@@ -81,7 +104,8 @@ class SentinelBase(ABC):
             # Phase 4: Shared state updates
             await self.on_context_update(params.get("context", {}))
         else:
-            await self.on_message(method, params, msg_id)
+            # Phase 7.3: For responses/broadcasts without method, pass full data in params
+            await self.on_message(method, params if method else data, msg_id)
 
     # --- Communication Methods ---
 
@@ -96,6 +120,12 @@ class SentinelBase(ABC):
 
     async def send_resume(self, re_check=True):
         await self._send_msg("starlight.resume", {"re_check": re_check})
+
+    async def send_action(self, cmd, selector, text=None):
+        """Phase 2/7: Execute a healing action via the Hub."""
+        params = {"cmd": cmd, "selector": selector}
+        if text: params["text"] = text
+        await self._send_msg("starlight.action", params)
 
     async def update_context(self, context_data):
         """Phase 4: Inject data into the Hub's sovereign state."""

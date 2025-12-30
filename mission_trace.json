@@ -1,158 +1,191 @@
 [
   {
-    "timestamp": 1767097035617,
-    "humanTime": "5:47:15 pm",
+    "timestamp": 1767100060916,
+    "humanTime": "6:37:40 pm",
     "type": "RECV",
     "layer": "Intent",
     "method": "starlight.registration",
     "params": {
-      "layer": "PulseSentinel",
-      "priority": 1,
-      "capabilities": [
-        "temporal-stability",
-        "settling",
-        "network-idle"
-      ]
+      "layer": "JanitorSentinel",
+      "priority": 5,
+      "selectors": [
+        ".modal",
+        ".popup",
+        "#overlay",
+        ".obstacle",
+        "#stabilize-btn"
+      ],
+      "capabilities": []
     },
-    "id": "1767097035615",
+    "id": "reg-1767100060",
     "snapshot": null
   },
   {
-    "timestamp": 1767097045314,
-    "humanTime": "5:47:25 pm",
+    "timestamp": 1767100069225,
+    "humanTime": "6:37:49 pm",
     "type": "RECV",
     "layer": "Intent",
     "method": "starlight.intent",
     "params": {
       "cmd": "goto",
-      "url": "file:///C:/cba/test/aura_test.html"
+      "url": "file:///C:/cba/test/learning_test.html"
     },
     "id": 1,
     "snapshot": "<html><head></head><body></body></html>"
   },
   {
-    "timestamp": 1767097045332,
-    "humanTime": "5:47:25 pm",
+    "timestamp": 1767100069231,
+    "humanTime": "6:37:49 pm",
     "type": "SEND",
     "layer": "Intent",
     "method": "starlight.pre_check",
     "params": {
       "command": {
-        "clientId": "AR175ChQOHOoFJvHsNxrA",
+        "clientId": "InOxvFVFpjhRZkauxpok0",
         "cmd": "goto",
-        "url": "file:///C:/cba/test/aura_test.html",
+        "url": "file:///C:/cba/test/learning_test.html",
         "id": 1
       },
       "blocking": [],
       "screenshot": null
     },
-    "id": "HN82SaN8FTO3h73WakOVw",
+    "id": "8yxBllt7qt7OMBWUS8bBY",
     "snapshot": "<html><head></head><body></body></html>"
   },
   {
-    "timestamp": 1767097045335,
-    "humanTime": "5:47:25 pm",
+    "timestamp": 1767100069233,
+    "humanTime": "6:37:49 pm",
     "type": "RECV",
-    "layer": "PulseSentinel",
+    "layer": "JanitorSentinel",
     "method": "starlight.clear",
     "params": {},
-    "id": "1767097045334",
+    "id": "1767100069233",
     "snapshot": null
   },
   {
-    "timestamp": 1767097045455,
-    "humanTime": "5:47:25 pm",
+    "timestamp": 1767100069331,
+    "humanTime": "6:37:49 pm",
     "type": "SEND",
     "layer": "System",
     "method": "starlight.entropy_stream",
     "params": {
       "entropy": true
     },
-    "id": "68-O7JRYzse3JQpy4fMLP",
+    "id": "FsYh-MWDLVkUigDuO-7E0",
     "snapshot": null
   },
   {
-    "timestamp": 1767097045668,
-    "humanTime": "5:47:25 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "GB5a4T4QpLtEiexppff3G",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097045858,
-    "humanTime": "5:47:25 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "KuP_ICRdmbkchVu_XfZ59",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097045963,
-    "humanTime": "5:47:25 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "1qgRX5nc5bBiRSl0pYeZo",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097046166,
-    "humanTime": "5:47:26 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "YQXkkx-A11wLonoPu9Ngh",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097046204,
-    "humanTime": "5:47:26 pm",
+    "timestamp": 1767100070006,
+    "humanTime": "6:37:50 pm",
     "type": "SEND",
     "layer": "Intent",
     "id": 1,
     "snapshot": null
   },
   {
-    "timestamp": 1767097046210,
-    "humanTime": "5:47:26 pm",
+    "timestamp": 1767100070012,
+    "humanTime": "6:37:50 pm",
     "type": "RECV",
     "layer": "Intent",
     "method": "starlight.intent",
     "params": {
-      "goal": "MISSION START",
-      "selector": "#target",
+      "goal": "COLLECT DATA",
+      "selector": "#secret-button",
       "selfHealed": false,
       "cmd": "click"
     },
     "id": 2,
-    "snapshot": "<!DOCTYPE html><html><head>\n    <title>Starlight Aura Test</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            padding: 2rem;\n            background: #0f172a;\n            color: white;\n        }\n\n        #target {\n            display: none;\n            padding: 1rem 2rem;\n            background: #3b82f6;\n            border: none;\n            border-radius: 4px;\n            color: white;\n            cursor: pointer;\n        }\n\n        .jitter {\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 5px;\n            background: #f43f5e;\n            display: none;\n        }\n    </style>\n</head>\n\n<body>\n    <h1>Phase 7.2: Aura Test</h1>\n    <p>This page will be unstable for 5 seconds after load.</p>\n    <div id=\"jitter\" class=\"jitter\" style=\"display: block;\"></div>\n    <button id=\"target\">MISSION START</button>\n\n    <script>\n        // Create entropy for 5 seconds\n        const jitter = document.getElementById('jitter');\n        const interval = setInterval(() => {\n            jitter.style.display = jitter.style.display === 'none' ? 'block' : 'none';\n        }, 100);\n\n        setTimeout(() => {\n            clearInterval(interval);\n            jitter.style.display = 'none';\n            document.getElementById('target').style.display = 'block';\n            console.log(\"Environment SETTLED\");\n        }, 5000);\n\n        document.getElementById('target').onclick = () => {\n            document.body.style.background = '#10b981';\n            document.getElementById('target').innerText = 'STABILIZED SUCCESS';\n        };\n    </script>\n\n\n</body></html>"
+    "snapshot": "<!DOCTYPE html><html><head>\n    <title>Starlight Learning Test</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            padding: 2rem;\n            background: #0f172a;\n            color: white;\n        }\n\n        .modal {\n            position: fixed;\n            top: 50%;\n            left: 50%;\n            transform: translate(-50%, -50%);\n            background: #1e293b;\n            padding: 2rem;\n            border: 2px solid #3b82f6;\n            border-radius: 8px;\n            z-index: 1000;\n        }\n\n        .overlay {\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: rgba(0, 0, 0, 0.8);\n            z-index: 999;\n        }\n\n        #custom-close {\n            background: #f43f5e;\n            color: white;\n            border: none;\n            padding: 0.5rem 1rem;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n\n        #secret-button {\n            padding: 1rem 2rem;\n            background: #10b981;\n            border: none;\n            color: white;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n    </style>\n</head>\n\n<body>\n    <h1>Phase 7.3: Sentinel Learning</h1>\n    <p>The Janitor must find the custom close button and remember it.</p>\n\n    <div id=\"modal-container\">\n        <div class=\"overlay\"></div>\n        <div class=\"modal\">\n            <h2>Obstacle Detected!</h2>\n            <p>I am a stubborn modal with a custom close button.</p>\n            <button id=\"custom-close\">DESTROY MODAL</button>\n        </div>\n    </div>\n\n    <button id=\"secret-button\">MISSION GOAL: COLLECT DATA</button>\n\n    <script>\n        document.getElementById('custom-close').onclick = () => {\n            document.getElementById('modal-container').style.display = 'none';\n        };\n\n        document.getElementById('secret-button').onclick = () => {\n            document.body.style.background = '#064e3b';\n            document.getElementById('secret-button').innerText = 'DATA COLLECTED';\n        };\n    </script>\n\n\n</body></html>"
   },
   {
-    "timestamp": 1767097046219,
-    "humanTime": "5:47:26 pm",
+    "timestamp": 1767100070029,
+    "humanTime": "6:37:50 pm",
     "type": "SEND",
     "layer": "Intent",
     "method": "starlight.pre_check",
     "params": {
       "command": {
-        "clientId": "AR175ChQOHOoFJvHsNxrA",
-        "goal": "MISSION START",
-        "selector": "#target",
+        "clientId": "InOxvFVFpjhRZkauxpok0",
+        "goal": "COLLECT DATA",
+        "selector": "#secret-button",
+        "selfHealed": false,
+        "cmd": "click",
+        "id": 2
+      },
+      "blocking": [
+        {
+          "selector": ".modal",
+          "id": "",
+          "className": "modal",
+          "display": "block",
+          "rect": "425x201"
+        }
+      ],
+      "screenshot": null
+    },
+    "id": "15G5CyIYim3sMINWTi8Ot",
+    "snapshot": "<!DOCTYPE html><html><head>\n    <title>Starlight Learning Test</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            padding: 2rem;\n            background: #0f172a;\n            color: white;\n        }\n\n        .modal {\n            position: fixed;\n            top: 50%;\n            left: 50%;\n            transform: translate(-50%, -50%);\n            background: #1e293b;\n            padding: 2rem;\n            border: 2px solid #3b82f6;\n            border-radius: 8px;\n            z-index: 1000;\n        }\n\n        .overlay {\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: rgba(0, 0, 0, 0.8);\n            z-index: 999;\n        }\n\n        #custom-close {\n            background: #f43f5e;\n            color: white;\n            border: none;\n            padding: 0.5rem 1rem;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n\n        #secret-button {\n            padding: 1rem 2rem;\n            background: #10b981;\n            border: none;\n            color: white;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n    </style>\n</head>\n\n<body>\n    <h1>Phase 7.3: Sentinel Learning</h1>\n    <p>The Janitor must find the custom close button and remember it.</p>\n\n    <div id=\"modal-container\">\n        <div class=\"overlay\"></div>\n        <div class=\"modal\">\n            <h2>Obstacle Detected!</h2>\n            <p>I am a stubborn modal with a custom close button.</p>\n            <button id=\"custom-close\">DESTROY MODAL</button>\n        </div>\n    </div>\n\n    <button id=\"secret-button\">MISSION GOAL: COLLECT DATA</button>\n\n    <script>\n        document.getElementById('custom-close').onclick = () => {\n            document.getElementById('modal-container').style.display = 'none';\n        };\n\n        document.getElementById('secret-button').onclick = () => {\n            document.body.style.background = '#064e3b';\n            document.getElementById('secret-button').innerText = 'DATA COLLECTED';\n        };\n    </script>\n\n\n</body></html>"
+  },
+  {
+    "timestamp": 1767100070030,
+    "humanTime": "6:37:50 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.hijack",
+    "params": {
+      "reason": "Predictive remediation for .modal"
+    },
+    "id": "1767100070030",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767100070031,
+    "humanTime": "6:37:50 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.action",
+    "params": {
+      "cmd": "click",
+      "selector": "#custom-close >> visible=true"
+    },
+    "id": "1767100070030",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767100070135,
+    "humanTime": "6:37:50 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "fw9ZHreU9ITcgRCIummh9",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767100071046,
+    "humanTime": "6:37:51 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.resume",
+    "params": {
+      "re_check": true
+    },
+    "id": "1767100071045",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767100072559,
+    "humanTime": "6:37:52 pm",
+    "type": "SEND",
+    "layer": "Intent",
+    "method": "starlight.pre_check",
+    "params": {
+      "command": {
+        "clientId": "InOxvFVFpjhRZkauxpok0",
+        "goal": "COLLECT DATA",
+        "selector": "#secret-button",
         "selfHealed": false,
         "cmd": "click",
         "id": 2
@@ -160,408 +193,42 @@
       "blocking": [],
       "screenshot": null
     },
-    "id": "EWipjNBaQM9o38vkUWZg9",
-    "snapshot": "<!DOCTYPE html><html><head>\n    <title>Starlight Aura Test</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            padding: 2rem;\n            background: #0f172a;\n            color: white;\n        }\n\n        #target {\n            display: none;\n            padding: 1rem 2rem;\n            background: #3b82f6;\n            border: none;\n            border-radius: 4px;\n            color: white;\n            cursor: pointer;\n        }\n\n        .jitter {\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 5px;\n            background: #f43f5e;\n            display: none;\n        }\n    </style>\n</head>\n\n<body>\n    <h1>Phase 7.2: Aura Test</h1>\n    <p>This page will be unstable for 5 seconds after load.</p>\n    <div id=\"jitter\" class=\"jitter\" style=\"display: block;\"></div>\n    <button id=\"target\">MISSION START</button>\n\n    <script>\n        // Create entropy for 5 seconds\n        const jitter = document.getElementById('jitter');\n        const interval = setInterval(() => {\n            jitter.style.display = jitter.style.display === 'none' ? 'block' : 'none';\n        }, 100);\n\n        setTimeout(() => {\n            clearInterval(interval);\n            jitter.style.display = 'none';\n            document.getElementById('target').style.display = 'block';\n            console.log(\"Environment SETTLED\");\n        }, 5000);\n\n        document.getElementById('target').onclick = () => {\n            document.body.style.background = '#10b981';\n            document.getElementById('target').innerText = 'STABILIZED SUCCESS';\n        };\n    </script>\n\n\n</body></html>"
+    "id": "laDNBVCn5EyhWQ6pg_3pz",
+    "snapshot": "<!DOCTYPE html><html><head>\n    <title>Starlight Learning Test</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            padding: 2rem;\n            background: #0f172a;\n            color: white;\n        }\n\n        .modal {\n            position: fixed;\n            top: 50%;\n            left: 50%;\n            transform: translate(-50%, -50%);\n            background: #1e293b;\n            padding: 2rem;\n            border: 2px solid #3b82f6;\n            border-radius: 8px;\n            z-index: 1000;\n        }\n\n        .overlay {\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: rgba(0, 0, 0, 0.8);\n            z-index: 999;\n        }\n\n        #custom-close {\n            background: #f43f5e;\n            color: white;\n            border: none;\n            padding: 0.5rem 1rem;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n\n        #secret-button {\n            padding: 1rem 2rem;\n            background: #10b981;\n            border: none;\n            color: white;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n    </style>\n</head>\n\n<body>\n    <h1>Phase 7.3: Sentinel Learning</h1>\n    <p>The Janitor must find the custom close button and remember it.</p>\n\n    <div id=\"modal-container\" style=\"display: none;\">\n        <div class=\"overlay\" style=\"display: none;\"></div>\n        <div class=\"modal\" style=\"display: none;\">\n            <h2>Obstacle Detected!</h2>\n            <p>I am a stubborn modal with a custom close button.</p>\n            <button id=\"custom-close\">DESTROY MODAL</button>\n        </div>\n    </div>\n\n    <button id=\"secret-button\">MISSION GOAL: COLLECT DATA</button>\n\n    <script>\n        document.getElementById('custom-close').onclick = () => {\n            document.getElementById('modal-container').style.display = 'none';\n        };\n\n        document.getElementById('secret-button').onclick = () => {\n            document.body.style.background = '#064e3b';\n            document.getElementById('secret-button').innerText = 'DATA COLLECTED';\n        };\n    </script>\n\n\n</body></html>"
   },
   {
-    "timestamp": 1767097046219,
-    "humanTime": "5:47:26 pm",
+    "timestamp": 1767100072560,
+    "humanTime": "6:37:52 pm",
     "type": "RECV",
-    "layer": "PulseSentinel",
-    "method": "starlight.wait",
-    "params": {
-      "retryAfterMs": 947
-    },
-    "id": "1767097046219",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097046351,
-    "humanTime": "5:47:26 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "iMPp64DdkC7oJpomF1U-6",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097046460,
-    "humanTime": "5:47:26 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "2m8XvX1zAypi73Pl3Sv12",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097046660,
-    "humanTime": "5:47:26 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "pDcK36-HYApHq0bhxtqor",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097046864,
-    "humanTime": "5:47:26 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "5ue2jYYXPmVfBWIA9reMe",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097047051,
-    "humanTime": "5:47:27 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "BGSK99-XRDRpfoa48iMjK",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097047159,
-    "humanTime": "5:47:27 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "IQ3dGEg0J0t0byrtWm5J8",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097047362,
-    "humanTime": "5:47:27 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "Pf7ZW4rA_s9FmjdFSIfV-",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097047549,
-    "humanTime": "5:47:27 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "tCDxhje2a1CRsqtFo5HCd",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097047657,
-    "humanTime": "5:47:27 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "ETua5eUst4YtpPbvXda97",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097047858,
-    "humanTime": "5:47:27 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "smhnzpPilWoUCceZa8_KE",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097048059,
-    "humanTime": "5:47:28 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "3dnwHZE9T0my8E_C41D_r",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097048262,
-    "humanTime": "5:47:28 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "DyALnaLvRAmghNqZ5Rkrz",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097048464,
-    "humanTime": "5:47:28 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "Ui-wYe6fPvzm88F4YB7pX",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097048665,
-    "humanTime": "5:47:28 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "7hKoRNIw7Ci3vG5qcLk39",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097048865,
-    "humanTime": "5:47:28 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "nrROtA3ebXR_GUjY-0Mkg",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097049053,
-    "humanTime": "5:47:29 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "i9qVPsQLyr6Qt2lpEh_nQ",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097049161,
-    "humanTime": "5:47:29 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "llZk20h6iTkGNhCTsAK7n",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097049363,
-    "humanTime": "5:47:29 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "ApZl_T8UOYBgqR_mxiwwg",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097049550,
-    "humanTime": "5:47:29 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "FL2nqCHTr_R4X0KmYqZU3",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097049659,
-    "humanTime": "5:47:29 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "1eRFGbEgG1FvW3FhkDsM1",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097049862,
-    "humanTime": "5:47:29 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "zfebSpZgZ26IeOo85YllU",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097050064,
-    "humanTime": "5:47:30 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "eqthXQ81LyhZT9nn8sIn2",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097050264,
-    "humanTime": "5:47:30 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "vBIZHivJyTyPSqgDNoN1T",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097050450,
-    "humanTime": "5:47:30 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "oySRunvs5PjDYk1ViLqlq",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097050560,
-    "humanTime": "5:47:30 pm",
-    "type": "SEND",
-    "layer": "System",
-    "method": "starlight.entropy_stream",
-    "params": {
-      "entropy": true
-    },
-    "id": "AXxwdBxxCjds-rSUElTV7",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097050687,
-    "humanTime": "5:47:30 pm",
-    "type": "SEND",
-    "layer": "Intent",
-    "method": "starlight.pre_check",
-    "params": {
-      "command": {
-        "clientId": "AR175ChQOHOoFJvHsNxrA",
-        "goal": "MISSION START",
-        "selector": "#target",
-        "selfHealed": false,
-        "cmd": "click",
-        "id": 2
-      },
-      "blocking": [],
-      "screenshot": null
-    },
-    "id": "dlLs5qu9zcoG37MsvZCDo",
-    "snapshot": "<!DOCTYPE html><html><head>\n    <title>Starlight Aura Test</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            padding: 2rem;\n            background: #0f172a;\n            color: white;\n        }\n\n        #target {\n            display: none;\n            padding: 1rem 2rem;\n            background: #3b82f6;\n            border: none;\n            border-radius: 4px;\n            color: white;\n            cursor: pointer;\n        }\n\n        .jitter {\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 5px;\n            background: #f43f5e;\n            display: none;\n        }\n    </style>\n</head>\n\n<body>\n    <h1>Phase 7.2: Aura Test</h1>\n    <p>This page will be unstable for 5 seconds after load.</p>\n    <div id=\"jitter\" class=\"jitter\" style=\"display: none;\"></div>\n    <button id=\"target\" style=\"display: block;\">MISSION START</button>\n\n    <script>\n        // Create entropy for 5 seconds\n        const jitter = document.getElementById('jitter');\n        const interval = setInterval(() => {\n            jitter.style.display = jitter.style.display === 'none' ? 'block' : 'none';\n        }, 100);\n\n        setTimeout(() => {\n            clearInterval(interval);\n            jitter.style.display = 'none';\n            document.getElementById('target').style.display = 'block';\n            console.log(\"Environment SETTLED\");\n        }, 5000);\n\n        document.getElementById('target').onclick = () => {\n            document.body.style.background = '#10b981';\n            document.getElementById('target').innerText = 'STABILIZED SUCCESS';\n        };\n    </script>\n\n\n</body></html>"
-  },
-  {
-    "timestamp": 1767097050688,
-    "humanTime": "5:47:30 pm",
-    "type": "RECV",
-    "layer": "PulseSentinel",
-    "method": "starlight.wait",
-    "params": {
-      "retryAfterMs": 873
-    },
-    "id": "1767097050687",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767097055086,
-    "humanTime": "5:47:35 pm",
-    "type": "SEND",
-    "layer": "Intent",
-    "method": "starlight.pre_check",
-    "params": {
-      "command": {
-        "clientId": "AR175ChQOHOoFJvHsNxrA",
-        "goal": "MISSION START",
-        "selector": "#target",
-        "selfHealed": false,
-        "cmd": "click",
-        "id": 2
-      },
-      "blocking": [],
-      "screenshot": null
-    },
-    "id": "hGbqEJwjaAROg6cen5gGY",
-    "snapshot": "<!DOCTYPE html><html><head>\n    <title>Starlight Aura Test</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            padding: 2rem;\n            background: #0f172a;\n            color: white;\n        }\n\n        #target {\n            display: none;\n            padding: 1rem 2rem;\n            background: #3b82f6;\n            border: none;\n            border-radius: 4px;\n            color: white;\n            cursor: pointer;\n        }\n\n        .jitter {\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 5px;\n            background: #f43f5e;\n            display: none;\n        }\n    </style>\n</head>\n\n<body>\n    <h1>Phase 7.2: Aura Test</h1>\n    <p>This page will be unstable for 5 seconds after load.</p>\n    <div id=\"jitter\" class=\"jitter\" style=\"display: none;\"></div>\n    <button id=\"target\" style=\"display: block;\">MISSION START</button>\n\n    <script>\n        // Create entropy for 5 seconds\n        const jitter = document.getElementById('jitter');\n        const interval = setInterval(() => {\n            jitter.style.display = jitter.style.display === 'none' ? 'block' : 'none';\n        }, 100);\n\n        setTimeout(() => {\n            clearInterval(interval);\n            jitter.style.display = 'none';\n            document.getElementById('target').style.display = 'block';\n            console.log(\"Environment SETTLED\");\n        }, 5000);\n\n        document.getElementById('target').onclick = () => {\n            document.body.style.background = '#10b981';\n            document.getElementById('target').innerText = 'STABILIZED SUCCESS';\n        };\n    </script>\n\n\n</body></html>"
-  },
-  {
-    "timestamp": 1767097055087,
-    "humanTime": "5:47:35 pm",
-    "type": "RECV",
-    "layer": "PulseSentinel",
+    "layer": "JanitorSentinel",
     "method": "starlight.clear",
     "params": {},
-    "id": "1767097055087",
+    "id": "1767100072560",
     "snapshot": null
   },
   {
-    "timestamp": 1767097055302,
-    "humanTime": "5:47:35 pm",
+    "timestamp": 1767100072668,
+    "humanTime": "6:37:52 pm",
     "type": "SEND",
     "layer": "System",
     "method": "starlight.entropy_stream",
     "params": {
       "entropy": true
     },
-    "id": "wW7Yg23YIHE9MJd7OLSYO",
+    "id": "e9DSeufpm5DCtR5x1H0Uz",
     "snapshot": null
   },
   {
-    "timestamp": 1767097055890,
-    "humanTime": "5:47:35 pm",
+    "timestamp": 1767100073274,
+    "humanTime": "6:37:53 pm",
     "type": "SEND",
     "layer": "Intent",
     "id": 2,
     "snapshot": null
   },
   {
-    "timestamp": 1767097055891,
-    "humanTime": "5:47:35 pm",
+    "timestamp": 1767100073276,
+    "humanTime": "6:37:53 pm",
     "type": "RECV",
     "layer": "Intent",
     "method": "starlight.finish",

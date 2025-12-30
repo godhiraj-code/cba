@@ -16,15 +16,9 @@ class VisionSentinel(SentinelBase):
         self.model = model
         self.capabilities = ["vision"]
         self.ollama_url = "http://localhost:11434/api/generate"
-        self.detected_selectors = []
-
-    async def on_registration(self, ws):
-        print(f"[{self.layer}] AI Vision Protocol Active (Model: {self.model})")
 
     async def on_pre_check(self, params, msg_id):
-        cmd = params.get("command", {}).get("cmd", "unknown")
         screenshot_b64 = params.get("screenshot")
-        blocking = params.get("blocking", [])
         
         if not screenshot_b64:
             await self.send_clear()
@@ -35,24 +29,33 @@ class VisionSentinel(SentinelBase):
         
         if obstacle:
             print(f"[{self.layer}] AI Success: Detected {obstacle}")
+            
+            target_selector = self.memory.get(obstacle)
+            if target_selector:
+                print(f"[{self.layer}] Phase 7: Recalling resolution for {obstacle} -> {target_selector}")
+            else:
+                target_selector = "button:has-text('Close') >> visible=true"
+            
             await self.send_hijack(f"AI Vision detected: {obstacle}")
-            
-            # Sovereign Healing
-            selectors = [
-                "#stabilize-btn",
-                ".close-btn >> visible=true",
-                "button:has-text('Close') >> visible=true"
-            ]
-            
-            for selector in selectors:
-                await self.send_action("click", selector)
-                await asyncio.sleep(0.3)
+            await self.send_action("click", target_selector)
+            self.last_action = { "id": obstacle, "selector": target_selector }
             
             await asyncio.sleep(1.0)
             await self.send_resume(re_check=True)
         else:
-            # AI says clear or failed
             await self.send_clear()
+
+    async def on_message(self, method, params, msg_id):
+        m_type = params.get("type") if not method else method
+        if (m_type == "COMMAND_COMPLETE" or method == "starlight.intent") and self.last_action:
+            if params.get("success", True):
+                obs_id = self.last_action["id"]
+                sel = self.last_action["selector"]
+                if self.memory.get(obs_id) != sel:
+                    print(f"[{self.layer}] Phase 7: Learning successful AI remediation! {obs_id} -> {sel}")
+                    self.memory[obs_id] = sel
+                    self._save_memory()
+            self.last_action = None
 
     async def analyze_screenshot(self, screenshot_b64):
         prompt = "What is the main obstacle in this image? (popup, modal, banner, or none)"

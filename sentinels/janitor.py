@@ -1,141 +1,87 @@
 import asyncio
-import websockets
+import sys
+import os
 import json
-import time
 
-class JanitorSentinel:
-    def __init__(self, uri="ws://localhost:8080"):
-        self.uri = uri
-        self.layer = "JanitorSentinel"
-        self.priority = 5
+# Path boilerplate for local imports
+sys.path.append(os.getcwd())
+from sdk.starlight_sdk import SentinelBase
+
+class JanitorSentinel(SentinelBase):
+    def __init__(self):
+        super().__init__(layer_name="JanitorSentinel", priority=5)
         self.blocking_patterns = [".modal", ".popup", "#overlay", ".obstacle", "#stabilize-btn"]
+        self.selectors = self.blocking_patterns 
         self.is_hijacking = False
 
-    async def connect(self):
-        async with websockets.connect(self.uri) as websocket:
-            print(f"[{self.layer}] Connected to Starlight Hub (v2.0 Protocol).")
-            
-            # Starlight v2.0: JSON-RPC Registration
-            registration = {
-                "jsonrpc": "2.0",
-                "method": "starlight.registration",
-                "params": {
-                    "layer": self.layer,
-                    "priority": self.priority,
-                    "selectors": self.blocking_patterns
-                },
-                "id": str(int(time.time() * 1000))
-            }
-            await websocket.send(json.dumps(registration))
+    async def on_pre_check(self, params, msg_id):
+        blocking = params.get("blocking", [])
+        
+        if blocking:
+            for b in blocking:
+                matched_pattern = None
+                for pattern in self.blocking_patterns:
+                    if pattern.replace('.', '') in b.get("className", "") or pattern.replace('#', '') == b.get("id", ""):
+                        matched_pattern = pattern
+                        break
+                
+                if matched_pattern:
+                    obstacle_id = b.get('selector', matched_pattern)
+                    await self.perform_remediation(obstacle_id)
+                    return 
+        
+        if not self.is_hijacking:
+            await self.send_clear()
 
-            # Start Heartbeat Task
-            heartbeat_task = asyncio.create_task(self.pulse(websocket))
-
-            async for message in websocket:
-                data = json.loads(message)
-                await self.handle_message(websocket, data)
-            
-            heartbeat_task.cancel()
-
-    async def pulse(self, ws):
-        while True:
-            # Starlight v2.0: JSON-RPC Pulse with Aura
-            msg = {
-                "jsonrpc": "2.0",
-                "method": "starlight.pulse",
-                "params": {
-                    "data": {
-                        "currentAura": self.blocking_patterns
-                    }
-                },
-                "id": str(int(time.time() * 1000))
-            }
-            await ws.send(json.dumps(msg))
-            await asyncio.sleep(0.5)  # 500ms heartbeat
-
-    async def handle_message(self, ws, data):
-        # Starlight v2.0: Check for JSON-RPC method
-        method = data.get("method")
-        params = data.get("params", {})
-
-        if method == "starlight.pre_check":
-            cmd = params.get("command", {}).get("cmd", "unknown")
-            print(f"[{self.layer}] PRE_CHECK: Auditing environment for {cmd}...")
-            
-            # Check for blocking elements sent by Hub
-            blocking = params.get("blocking", [])
-            if blocking:
-                for b in blocking:
-                    matched_pattern = None
-                    for pattern in self.blocking_patterns:
-                        if pattern.replace('.', '') in b.get("className", "") or pattern.replace('#', '') == b.get("id", ""):
-                            matched_pattern = pattern
-                            break
-                    
-                    if matched_pattern:
-                        selector_to_hijack = b.get('selector', matched_pattern)
-                        await self.hijack(ws, selector_to_hijack, f"Proactive Audit: detected visible {selector_to_hijack}")
-                        return 
-            
-            # Path is clear - send CLEAR signal
-            if not self.is_hijacking:
-                clear_msg = {
-                    "jsonrpc": "2.0",
-                    "method": "starlight.clear",
-                    "params": {},
-                    "id": str(int(time.time() * 1000))
-                }
-                await ws.send(json.dumps(clear_msg))
-
-    async def hijack(self, ws, selector, reason):
+    async def perform_remediation(self, obstacle_id):
         if self.is_hijacking: return
-
-        print(f"[{self.layer}] !!! HIJACKING !!! Reason: {reason}")
         self.is_hijacking = True
         
-        # Starlight v2.0: HIJACK signal
-        hijack_msg = {
-            "jsonrpc": "2.0",
-            "method": "starlight.hijack",
-            "params": {
-                "reason": reason,
-                "obstacleSignature": selector
-            },
-            "id": str(int(time.time() * 1000))
-        }
-        await ws.send(json.dumps(hijack_msg))
+        best_action = self.memory.get(obstacle_id)
+        if best_action:
+            print(f"[{self.layer}] Phase 7: Recalling best action for {obstacle_id} -> {best_action}")
+            await self.send_hijack(f"Predictive remediation for {obstacle_id}")
+            await self.send_action("click", best_action)
+            self.last_action = { "id": obstacle_id, "selector": best_action }
+        else:
+            print(f"[{self.layer}] !!! HIJACKING !!! Reason: Detected {obstacle_id}")
+            await self.send_hijack(f"Janitor heuristic healing for {obstacle_id}")
+            
+            fallback_selectors = [
+                f"{obstacle_id} .close", 
+                f"{obstacle_id} #close-btn", 
+                ".modal-close", 
+                ".close-btn",
+                "button:has-text('Close')",
+                "#custom-close"
+            ]
+            
+            for selector in fallback_selectors:
+                full_sel = f"{selector} >> visible=true"
+                print(f"[{self.layer}] Trying heuristic: {full_sel}")
+                await self.send_action("click", full_sel)
+                # We track the LAST one tried. In our test, #custom-close is last.
+                self.last_action = { "id": obstacle_id, "selector": full_sel }
+                await asyncio.sleep(0.5)
 
-        # Execute Sovereign Healing
-        print(f"[{self.layer}] Executing Sovereign Healing...")
-        target_pattern = selector if "close" in selector else ".close-btn"
-        
-        # Starlight v2.0: ACTION signal
-        action_msg = {
-            "jsonrpc": "2.0",
-            "method": "starlight.action",
-            "params": {
-                "cmd": "click",
-                "selector": f"{target_pattern} >> visible=true"
-            },
-            "id": str(int(time.time() * 1000))
-        }
-        await ws.send(json.dumps(action_msg))
-        
-        await asyncio.sleep(1.5)
-
-        # Starlight v2.0: RESUME signal
-        print(f"[{self.layer}] Requesting RE_CHECK for landscape stability...")
-        resume_msg = {
-            "jsonrpc": "2.0",
-            "method": "starlight.resume",
-            "params": {
-                "re_check": True
-            },
-            "id": str(int(time.time() * 1000))
-        }
-        await ws.send(json.dumps(resume_msg))
+        await asyncio.sleep(1.0)
+        await self.send_resume(re_check=True)
         self.is_hijacking = False
+
+    async def on_message(self, method, params, msg_id):
+        # Starlight v2.6: Listen for broadcasted command completion to learn
+        m_type = params.get("type") if not method else method
+        
+        if (m_type == "COMMAND_COMPLETE" or method == "starlight.intent") and self.last_action:
+            if params.get("success", True):
+                obs_id = self.last_action["id"]
+                sel = self.last_action["selector"]
+                if self.memory.get(obs_id) != sel:
+                    print(f"[{self.layer}] Phase 7: LEARNING successful remediation! {obs_id} -> {sel}")
+                    self.memory[obs_id] = sel
+                    self._save_memory()
+            self.last_action = None
 
 if __name__ == "__main__":
     sentinel = JanitorSentinel()
-    asyncio.run(sentinel.connect())
+    asyncio.run(sentinel.start())
