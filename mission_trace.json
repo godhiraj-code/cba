@@ -1,7 +1,26 @@
 [
   {
-    "timestamp": 1767100060916,
-    "humanTime": "6:37:40 pm",
+    "timestamp": 1767101102984,
+    "humanTime": "6:55:02 pm",
+    "type": "RECV",
+    "layer": "Intent",
+    "method": "starlight.registration",
+    "params": {
+      "layer": "PulseSentinel",
+      "priority": 1,
+      "selectors": [],
+      "capabilities": [
+        "temporal-stability",
+        "settling",
+        "network-idle"
+      ]
+    },
+    "id": "reg-1767101102",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767101111785,
+    "humanTime": "6:55:11 pm",
     "type": "RECV",
     "layer": "Intent",
     "method": "starlight.registration",
@@ -17,12 +36,12 @@
       ],
       "capabilities": []
     },
-    "id": "reg-1767100060",
+    "id": "reg-1767101111",
     "snapshot": null
   },
   {
-    "timestamp": 1767100069225,
-    "humanTime": "6:37:49 pm",
+    "timestamp": 1767101124205,
+    "humanTime": "6:55:24 pm",
     "type": "RECV",
     "layer": "Intent",
     "method": "starlight.intent",
@@ -34,14 +53,14 @@
     "snapshot": "<html><head></head><body></body></html>"
   },
   {
-    "timestamp": 1767100069231,
-    "humanTime": "6:37:49 pm",
+    "timestamp": 1767101125721,
+    "humanTime": "6:55:25 pm",
     "type": "SEND",
     "layer": "Intent",
     "method": "starlight.pre_check",
     "params": {
       "command": {
-        "clientId": "InOxvFVFpjhRZkauxpok0",
+        "clientId": "CVv1wdtyjOMZjknESxifI",
         "cmd": "goto",
         "url": "file:///C:/cba/test/learning_test.html",
         "id": 1
@@ -49,42 +68,52 @@
       "blocking": [],
       "screenshot": null
     },
-    "id": "8yxBllt7qt7OMBWUS8bBY",
+    "id": "Tot-39D18zwXdXpbj-IDI",
     "snapshot": "<html><head></head><body></body></html>"
   },
   {
-    "timestamp": 1767100069233,
-    "humanTime": "6:37:49 pm",
+    "timestamp": 1767101125722,
+    "humanTime": "6:55:25 pm",
     "type": "RECV",
     "layer": "JanitorSentinel",
     "method": "starlight.clear",
     "params": {},
-    "id": "1767100069233",
+    "id": "1767101125722",
     "snapshot": null
   },
   {
-    "timestamp": 1767100069331,
-    "humanTime": "6:37:49 pm",
+    "timestamp": 1767101125723,
+    "humanTime": "6:55:25 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767101125723",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767101125787,
+    "humanTime": "6:55:25 pm",
     "type": "SEND",
     "layer": "System",
     "method": "starlight.entropy_stream",
     "params": {
       "entropy": true
     },
-    "id": "FsYh-MWDLVkUigDuO-7E0",
+    "id": "N8OVHNz3iIOFYZR9bxvEz",
     "snapshot": null
   },
   {
-    "timestamp": 1767100070006,
-    "humanTime": "6:37:50 pm",
+    "timestamp": 1767101126350,
+    "humanTime": "6:55:26 pm",
     "type": "SEND",
     "layer": "Intent",
     "id": 1,
     "snapshot": null
   },
   {
-    "timestamp": 1767100070012,
-    "humanTime": "6:37:50 pm",
+    "timestamp": 1767101126353,
+    "humanTime": "6:55:26 pm",
     "type": "RECV",
     "layer": "Intent",
     "method": "starlight.intent",
@@ -98,14 +127,14 @@
     "snapshot": "<!DOCTYPE html><html><head>\n    <title>Starlight Learning Test</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            padding: 2rem;\n            background: #0f172a;\n            color: white;\n        }\n\n        .modal {\n            position: fixed;\n            top: 50%;\n            left: 50%;\n            transform: translate(-50%, -50%);\n            background: #1e293b;\n            padding: 2rem;\n            border: 2px solid #3b82f6;\n            border-radius: 8px;\n            z-index: 1000;\n        }\n\n        .overlay {\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: rgba(0, 0, 0, 0.8);\n            z-index: 999;\n        }\n\n        #custom-close {\n            background: #f43f5e;\n            color: white;\n            border: none;\n            padding: 0.5rem 1rem;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n\n        #secret-button {\n            padding: 1rem 2rem;\n            background: #10b981;\n            border: none;\n            color: white;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n    </style>\n</head>\n\n<body>\n    <h1>Phase 7.3: Sentinel Learning</h1>\n    <p>The Janitor must find the custom close button and remember it.</p>\n\n    <div id=\"modal-container\">\n        <div class=\"overlay\"></div>\n        <div class=\"modal\">\n            <h2>Obstacle Detected!</h2>\n            <p>I am a stubborn modal with a custom close button.</p>\n            <button id=\"custom-close\">DESTROY MODAL</button>\n        </div>\n    </div>\n\n    <button id=\"secret-button\">MISSION GOAL: COLLECT DATA</button>\n\n    <script>\n        document.getElementById('custom-close').onclick = () => {\n            document.getElementById('modal-container').style.display = 'none';\n        };\n\n        document.getElementById('secret-button').onclick = () => {\n            document.body.style.background = '#064e3b';\n            document.getElementById('secret-button').innerText = 'DATA COLLECTED';\n        };\n    </script>\n\n\n</body></html>"
   },
   {
-    "timestamp": 1767100070029,
-    "humanTime": "6:37:50 pm",
+    "timestamp": 1767101126359,
+    "humanTime": "6:55:26 pm",
     "type": "SEND",
     "layer": "Intent",
     "method": "starlight.pre_check",
     "params": {
       "command": {
-        "clientId": "InOxvFVFpjhRZkauxpok0",
+        "clientId": "CVv1wdtyjOMZjknESxifI",
         "goal": "COLLECT DATA",
         "selector": "#secret-button",
         "selfHealed": false,
@@ -123,24 +152,36 @@
       ],
       "screenshot": null
     },
-    "id": "15G5CyIYim3sMINWTi8Ot",
+    "id": "RsKn0S8n3uzo4KsqVeDi-",
     "snapshot": "<!DOCTYPE html><html><head>\n    <title>Starlight Learning Test</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            padding: 2rem;\n            background: #0f172a;\n            color: white;\n        }\n\n        .modal {\n            position: fixed;\n            top: 50%;\n            left: 50%;\n            transform: translate(-50%, -50%);\n            background: #1e293b;\n            padding: 2rem;\n            border: 2px solid #3b82f6;\n            border-radius: 8px;\n            z-index: 1000;\n        }\n\n        .overlay {\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: rgba(0, 0, 0, 0.8);\n            z-index: 999;\n        }\n\n        #custom-close {\n            background: #f43f5e;\n            color: white;\n            border: none;\n            padding: 0.5rem 1rem;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n\n        #secret-button {\n            padding: 1rem 2rem;\n            background: #10b981;\n            border: none;\n            color: white;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n    </style>\n</head>\n\n<body>\n    <h1>Phase 7.3: Sentinel Learning</h1>\n    <p>The Janitor must find the custom close button and remember it.</p>\n\n    <div id=\"modal-container\">\n        <div class=\"overlay\"></div>\n        <div class=\"modal\">\n            <h2>Obstacle Detected!</h2>\n            <p>I am a stubborn modal with a custom close button.</p>\n            <button id=\"custom-close\">DESTROY MODAL</button>\n        </div>\n    </div>\n\n    <button id=\"secret-button\">MISSION GOAL: COLLECT DATA</button>\n\n    <script>\n        document.getElementById('custom-close').onclick = () => {\n            document.getElementById('modal-container').style.display = 'none';\n        };\n\n        document.getElementById('secret-button').onclick = () => {\n            document.body.style.background = '#064e3b';\n            document.getElementById('secret-button').innerText = 'DATA COLLECTED';\n        };\n    </script>\n\n\n</body></html>"
   },
   {
-    "timestamp": 1767100070030,
-    "humanTime": "6:37:50 pm",
+    "timestamp": 1767101126361,
+    "humanTime": "6:55:26 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 427
+    },
+    "id": "1767101126360",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767101126361,
+    "humanTime": "6:55:26 pm",
     "type": "RECV",
     "layer": "JanitorSentinel",
     "method": "starlight.hijack",
     "params": {
       "reason": "Predictive remediation for .modal"
     },
-    "id": "1767100070030",
+    "id": "1767101126360",
     "snapshot": null
   },
   {
-    "timestamp": 1767100070031,
-    "humanTime": "6:37:50 pm",
+    "timestamp": 1767101126361,
+    "humanTime": "6:55:26 pm",
     "type": "RECV",
     "layer": "JanitorSentinel",
     "method": "starlight.action",
@@ -148,42 +189,42 @@
       "cmd": "click",
       "selector": "#custom-close >> visible=true"
     },
-    "id": "1767100070030",
+    "id": "1767101126361",
     "snapshot": null
   },
   {
-    "timestamp": 1767100070135,
-    "humanTime": "6:37:50 pm",
+    "timestamp": 1767101126399,
+    "humanTime": "6:55:26 pm",
     "type": "SEND",
     "layer": "System",
     "method": "starlight.entropy_stream",
     "params": {
       "entropy": true
     },
-    "id": "fw9ZHreU9ITcgRCIummh9",
+    "id": "O8tls54bAJ1nWUltBPvUc",
     "snapshot": null
   },
   {
-    "timestamp": 1767100071046,
-    "humanTime": "6:37:51 pm",
+    "timestamp": 1767101127363,
+    "humanTime": "6:55:27 pm",
     "type": "RECV",
     "layer": "JanitorSentinel",
     "method": "starlight.resume",
     "params": {
       "re_check": true
     },
-    "id": "1767100071045",
+    "id": "1767101127362",
     "snapshot": null
   },
   {
-    "timestamp": 1767100072559,
-    "humanTime": "6:37:52 pm",
+    "timestamp": 1767101128868,
+    "humanTime": "6:55:28 pm",
     "type": "SEND",
     "layer": "Intent",
     "method": "starlight.pre_check",
     "params": {
       "command": {
-        "clientId": "InOxvFVFpjhRZkauxpok0",
+        "clientId": "CVv1wdtyjOMZjknESxifI",
         "goal": "COLLECT DATA",
         "selector": "#secret-button",
         "selfHealed": false,
@@ -193,42 +234,52 @@
       "blocking": [],
       "screenshot": null
     },
-    "id": "laDNBVCn5EyhWQ6pg_3pz",
+    "id": "DHHXhkLHIxcJKdvmCrmq5",
     "snapshot": "<!DOCTYPE html><html><head>\n    <title>Starlight Learning Test</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            padding: 2rem;\n            background: #0f172a;\n            color: white;\n        }\n\n        .modal {\n            position: fixed;\n            top: 50%;\n            left: 50%;\n            transform: translate(-50%, -50%);\n            background: #1e293b;\n            padding: 2rem;\n            border: 2px solid #3b82f6;\n            border-radius: 8px;\n            z-index: 1000;\n        }\n\n        .overlay {\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: rgba(0, 0, 0, 0.8);\n            z-index: 999;\n        }\n\n        #custom-close {\n            background: #f43f5e;\n            color: white;\n            border: none;\n            padding: 0.5rem 1rem;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n\n        #secret-button {\n            padding: 1rem 2rem;\n            background: #10b981;\n            border: none;\n            color: white;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n    </style>\n</head>\n\n<body>\n    <h1>Phase 7.3: Sentinel Learning</h1>\n    <p>The Janitor must find the custom close button and remember it.</p>\n\n    <div id=\"modal-container\" style=\"display: none;\">\n        <div class=\"overlay\" style=\"display: none;\"></div>\n        <div class=\"modal\" style=\"display: none;\">\n            <h2>Obstacle Detected!</h2>\n            <p>I am a stubborn modal with a custom close button.</p>\n            <button id=\"custom-close\">DESTROY MODAL</button>\n        </div>\n    </div>\n\n    <button id=\"secret-button\">MISSION GOAL: COLLECT DATA</button>\n\n    <script>\n        document.getElementById('custom-close').onclick = () => {\n            document.getElementById('modal-container').style.display = 'none';\n        };\n\n        document.getElementById('secret-button').onclick = () => {\n            document.body.style.background = '#064e3b';\n            document.getElementById('secret-button').innerText = 'DATA COLLECTED';\n        };\n    </script>\n\n\n</body></html>"
   },
   {
-    "timestamp": 1767100072560,
-    "humanTime": "6:37:52 pm",
+    "timestamp": 1767101128869,
+    "humanTime": "6:55:28 pm",
     "type": "RECV",
     "layer": "JanitorSentinel",
     "method": "starlight.clear",
     "params": {},
-    "id": "1767100072560",
+    "id": "1767101128869",
     "snapshot": null
   },
   {
-    "timestamp": 1767100072668,
-    "humanTime": "6:37:52 pm",
+    "timestamp": 1767101128869,
+    "humanTime": "6:55:28 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767101128869",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767101129030,
+    "humanTime": "6:55:29 pm",
     "type": "SEND",
     "layer": "System",
     "method": "starlight.entropy_stream",
     "params": {
       "entropy": true
     },
-    "id": "e9DSeufpm5DCtR5x1H0Uz",
+    "id": "wuuVQvsQzenVGIxh1R_qE",
     "snapshot": null
   },
   {
-    "timestamp": 1767100073274,
-    "humanTime": "6:37:53 pm",
+    "timestamp": 1767101129584,
+    "humanTime": "6:55:29 pm",
     "type": "SEND",
     "layer": "Intent",
     "id": 2,
     "snapshot": null
   },
   {
-    "timestamp": 1767100073276,
-    "humanTime": "6:37:53 pm",
+    "timestamp": 1767101129585,
+    "humanTime": "6:55:29 pm",
     "type": "RECV",
     "layer": "Intent",
     "method": "starlight.finish",

@@ -6,8 +6,11 @@ const path = require('path');
 
 class CBAHub {
     constructor(port = 8080) {
-        this.port = port;
-        this.wss = new WebSocketServer({ port });
+        // Load configuration
+        this.config = this.loadConfig();
+
+        this.port = this.config.hub?.port || port;
+        this.wss = new WebSocketServer({ port: this.port });
         this.browser = null;
         this.page = null;
         this.sentinels = new Map();
@@ -16,32 +19,68 @@ class CBAHub {
         this.lockTimeout = null;
         this.commandQueue = [];
         this.pendingRequests = new Map();
-        this.heartbeatTimeout = 5000;
+        this.heartbeatTimeout = this.config.hub?.heartbeatTimeout || 5000;
         this.systemHealthy = true;
         this.reportData = [];
         this.screenshotsDir = path.join(process.cwd(), 'screenshots');
-        this.totalSavedTime = 0; // In seconds
+        this.totalSavedTime = 0;
         this.hijackStarts = new Map();
         this.lastEntropyBroadcast = 0;
-        this.sovereignState = {}; // Phase 4: Shared Mission Context
-        this.missionTrace = [];   // Phase 6: Time-Travel Triage Logging
-        this.historicalMemory = new Map(); // Phase 7: Predictive Memory
-        this.historicalAuras = new Set();  // Phase 7.2: High-entropy temporal windows
-        this.missionStartTime = null;      // Phase 7.2: Mission clock alignment
-        this.isProcessing = false; // Flag to track active command execution
+        this.sovereignState = {};
+        this.missionTrace = [];
+        this.historicalMemory = new Map();
+        this.historicalAuras = new Set();
+        this.missionStartTime = null;
+        this.isProcessing = false;
 
         if (!fs.existsSync(this.screenshotsDir)) fs.mkdirSync(this.screenshotsDir);
 
+        this.cleanupScreenshots();
         this.loadHistoricalMemory();
         this.init();
     }
 
+    loadConfig() {
+        const configPath = path.join(process.cwd(), 'config.json');
+        try {
+            if (fs.existsSync(configPath)) {
+                return JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            }
+        } catch (e) {
+            console.warn('[CBA Hub] Warning: Could not load config.json:', e.message);
+        }
+        return {};
+    }
+
+    cleanupScreenshots() {
+        const maxAge = this.config.hub?.screenshotMaxAge || 86400000; // 24h default
+        const now = Date.now();
+        try {
+            const files = fs.readdirSync(this.screenshotsDir);
+            let cleaned = 0;
+            for (const file of files) {
+                const filepath = path.join(this.screenshotsDir, file);
+                const stat = fs.statSync(filepath);
+                if (now - stat.mtimeMs > maxAge) {
+                    fs.unlinkSync(filepath);
+                    cleaned++;
+                }
+            }
+            if (cleaned > 0) {
+                console.log(`[CBA Hub] Cleanup: Removed ${cleaned} old screenshots.`);
+            }
+        } catch (e) {
+            console.warn('[CBA Hub] Screenshot cleanup failed:', e.message);
+        }
+    }
+
     async init() {
-        // v2.0 Mission Safety Timeout (3 mins)
+        // Mission Safety Timeout from config
+        const missionTimeout = this.config.hub?.missionTimeout || 180000;
         setTimeout(() => {
             console.warn("[CBA Hub] MISSION TIMEOUT REACHED. Closing browser...");
             this.shutdown();
-        }, 180000);
+        }, missionTimeout);
 
         console.log(`[CBA Hub] Starting Starlight Hub: The Hero's Journey...`);
         this.browser = await chromium.launch({ headless: false });
@@ -113,7 +152,8 @@ class CBAHub {
 
     broadcastEntropy() {
         const now = Date.now();
-        if (now - this.lastEntropyBroadcast < 100) return; // v2.0 Starlight Throttling (10hz max)
+        const throttle = this.config.hub?.entropyThrottle || 100;
+        if (now - this.lastEntropyBroadcast < throttle) return;
         this.lastEntropyBroadcast = now;
 
         const msgObj = {
@@ -216,7 +256,6 @@ class CBAHub {
 
     async recordTrace(type, sentinelId, data, includeSnapshot = false) {
         if (data.method === 'starlight.pulse') return;
-        // v2.5: High-fidelity mission logging
         const sentinel = this.sentinels.get(sentinelId);
         const snapshot = includeSnapshot ? await this.takeDOMSnapshot() : null;
 
@@ -228,8 +267,14 @@ class CBAHub {
             method: data.method,
             params: data.params,
             id: data.id,
-            snapshot // Phase 6: Full DOM state for time-travel
+            snapshot
         });
+
+        // Trace rotation: keep only the last N events
+        const maxEvents = this.config.hub?.traceMaxEvents || 500;
+        if (this.missionTrace.length > maxEvents) {
+            this.missionTrace = this.missionTrace.slice(-maxEvents);
+        }
     }
 
     async takeDOMSnapshot() {
@@ -388,7 +433,8 @@ class CBAHub {
         this.lockOwner = id;
 
         if (this.lockTimeout) clearTimeout(this.lockTimeout);
-        this.lockTimeout = setTimeout(() => this.releaseLock('TTL Expired'), 5000);
+        const lockTTL = this.config.hub?.lockTTL || 5000;
+        this.lockTimeout = setTimeout(() => this.releaseLock('TTL Expired'), lockTTL);
 
         const screenshot = await this.takeScreenshot(`HIJACK_${requested.layer}`);
 
@@ -455,10 +501,11 @@ class CBAHub {
             // Phase 7.2: Aura-Based Throttling (Predictive Pacing)
             let predictiveWait = false;
             if (this.isHistoricallyUnstable()) {
+                const auraWait = this.config.aura?.predictiveWaitMs || 1500;
                 console.log(`[CBA Hub] Aura Detected: Proactively slowing down for historical jitter...`);
-                await new Promise(r => setTimeout(r, 1500));
+                await new Promise(r => setTimeout(r, auraWait));
                 predictiveWait = true;
-                this.totalSavedTime += 30; // ROI: 30s saved per predictive stabilization
+                this.totalSavedTime += 30;
             }
 
             const clear = await this.broadcastPreCheck(msg);
@@ -509,7 +556,7 @@ class CBAHub {
     }
 
     async broadcastPreCheck(msg) {
-        const syncBudget = 90000; // Deep Vision Budget (90s)
+        const syncBudget = this.config.hub?.syncBudget || 30000;
         console.log(`[CBA Hub] Awaiting Handshake for ${msg.cmd} (Budget: ${syncBudget / 1000}s)...`);
 
         const relevantSentinels = Array.from(this.sentinels.entries())

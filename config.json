@@ -1,0 +1,26 @@
+{
+    "hub": {
+        "port": 8080,
+        "syncBudget": 30000,
+        "missionTimeout": 180000,
+        "heartbeatTimeout": 5000,
+        "lockTTL": 5000,
+        "entropyThrottle": 100,
+        "screenshotMaxAge": 86400000,
+        "traceMaxEvents": 500
+    },
+    "aura": {
+        "predictiveWaitMs": 1500,
+        "bucketSizeMs": 500
+    },
+    "sentinel": {
+        "settlementWindow": 1.0,
+        "reconnectDelay": 3,
+        "heartbeatInterval": 2
+    },
+    "vision": {
+        "model": "moondream",
+        "timeout": 25,
+        "ollamaUrl": "http://localhost:11434/api/generate"
+    }
+}
