@@ -1,9 +1,16 @@
 # 🛰️ Constellation-Based Automation (CBA)
-## Starlight Protocol v2.6 (GALAXY) — The Predictive Intelligence Era
+## Starlight Protocol v2.7 — The Predictive Intelligence Era
+
+[![Version](https://img.shields.io/badge/version-2.7.0-blue.svg)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
+[![Python](https://img.shields.io/badge/python-%3E%3D3.9-blue.svg)](https://python.org)
 
 **"Don't look at the ground; look at the Starlight."**
 
 CBA is a philosophical shift in browser automation. Inspired by biological navigation (like the dung beetle using the Milky Way), this framework moves away from linear scripts that handle every possible UI obstacle. Instead, it uses a **Sovereign Constellation** of autonomous agents (Sentinels) that orient toward high-level goals.
+
+---
 
 ## 🏗️ The Sovereign Constellation
 
@@ -11,97 +18,189 @@ CBA is a philosophical shift in browser automation. Inspired by biological navig
 
 CBA uses a **Decentralized Sidecar Architecture** communicating over a JSON-RPC message bus.
 
-| Layer | Biological Equivalent | Role in CBA |
-| :--- | :--- | :--- |
-| **Intent Layer** | The Goal | High-level business intent. Now **Selector-Less** (e.g., `{ goal: 'Login' }`). |
-| **The Hub** | The Brain | Orchestrates Playwright, resolves semantic goals, and manages the **Sovereign Context**. |
-| **Vision (Sentinel)** | AI Perception | Uses local SLMs (Moondream) to visually detect and heal obstacles without selectors. |
-| **Janitor (Sentinel)** | The Ground | Heuristic background process that clears modals, cookie banners, and overlays. |
-| **Pulse (Sentinel)** | Entropy | Monitors network/DOM jitter to enforce **Wait-Less** temporal stability. |
-| **Data (Sentinel)** | Intelligence | Passively extracts metadata (tokens, links) and injects it into the shared context. |
+| Layer | Role |
+| :--- | :--- |
+| **Intent Layer** | High-level business intent. Selector-less (e.g., `{ goal: 'Login' }`). |
+| **The Hub** | Orchestrates Playwright, resolves semantic goals, manages **Sovereign Context**. |
+| **Vision Sentinel** | Uses local SLMs (Moondream) for visual obstacle detection. |
+| **Janitor Sentinel** | Heuristic background process that clears modals and overlays. |
+| **Pulse Sentinel** | Monitors network/DOM jitter for **Wait-Less** temporal stability. |
+| **Data Sentinel** | Passively extracts metadata and injects it into the shared context. |
 
-## 🛰️ The Starlight Protocol (v2.5)
+---
+
+## ✨ What's New in v2.7
+
+### 🛠️ Phase 8: Codebase Hardening
+
+| Feature | Description |
+|---------|-------------|
+| **Centralized Config** | All settings in `config.json` |
+| **Screenshot Cleanup** | Auto-removes files older than 24h |
+| **Trace Rotation** | Limits mission trace to 500 events |
+| **Graceful Shutdown** | Ctrl+C saves sentinel memory |
+| **SDK Improvements** | Atomic writes, proper exceptions |
+| **PulseSentinel Migration** | Now uses SentinelBase SDK |
+
+See [CHANGELOG.md](CHANGELOG.md) for full history.
+
+---
+
+## 🛰️ The Starlight Protocol
 
 Standardized signals for zero-wait, selector-less autonomy:
 
-| Method | Initiator | Purpose |
-| :--- | :--- | :--- |
-| `starlight.intent` | Intent | Issues a high-level `goal` or `cmd`. |
-| `starlight.pre_check` | Hub | Handshake broadcast with screenshot for **AI Vision** analysis. |
-| `starlight.wait` | Sentinel | Veto due to environmental instability (Temporal Stability). |
-| `starlight.hijack` | Sentinel | Request absolute browser lock for recovery/healing. |
-| `starlight.context_update`| Sentinel | Inject intelligence into the Hub’s shared mission state. |
+| Method | Purpose |
+| :--- | :--- |
+| `starlight.intent` | Issues a high-level `goal` or `cmd`. |
+| `starlight.pre_check` | Handshake broadcast with screenshot for AI analysis. |
+| `starlight.wait` | Veto due to environmental instability. |
+| `starlight.hijack` | Request absolute browser lock for healing. |
+| `starlight.context_update` | Inject intelligence into the shared mission state. |
+
+---
 
 ## 🛠️ The Starlight SDK (Python)
-Build a sentinel in minutes using the provided base class:
+
+Build a sentinel in minutes:
+
 ```python
 from sdk.starlight_sdk import SentinelBase
 
 class MySentinel(SentinelBase):
+    def __init__(self):
+        super().__init__(layer_name="MySentinel", priority=10)
+        self.capabilities = ["custom-healing"]
+
     async def on_pre_check(self, params, msg_id):
         # Your custom healing logic here
         await self.send_clear()
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(MySentinel().start())
 ```
 
-- **Context Awareness**: Logs shared metadata discovered by the constellation.
+**SDK Features:**
+- ✅ Auto-reconnect on connection failure
+- ✅ Persistent memory (JSON-based)
+- ✅ Graceful shutdown (SIGINT/SIGTERM)
+- ✅ Atomic file writes
+- ✅ Config-driven settings
 
-## 🎞️ Phase 6: The "Omega" Standard
-CBA has transitioned from a framework to a **Standard for Resilient Infrastructure**.
+---
 
-### ⏪ Time-Travel Triage
-Every mission is now recorded with high-fidelity telemetry. Use the `triage.html` tool to:
-- **Rewind** failed runs to the exact DOM state.
-- **Inspect** every JSON-RPC handshake between the Hub and Sentinels.
-- **Diagnose** environmental entropy through integrated visual context.
+## 🌌 Phase 7: The Galaxy Mesh
 
-### 🌐 Cloud Orchestration
-CBA is now Docker-native. Spin up a full constellation in seconds:
-```bash
-docker-compose up --build
-```
-This deploys a managed Hub and a mesh of Sentinels (Pulse, Janitor, Data) for ephemeral execution.
+CBA is a **Self-Learning Ecosystem**:
 
-### 🛰️ The Starlight Standard (Compliance)
-Formal protocol specifications are available in [STARLIGHT_STANDARD.md](file:///c:/cba/STARLIGHT_STANDARD.md).
+### 🧠 Predictive Memory
+The Hub learns from every mission:
+- **Self-Healing**: Failed selectors auto-substitute from historical memory
+- **Aura Throttling**: Proactive pacing during historically unstable windows
+- **Sentinel Learning**: Agents remember successful remediation strategies
 
-## 🌌 Phase 7: The "Galaxy" Mesh
-CBA is now evolving into a **Self-Learning Ecosystem**.
+### 📈 ROI Dashboard
+The `report.html` quantifies business value:
+- **Triage Savings**: Minutes saved per obstacle cleared
+- **Self-Healing Credits**: Automated selector fixes
+- **Aura Stabilization**: Predictive jitter avoidance
+- **Visual Proof**: Before/after screenshots
 
-### 🧠 Predictive Memory (Self-Healing)
-The Hub now learns from every mission. By indexing `mission_trace.json`, it builds a mapping of high-level goals to successful selectors.
-- **Auto-Recovery**: If a selector fails, the Hub cross-references its memory to find a historical substitute.
-- **Aura-Based Throttling**: The Hub learns "Environmental Auras" (temporal jitter clusters) and proactive slows down mission pacing to maintain stability.
-- **Semantic Evolution**: The more missions you run, the smarter the Hub becomes.
-
-### 📈 ROI Dashboard 2.0
-The `report.html` now quantifies the business value of autonomy:
-- **Triage Savings**: Automatically calculates minutes saved per obstacle cleared.
-- **Healing Credits**: Tracks mission-saving "Self-Healing" events in real-time.
-- **Predictive ROI**: Quantifies value of proactive "Aura Stabilization" events.
-- **Visual Proof**: State-aware screenshots provide undeniable evidence of mission success.
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v18+) & Python (3.9+)
-- [Ollama](https://ollama.ai/) (for Vision Sentinel)
-- Playwright
+- Node.js v18+ & Python 3.9+
+- [Ollama](https://ollama.ai/) (optional, for Vision Sentinel)
 
 ### Setup
 ```bash
 git clone <repo-url>
+cd cba
 npm install
-pip install websockets httpx
+pip install -r requirements.txt
 npx playwright install chromium
 ```
 
-### The "Full Constellation" Demo
-Run the world-class **Cosmic Challenge** or the **Self-Healing Demo**:
-- **Easiest**: Run `run_cba.bat` and select your mission.
-- **Manual**:
-    1. **Start Hub**: `node src/hub.js`
-    2. **Start Constellation**: Pulse, Janitor, Vision, Data sentinels.
-    3. **Run Intent**: `node src/intent.js` or `node test/intent_self_heal.js`.
+### Run the Demo
+```bash
+# Windows (recommended)
+run_cba.bat
+
+# Manual
+node src/hub.js          # Terminal 1
+python sentinels/pulse_sentinel.py   # Terminal 2
+python sentinels/janitor.py          # Terminal 3
+node src/intent.js       # Terminal 4
+```
 
 ---
+
+## ⚙️ Configuration
+
+All settings are in `config.json`:
+
+```json
+{
+    "hub": {
+        "port": 8080,
+        "syncBudget": 30000,
+        "missionTimeout": 180000
+    },
+    "sentinel": {
+        "settlementWindow": 1.0,
+        "reconnectDelay": 3
+    },
+    "vision": {
+        "model": "moondream",
+        "timeout": 25
+    }
+}
+```
+
+See [technical_guide.md](technical_guide.md) for full reference.
+
+---
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [user_guide.md](user_guide.md) | Getting started, sentinel overview |
+| [technical_guide.md](technical_guide.md) | Protocol spec, SDK reference |
+| [CHANGELOG.md](CHANGELOG.md) | Version history |
+| [STARLIGHT_STANDARD.md](STARLIGHT_STANDARD.md) | Formal protocol specification |
+| [roadmap.md](roadmap.md) | Future development plans |
+
+---
+
+## 🐳 Docker Deployment
+
+```bash
+docker-compose up --build
+```
+
+Deploys a managed Hub and sentinel mesh for ephemeral CI/CD execution.
+
+---
+
+## 🗺️ Roadmap
+
+| Phase | Status |
+|-------|--------|
+| Phase 1-6 | ✅ Complete |
+| Phase 7 (Galaxy Mesh) | ✅ Complete |
+| Phase 8 (Quality) | ✅ Complete |
+| Phase 9 (Security) | 🔜 Coming Soon |
+
+---
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE)
+
+---
+
 *Built with ❤️ by [Dhiraj Das](https://www.dhirajdas.dev)*

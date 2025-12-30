@@ -34,20 +34,77 @@ graph TD
 
 ---
 
-## 3. Basic Usage: The Mission
+## 3. Quick Start
 
-To run a CBA mission, you launch a **Constellation**.
+### Prerequisites
+- **Node.js** v18+ and **Python** 3.9+
+- **Playwright**: `npx playwright install chromium`
+- **Python deps**: `pip install -r requirements.txt`
+- **Ollama** (optional): For AI Vision Sentinel
 
-1. **Launch the Hub**: `node src/hub.js`
-2. **Launch Sentinels**: Run your agents (e.g., `python sentinels/pulse_sentinel.py`).
-3. **Execute Intent**: `node src/intent.js`
+### Running a Mission
 
-> [!TIP]
-> Use the provided `run_cba.bat` to launch the full world-class constellation at once!
+**Option A: One-Click Launch**
+```bash
+run_cba.bat
+```
+Select your mission from the menu.
+
+**Option B: Manual Launch**
+```bash
+# Terminal 1: Hub
+node src/hub.js
+
+# Terminal 2: Pulse Sentinel
+python sentinels/pulse_sentinel.py
+
+# Terminal 3: Janitor Sentinel
+python sentinels/janitor.py
+
+# Terminal 4: Run Intent
+node src/intent.js
+```
 
 ---
 
-## 4. Semantic Intent (Phase 5)
+## 4. Configuration
+
+CBA v2.7 introduces centralized configuration via `config.json`:
+
+```json
+{
+    "hub": {
+        "port": 8080,
+        "syncBudget": 30000,
+        "missionTimeout": 180000,
+        "screenshotMaxAge": 86400000,
+        "traceMaxEvents": 500
+    },
+    "aura": {
+        "predictiveWaitMs": 1500
+    },
+    "sentinel": {
+        "settlementWindow": 1.0,
+        "reconnectDelay": 3
+    },
+    "vision": {
+        "model": "moondream",
+        "timeout": 25
+    }
+}
+```
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `syncBudget` | 30000 | Max wait (ms) for sentinel handshake |
+| `missionTimeout` | 180000 | Max mission duration (ms) |
+| `screenshotMaxAge` | 86400000 | Auto-delete screenshots older than 24h |
+| `traceMaxEvents` | 500 | Max events in mission trace |
+| `settlementWindow` | 1.0 | Seconds of silence required for stability |
+
+---
+
+## 5. Semantic Intent (Phase 5)
 
 You no longer need to find selectors. Just tell the Hub what you want to achieve.
 
@@ -62,99 +119,87 @@ The Hub's **Semantic Resolver** will scan the page's accessibility layer and tex
 
 ---
 
-## 5. Temporal Stability (Phase 3)
-
-Forget `setTimeout` or `waitForSelector`. The **Pulse Sentinel** monitors the environment's "Entropy" (network requests + DOM mutations).
-
-- If the page is jittery, the Hub will automatically **WAIT**.
-- Once the Pulse reports "Settled," the Hub executes.
-- This results in **0-wait** code that is perfectly timed to the site's performance.
-
----
-
 ## 6. Understanding the Sentinels
 
 ### 💓 The Pulse Sentinel (Stability)
 The Guardian of Time. It eliminates flakiness by ensuring the environment is stable before any action.
+- **Now uses SDK**: Inherits from `SentinelBase` for consistency
+- **Auto-reconnect**: Retries connection if Hub restarts
 
 ### 🧹 The Janitor Sentinel (Heuristics)
 Detects known obstacles (modals, cookie banners) and hijacks control to clear them.
+- **Persistent Memory**: Remembers which selectors worked
+- **Predictive Mode**: Uses learned selectors on subsequent runs
 
 ### 👁️ The Vision Sentinel (AI-Driven)
-Uses Local AI (Ollama) to visually detect obstacles without selectors. Perfect for chaotic or encrypted UIs.
+Uses Local AI (Ollama) to visually detect obstacles without selectors.
+- **Configurable Model**: Set via `config.json`
+- **Timeout Handling**: Graceful fallback on Ollama timeout
 
 ### 📊 The Data Sentinel (Intelligence)
-Passively extracts metadata (tokens, IDs) and injects it into the shared context for your intent script to use.
+Extracts real metadata from commands and injects it into the shared context.
 
 ---
 
-## 7. OMEGA Standard: Time-Travel Triage (Phase 6)
-CBA now features **Time-Travel Triage**, allowing you to inspect missions with surgical precision.
+## 7. Phase 7: Predictive Intelligence & The Galaxy Mesh
 
-### How to use the Triage Tool
-1.  **Run Mission**: Execute your mission as usual. A `mission_trace.json` file will automatically be generated in the root directory.
-2.  **Open Triage**: Open [triage.html](file:///c:/cba/triage.html) in any modern browser.
-3.  **Load Trace**: Click "Load mission_trace.json" and select your file.
-4.  **Rewind**: Select any `starlight.intent` event to see exactly what the browser looked like at that moment.
-
-### Why use Triage?
-- **Debug "Black Box" Failures**: See why a goal failed by viewing the exact DOM state during execution.
-- **Audit Sentinels**: Verify that Sentinels are identifying obstacles correctly.
-- **Protocol Analysis**: Inspect the JSON-RPC timing and parameters.
-
----
-
-## 8. Cloud Orchestration (Docker)
-CBA is ready for ephemeral, cloud-based execution via Docker.
-
-### Running via Docker Compose
-Simply run:
-```bash
-docker-compose up --build
-```
-This will spin up:
-- **Hub**: The central orchestrator.
-- **Sentinels**: A managed mesh of Pulse, Janitor, and Data agents.
-
-### Benefits
-- **Ephemeral Environments**: Perfect for CI/CD pipelines.
-- **Isolation**: Each mission runs in a clean, containerized browser context.
-- **Standardization**: Identical execution across all environments.
-
----
-
-## 9. Phase 7: Predictive Intelligence & The Galaxy Mesh
 CBA is no longer just a listener; it is a **learner**.
 
 ### 🧬 Self-Healing Selectors
 When a UI change breaks a selector, the Hub switches from **Reactive** to **Predictive** mode:
 1.  **Failure Detected**: A command fails to find its target.
-2.  **Memory Retrieval**: The Hub consults its `historicalMemory` (learned from past successful `mission_trace.json` runs).
-3.  **Substitution**: It automatically retries with a historically successful selector for that specific goal.
+2.  **Memory Retrieval**: The Hub consults its `historicalMemory`.
+3.  **Substitution**: It automatically retries with a historically successful selector.
 4.  **Proof**: The event is tagged with a **SELF-HEALED** badge in the report.
 
-- **Minutes Saved**: The Hub calculates value based on:
-    - **5 mins** baseline for every Sentinel intervention (manual triage avoidance).
-    - **2-3 mins** for every Self-Healing event (manual debugging avoidance).
-    - **30s** for every **Aura Stabilization** event (predictive jitter avoidance).
-- **Visual Validation**: "Before" and "After" snapshots provide evidence of exactly where the Hub saved the mission.
-
 ### 🌀 What is an Aura?
-An **Aura** is a temporal window of high environment entropy. By learning these "Auras" from past runs, the Hub can proactively slow down its mission pace *before* a failure occurs, ensuring a "smooth arrival" every time.
+An **Aura** is a temporal window of high environment entropy. By learning these "Auras" from past runs, the Hub can proactively slow down its mission pace *before* a failure occurs.
 
 ### 🏛️ Sovereign Intelligence (Sentinel Learning)
-Sentinels are no longer amnesiac. Through the **Starlight SDK**, every agent now possesses a **Persistent Memory Layer**:
-- **Experience Accumulation**: When a Janitor or Vision sentinel successfully clears an obstacle, it records the winning selector.
-- **Predictive Remediation**: In subsequent runs, the Sentinel skips "exploration" and goes straight to the proven solution.
-- **Local Persistence**: Memory is stored locally as JSON (e.g., `JanitorSentinel_memory.json`), ensuring intelligence persists across system restarts.
+Sentinels possess a **Persistent Memory Layer**:
+- **Experience Accumulation**: Records winning selectors
+- **Predictive Remediation**: Skips exploration on known obstacles
+- **Local Persistence**: JSON files like `JanitorSentinel_memory.json`
+- **Graceful Shutdown**: Memory saved on Ctrl+C
+
+---
+
+## 8. Phase 8: Quality & Configuration (NEW)
+
+### What's New in v2.7
+
+| Feature | Description |
+|---------|-------------|
+| **Centralized Config** | All settings in `config.json` |
+| **Screenshot Cleanup** | Auto-removes files older than 24h |
+| **Trace Rotation** | Limits `mission_trace.json` to 500 events |
+| **Graceful Shutdown** | Ctrl+C saves sentinel memory |
+| **Atomic File Writes** | Prevents memory corruption |
+| **Python Dependencies** | Pinned in `requirements.txt` |
+
+---
+
+## 9. Time-Travel Triage (Phase 6)
+
+CBA features **Time-Travel Triage**, allowing you to inspect missions with surgical precision.
+
+### How to use the Triage Tool
+1.  **Run Mission**: A `mission_trace.json` file is generated.
+2.  **Open Triage**: Open `triage.html` in any browser.
+3.  **Load Trace**: Click "Load mission_trace.json".
+4.  **Rewind**: Select any event to see the browser state.
 
 ---
 
 ## 10. Troubleshooting
 
-- **AI Analysis Timed Out**: Ensure [Ollama](https://ollama.ai/) is running with the `moondream` model.
-- **Goal Resolution Failed**: Ensure the button or link has visible text or aria-labels that match your goal.
-- **System Unresponsive**: View the `CBA Hub` console for "Critical Sentinel UNRESPONSIVE" errors.
+| Issue | Solution |
+|-------|----------|
+| AI Analysis Timed Out | Ensure Ollama is running with `moondream` |
+| Goal Resolution Failed | Ensure button has visible text or aria-label |
+| System Unresponsive | Check Hub console for "UNRESPONSIVE" errors |
+| Sentinel Won't Connect | Verify Hub is running on port 8080 |
+| Memory Not Saved | Ensure graceful shutdown (Ctrl+C, not kill) |
 
 ---
 

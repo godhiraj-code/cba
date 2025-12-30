@@ -1,39 +1,71 @@
-# CBA Vision: The "Starlight Protocol" Roadmap
+# 🛰️ CBA World-Class Roadmap: The "Universal Starlight" Strategy
 
-To evolve from a prototype to a world-class, production-grade protocol, CBA must shift from "Reactive Healing" to "Proactive Intelligence." This roadmap outlines the trajectory to handle any website at enterprise scale.
-
-## Phase 1: Protocol Standardization (Starlight v2.0)
-The core communication between Hub and Sentinels must be codified into a formal specification.
-
-- **Formal JSON-RPC Schema**: Define strict types for `PRE_CHECK`, `HIJACK`, `RESUME`, and `HEARTBEAT`.
-- **Bidirectional Auras**: Allow Sentinels to not just "clear obstacles" but "enrich state" (e.g., a "Data Sentinel" that populates a global context for the Intent Layer).
-- **Latency Quotas**: Enforce strict millisecond budgets for Sentinel handshakes to prevent performance degradation.
-
-## Phase 2: The "Visionary" Layer (AI-Driven Healing)
-Moving beyond selector-based pattern matching to visual/semantic understanding.
-
-- **Local SLM Integration**: Deploy Small Language Models (like Llama/Phi) within "Vision Sentinels" to identify "Obstacles" purely by visual context (e.g., "this looks like a cookie banner") without needing CSS/XPath.
-- **Self-Healing Selectors**: If a Sentinel clears an obstacle, it should broadcast the "Corrected Path" back to the Hub's persistent memory to optimize future runs.
-
-## Phase 3: Enterprise Scalability & Cloud Sentinels
-CBA must move from a local "Sidecar" to a distributed "Fleet."
-
-- **Cloud Orchestrator**: A managed Hub that can spin up Sentinels in isolated containers across a global cluster.
-- **Sentinel Marketplace**: Plug-and-play "Auras" for complex third-party platforms (Salesforce, ServiceNow, Stripe, AWS Console).
-- **Security Hardening**: E2E encryption for the WebSocket bus and secure "Historian" Sentinels for credential rotation.
-
-## Phase 4: Developer Ecosystem (The CBA SDK)
-Making it the "Universal Language" of automation.
-
-- **Multi-Language SDKs**: Official CBA client libraries for Java, C#, Python, and Golang.
-- **CBA-CLI**: A powerful command-line tool for scaffolding Sentinels, debugging Starlight signals, and inspecting "Hero Story" timelines.
-- **IDE Integration**: VS Code extension to visualize the "Stars" (Auras) while writing Intent scripts.
-
-## Phase 5: World-Class Reliability (The "Omega" Hub)
-Achieving 99.9% Test Stability.
-
-- **Time-Travel Debugging**: Record the entire "Constellation" state to allow replaying a failed "Hero Story" at any exact millisecond for triage.
-- **Chaos Injection**: A built-in "Chaos Sentinel" that intentionally breaks the environment during execution to stress-test the healing layers of a new application.
+To transform Constellation-Based Automation from a smart framework into a global automation paradigm, we must move from **Reactive Healing** to **Sovereign Intelligence**.
 
 ---
+
+## 🟢 PHASE 1: The Core Protocol (COMPLETED)
+*Establish the foundational Sidecar Architecture.*
+- **Starlight v2.0**: JSON-RPC 2.0 message bus implementation. [DONE]
+- **Priority Handshaking**: Multi-sentinel coordination (Janitor vs Pulse). [DONE]
+- **Business ROI Reporting**: Autonomous "Hero Story" report generation. [DONE]
+
+## 🟢 PHASE 2: AI Visionary Layer (COMPLETED)
+*Integrate Local SLMs for visual, selector-free resilience.*
+- **Local Vision Pulse**: `moondream` integration for visual obstacle detection. [DONE]
+- **Hybrid Healing**: 25s AI budget with seamless heuristic fallback. [DONE]
+- **Sovereign Hijack**: Priority-based browser control for AI intervention. [DONE]
+
+## 🟢 PHASE 3: Temporal Stability & Network Pulse (COMPLETED)
+*Eliminating "Flakiness" at the source: Network & DOM Jitter.*
+- **The Pulse Sentinel**: Specialized agent for Network/DOM mutation monitoring. [DONE]
+- **Auto-Wait Handshake**: Hub-level execution delay based on environment stability. [DONE]
+- **Wait-Less Execution**: Removal of manual `setTimeout` from intent scripts. [DONE]
+
+## 🟢 PHASE 4: Decentralized Sentinel Mesh (COMPLETED)
+*Scaling CBA across distributed environments.*
+- **Sovereign Context Injection**: Shared intelligence across the constellation. [DONE]
+- **The Starlight SDK**: Standardized base class for rapid Sentinel development. [DONE]
+- **Data Sentinel**: Example agent performing passive intelligence extraction. [DONE]
+
+## 🟢 PHASE 5: Semantic Intent & Mission Planning (COMPLETED)
+*Moving from "Clicking" to "Goal Achievement."*
+- **Semantic Resolver**: Hub-level translation of goals (e.g., "INITIATE MISSION") to selectors. [DONE]
+- **Dynamic ID Resilience**: Handling randomly generated attributes via semantic scanning. [DONE]
+- **The Cosmic Challenge**: A world-class stress test of the full autonomous fleet. [DONE]
+
+---
+
+## 🟢 PHASE 6: The "Omega" Standard & Ecosystem (COMPLETED)
+*Achieving World-Class Paradigm Status.*
+- **Starlight Certification**: A formal ISO-like standard for "Resilient Test Infrastructure." [DONE]
+- **CBA Cloud Orchestrator**: A global, managed Hub that spins up ephemeral browsers and Sentinels on demand. [DONE]
+- **Time-Travel Triage**: The ability to "Rewind" a failed mission and inspect the exact handshake logs. [DONE]
+
+## 🛰️ NEXT: PHASE 7: The "Galaxy" Mesh (Predictive Intelligence)
+*Moving from Reactive Healing to Predictive Avoidance.*
+- **Self-Healing Selectors**: Use `mission_trace.json` history to automatically suggest substitutes for failed selectors. [DONE]
+- **Aura-Based Throttling**: Dynamic Hub frequency adjustment based on historical environmental entropy. [DONE]
+- **Sentinel Learning**: Persistent memory for Sentinels to optimize corrective actions over time. [DONE]
+
+## 🟢 PHASE 8: The Starlight Ecosystem (DevX) (COMPLETED)
+*Transforming CBA into a formal Developer Toolset.*
+- **Centralized Configuration**: All settings externalized to `config.json`. [DONE]
+- **Graceful Shutdown**: Signal handlers for clean sentinel termination. [DONE]
+- **SDK Hardening**: Atomic writes, proper exceptions, auto-reconnect. [DONE]
+- **Screenshot Cleanup**: Auto-removes files older than 24h. [DONE]
+- **Trace Rotation**: Limits mission trace to 500 events. [DONE]
+- **Starlight CLI**: Advanced project scaffolding and constellation management. [PLANNED]
+
+## 🛡️ PHASE 9: Sovereign Security & Compliance
+*Turning CBA into a Shield for Enterprise Environments.*
+- **Shadow DOM Penetration**: Advanced deep-piercing selectors for encapsulated web components.
+- **PII Sentinel**: Passive sentinel for detecting and alerting on sensitive data in the UI.
+- **Traffic Sovereign**: Network-level request manipulation and chaos engineering via the Hub.
+
+---
+
+### 🛡️ MISSION STATUS: STARLIGHT v2.7 OPERATIONAL
+CBA has made the **Environment** irrelevant to the **Goal**. Whether the UI changes, popups appear, or the network lags—the Starlight Protocol ensures the journey reaches its destination.
+
 *Built with ❤️ by [Dhiraj Das](https://www.dhirajdas.dev)*
