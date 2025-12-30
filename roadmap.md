@@ -72,6 +72,9 @@ To transform Constellation-Based Automation from a smart framework into a global
 ## 🟢 PHASE 13: Cross Browser and Mobile Constellation (Android, iOS)
 
 ## 🟢 PHASE 14: Plugin market place - Sentinel Store, Plugin SDK 
+
+## 🟢 PHASE 15: Visual editor for non developes , business users, managers to build sentinel 
+
 ---
 
 ### 🛡️ MISSION STATUS: STARLIGHT v2.7 OPERATIONAL
