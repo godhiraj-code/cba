@@ -221,8 +221,19 @@ function launchMission(missionFile) {
 }
 
 // HTTP server for static files
+const projectRoot = path.join(__dirname, '..');
+
 const server = http.createServer((req, res) => {
-    let filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
+    let filePath;
+
+    // Serve launcher UI files from launcher/ directory
+    if (req.url === '/' || req.url.startsWith('/client.js') || req.url.startsWith('/styles.css')) {
+        filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
+    } else {
+        // Serve other files (report.html, screenshots/) from project root
+        filePath = path.join(projectRoot, req.url);
+    }
+
     const ext = path.extname(filePath);
 
     const mimeTypes = {
@@ -230,7 +241,8 @@ const server = http.createServer((req, res) => {
         '.css': 'text/css',
         '.js': 'application/javascript',
         '.png': 'image/png',
-        '.jpg': 'image/jpeg'
+        '.jpg': 'image/jpeg',
+        '.webp': 'image/webp'
     };
 
     const contentType = mimeTypes[ext] || 'text/plain';
@@ -238,7 +250,7 @@ const server = http.createServer((req, res) => {
     fs.readFile(filePath, (err, content) => {
         if (err) {
             res.writeHead(404);
-            res.end('Not found');
+            res.end('Not found: ' + req.url);
         } else {
             res.writeHead(200, { 'Content-Type': contentType });
             res.end(content);

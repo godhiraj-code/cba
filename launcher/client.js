@@ -171,7 +171,8 @@ function launchMission() {
 }
 
 function openReport() {
-    window.open('../report.html', '_blank');
+    // Open report.html from the project root (served at /report.html)
+    window.open('/report.html', '_blank');
 }
 
 function clearLogs() {

@@ -32,6 +32,7 @@ class CBAHub {
         this.historicalAuras = new Set();
         this.missionStartTime = null;
         this.isProcessing = false;
+        this.isShuttingDown = false;
 
         if (!fs.existsSync(this.screenshotsDir)) fs.mkdirSync(this.screenshotsDir);
 
@@ -493,10 +494,18 @@ class CBAHub {
     }
 
     async shutdown() {
+        if (this.isShuttingDown) return; // Prevent double shutdown
+        this.isShuttingDown = true;
         console.log("[CBA Hub] Test Finished. Closing gracefully...");
-        // Wait for queue to drain
-        while (this.commandQueue.length > 0 || this.isLocked || this.isProcessing) {
+
+        // Clear the queue - no more processing
+        this.commandQueue = [];
+
+        // Wait for any in-flight processing to finish
+        let waitCount = 0;
+        while (this.isProcessing && waitCount < 50) {
             await new Promise(r => setTimeout(r, 100));
+            waitCount++;
         }
         await this.generateReport();
         await this.saveMissionTrace();
@@ -598,6 +607,8 @@ class CBAHub {
     }
 
     async processQueue() {
+        // Don't process if shutting down
+        if (this.isShuttingDown) return;
         if (this.isLocked || this.commandQueue.length === 0 || !this.systemHealthy || this.isProcessing) return;
 
         if (!this.missionStartTime) this.missionStartTime = Date.now();
@@ -624,6 +635,7 @@ class CBAHub {
             }
 
             const clear = await this.broadcastPreCheck(msg);
+            let forcedProceed = false;
             if (!clear) {
                 // Track pre-check retries for animation tolerance
                 msg._preCheckRetries = (msg._preCheckRetries || 0) + 1;
@@ -631,11 +643,13 @@ class CBAHub {
 
                 if (msg._preCheckRetries >= maxRetries) {
                     console.log(`[CBA Hub] ANIMATION TOLERANCE: Max pre-check retries (${maxRetries}) reached. Force proceeding with ${msg.cmd}...`);
+                    forcedProceed = true;
                     // Continue execution despite veto (animation tolerance)
                 } else {
                     console.log(`[CBA Hub] Pre-check failed (${msg._preCheckRetries}/${maxRetries}) for ${msg.cmd}. Retrying in 1s...`);
                     this.commandQueue.unshift(msg);
                     setTimeout(() => {
+                        if (this.isShuttingDown) return; // Don't process if shutting down
                         this.isProcessing = false;
                         this.processQueue();
                     }, 1000);
@@ -657,12 +671,13 @@ class CBAHub {
                 type: 'COMMAND',
                 id: msg.id,
                 cmd: msg.cmd,
-                goal: msg.goal, // Phase 9: Store semantic goal for descriptive reports
+                goal: msg.goal,
                 selector: msg.selector,
-                url: msg.url, // Phase 7: Capture URL for GOTO reporting
+                url: msg.url,
                 success,
-                selfHealed: selfHealed || msg.selfHealed, // Phase 7: Tracking Predictive Healing
-                predictiveWait, // Phase 7.2: Tracking Aura Throttling
+                forcedProceed,
+                selfHealed: selfHealed || msg.selfHealed,
+                predictiveWait,
                 timestamp: new Date().toLocaleTimeString(),
                 beforeScreenshot,
                 afterScreenshot
@@ -681,6 +696,9 @@ class CBAHub {
     }
 
     async broadcastPreCheck(msg) {
+        // Exit early if shutting down to prevent page.evaluate after browser closes
+        if (this.isShuttingDown) return true;
+
         const syncBudget = this.config.hub?.syncBudget || 30000;
         console.log(`[CBA Hub] Awaiting Handshake for ${msg.cmd} (Budget: ${syncBudget / 1000}s)...`);
 
@@ -949,62 +967,179 @@ class CBAHub {
         const totalSavedMins = Math.floor(this.totalSavedTime / 60);
         const html = `
     <!DOCTYPE html>
-        <html>
+        <html lang="en">
             <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>CBA Hero Story: Navigational Proof</title>
                 <style>
-                    body { font-family: 'Inter', -apple-system, sans-serif; background: #0f172a; color: white; padding: 2rem; max-width: 1200px; margin: auto; }
-                    .hero-header { text-align: center; padding: 3rem; background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 12px; margin-bottom: 2rem; border: 1px solid #334155; }
-                    .card { background: #1e293b; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #334155; position: relative; }
-                    .hijack { border-left: 6px solid #f43f5e; background: rgba(244, 63, 94, 0.05); }
-                    .command { border-left: 6px solid #3b82f6; background: rgba(59, 130, 246, 0.05); }
-                    .tag { position: absolute; top: 1rem; right: 1rem; padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
-                    .tag-hijack { background: #f43f5e; }
-                    .tag-command { background: #3b82f6; }
-                    img { max-width: 100%; border-radius: 6px; margin-top: 1rem; border: 1px solid #475569; }
-                    .flex { display: flex; gap: 1.5rem; margin-top: 1rem; }
-                    .roi-dashboard { margin-top: 4rem; padding: 2rem; background: #064e3b; border-radius: 12px; border: 2px solid #10b981; text-align: center; }
-                    .roi-value { font-size: 3rem; font-weight: 800; color: #10b981; margin: 1rem 0; }
-                    .meta { color: #94a3b8; font-size: 0.85rem; margin-bottom: 0.5rem; font-family: monospace; }
-                    .card-title { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; font-size: 1.25rem; font-weight: bold; }
-                    .badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
-                    .badge-success { background: #10b981; }
-                    .badge-danger { background: #f43f5e; }
-                    .badge-warning { background: #f59e0b; color: #0f172a; }
-                    .badge-info { background: #3b82f6; }
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+                    
+                    :root {
+                        --bg-primary: #0A0A0A;
+                        --bg-secondary: #111111;
+                        --bg-card: #141414;
+                        --accent: #10B981;
+                        --border: #222222;
+                        --text-primary: #F9FAFB;
+                        --text-secondary: #9CA3AF;
+                    }
+
+                    body { 
+                        font-family: 'Inter', -apple-system, sans-serif; 
+                        background: var(--bg-primary); 
+                        color: var(--text-primary); 
+                        padding: 3rem 1.5rem; 
+                        max-width: 1000px; 
+                        margin: auto; 
+                        line-height: 1.6;
+                    }
+
+                    .hero-header { 
+                        text-align: center; 
+                        padding: 4rem 2rem; 
+                        background: var(--bg-secondary); 
+                        border-radius: 20px; 
+                        margin-bottom: 3rem; 
+                        border: 1px solid var(--border); 
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .hero-header::after {
+                        content: '';
+                        position: absolute;
+                        top: 0; left: 0; right: 0; bottom: 0;
+                        background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.1), transparent 70%);
+                        pointer-events: none;
+                    }
+
+                    .hero-header h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em; }
+                    .hero-header p { color: var(--text-secondary); font-size: 1.1rem; }
+
+                    .card { 
+                        background: var(--bg-card); 
+                        border-radius: 16px; 
+                        padding: 2rem; 
+                        margin-bottom: 2rem; 
+                        border: 1px solid var(--border); 
+                        position: relative; 
+                        transition: border-color 0.3s ease;
+                    }
+
+                    .card:hover { border-color: var(--accent); }
+
+                    .hijack { border-left: 6px solid #f43f5e; }
+                    .command { border-left: 6px solid var(--accent); }
+
+                    .tag { 
+                        position: absolute; 
+                        top: 1.5rem; 
+                        right: 1.5rem; 
+                        padding: 0.4rem 1rem; 
+                        border-radius: 20px; 
+                        font-size: 0.75rem; 
+                        font-weight: 700; 
+                        text-transform: uppercase; 
+                        letter-spacing: 0.05em;
+                    }
+                    .tag-hijack { background: #f43f5e; color: white; }
+                    .tag-command { background: var(--accent); color: var(--bg-primary); }
+
+                    img { 
+                        max-width: 100%; 
+                        border-radius: 12px; 
+                        margin-top: 1.5rem; 
+                        border: 1px solid var(--border); 
+                        transition: transform 0.3s ease;
+                    }
+                    img:hover { transform: scale(1.02); }
+
+                    .flex { display: flex; gap: 2rem; margin-top: 1.5rem; }
+                    .flex > div { flex: 1; }
+
+                    .roi-dashboard { 
+                        margin-top: 5rem; 
+                        padding: 4rem; 
+                        background: var(--bg-secondary); 
+                        border-radius: 24px; 
+                        border: 1px solid var(--accent); 
+                        text-align: center; 
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .roi-value { 
+                        font-size: 4rem; 
+                        font-weight: 800; 
+                        color: var(--accent); 
+                        margin: 1.5rem 0; 
+                        letter-spacing: -0.03em;
+                    }
+
+                    .meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; font-family: 'JetBrains Mono', monospace; }
+                    .card-title { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; font-size: 1.3rem; font-weight: 700; }
+                    
+                    .badge { padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
+                    .badge-success { background: var(--accent); color: var(--bg-primary); }
+                    .badge-danger { background: #f43f5e; color: white; }
+                    .badge-warning { background: #f59e0b; color: #0a0a0a; }
+                    .badge-info { background: #3b82f6; color: white; }
+
+                    code { background: rgba(255,255,255,0.05); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
                     h1, h3 { margin: 0; }
-                    p { color: #cbd5e1; line-height: 1.6; }
+                    p { color: var(--text-secondary); line-height: 1.8; }
+                    i { opacity: 0.7; font-size: 0.9em; }
                 </style>
             </head>
             <body>
                 <div class="hero-header">
                     <h1>🌠 Starlight Protocol: The Hero's Journey</h1>
-                    <p>Proving that your intent is bigger than the environment's noise.</p>
+                    <p>Evidence-based automation for the modern web.</p>
                 </div>
 
                 <div id="timeline">
-                    ${this.reportData.map(item => `
-                    <div class="card ${item.type.toLowerCase()}">
-                        <span class="tag tag-${item.type.toLowerCase()}">${item.type === 'HIJACK' ? 'Sentinel Intervention' : 'Intent Path'}</span>
-                        <div class="meta">${item.timestamp}</div>
-                        ${item.type === 'HIJACK' ? `
-                            <h3>Sovereign Correction: ${item.sentinel}</h3>
-                            <p><strong>Reason:</strong> ${item.reason}</p>
-                            <img src="screenshots/${item.screenshot}" alt="Obstacle Detected" />
-                        ` : `
-                            <div class="card-title">
-                                <span>${item.cmd.toUpperCase()}: ${item.goal ? `"${item.goal}" → ` : ''}${item.cmd === 'goto' ? item.url : (item.selector || 'unknown')}</span>
-                                <span class="badge ${item.success ? 'badge-success' : 'badge-danger'}">${item.success ? 'SUCCESS' : 'FAILURE'}</span>
-                                ${item.selfHealed ? '<span class="badge badge-warning">SELF-HEALED</span>' : ''}
-                                ${item.predictiveWait ? '<span class="badge badge-info">AURA STABILIZED</span>' : ''}
-                            </div>
-                            <div class="flex">
-                                <div><p class="meta">Before Influence:</p><img src="screenshots/${item.beforeScreenshot}" /></div>
-                                <div><p class="meta">After Success:</p><img src="screenshots/${item.afterScreenshot}" /></div>
-                            </div>
-                        `}
-                    </div>
-                `).join('')}
+                    ${this.reportData.map(item => {
+            if (item.type === 'HIJACK') {
+                return `
+                                <div class="card hijack">
+                                    <span class="tag tag-hijack">Sentinel Intervention</span>
+                                    <div class="meta">${item.timestamp}</div>
+                                    <h3>Sovereign Correction: ${item.sentinel}</h3>
+                                    <p><strong>Reason:</strong> ${item.reason}</p>
+                                    <img src="screenshots/${item.screenshot}" alt="Obstacle Detected" />
+                                </div>
+                            `;
+            } else {
+                const status = item.success ? (item.forcedProceed ? 'FORCED' : 'SUCCESS') : 'FAILED';
+                const badgeClass = item.success ? (item.forcedProceed ? 'badge-warning' : 'badge-success') : 'badge-danger';
+
+                return `
+                                <div class="card command">
+                                    <div class="tag tag-command">Intent</div>
+                                    <div class="meta">${item.timestamp} | ID: ${item.id}</div>
+                                    <div class="card-title">
+                                        <span>${item.cmd.toUpperCase()}: ${item.cmd === 'goto' ? item.url : (item.goal || item.selector)}</span>
+                                        <span class="badge ${badgeClass}">${status}</span>
+                                    </div>
+                                    <p>Resolved Selector: <code>${item.selector || 'N/A'}</code></p>
+                                    ${item.selfHealed ? '<p>🛡️ <i>Self-Healed: Predictive anchor used due to DOM drift.</i></p>' : ''}
+                                    ${item.predictiveWait ? '<p>⏳ <i>Aura Throttling: Slowed down for historical jitter.</i></p>' : ''}
+                                    ${item.forcedProceed ? '<p>⚠️ <i>Forced Proceed: Handshake timed out or vetoed, proceeding anyway.</i></p>' : ''}
+                                    <div class="flex">
+                                        <div>
+                                            <div class="meta">Before State</div>
+                                            <img src="screenshots/${item.beforeScreenshot}" alt="Before State">
+                                        </div>
+                                        <div>
+                                            <div class="meta">After State</div>
+                                            <img src="screenshots/${item.afterScreenshot}" alt="After State">
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+            }
+        }).join('')}
                 </div>
 
                 <div class="roi-dashboard">

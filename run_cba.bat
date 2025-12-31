@@ -7,8 +7,9 @@ echo 1. Standard Mission (intent.js)
 echo 2. Self-Healing Demo (intent_self_heal.js) - Phase 7.1
 echo 3. Aura Pacing Demo (intent_aura.js) - Phase 7.2
 echo 4. Sentinel Learning Demo (intent_learning.js) - Phase 7.3
+echo 5. Security Test (intent_security.js) - Phase 9
 echo --------------------------------------------------
-set /p choice="Select Mission [1-4]: "
+set /p choice="Select Mission [1-5]: "
 
 :: NOTE: Ensure Ollama is running 'moondream' for the Vision Sentinel.
 
@@ -43,6 +44,11 @@ echo [Launcher] Launching Data Sentinel...
 start "CBA Data" cmd /c "python sentinels/data_sentinel.py"
 timeout /t 2 /nobreak >nul
 
+:: 4.6 Launch the PII Sentinel (Python - Phase 9 Security)
+echo [Launcher] Launching PII Sentinel...
+start "CBA PII" cmd /c "python sentinels/pii_sentinel.py"
+timeout /t 2 /nobreak >nul
+
 :: 5. Launch the Intent Layer (The Mission)
 echo [Launcher] Executing Mission Intent...
 if "%choice%"=="2" (
@@ -51,6 +57,8 @@ if "%choice%"=="2" (
     node test/intent_aura.js
 ) else if "%choice%"=="4" (
     node test/intent_learning.js
+) else if "%choice%"=="5" (
+    node test/intent_security.js
 ) else (
     node src/intent.js
 )

@@ -14,7 +14,7 @@ CBA is a philosophical shift in browser automation. Inspired by biological navig
 
 ## 🏗️ The Sovereign Constellation
 
-![CBA Architecture](architecture.png)
+![Starlight Architecture](assets/architecture.png)
 
 CBA uses a **Decentralized Sidecar Architecture** communicating over a JSON-RPC message bus.
 
@@ -132,7 +132,7 @@ The `report.html` quantifies business value:
 - **Aura Stabilization**: Predictive jitter avoidance
 - **Visual Proof**: Before/after screenshots
 
-![Starlight Report](report_screenshot.png)
+![Starlight Report](assets/report_screenshot.png)
 
 ---
 
@@ -155,7 +155,7 @@ http://localhost:3000
 - 📋 Live logs console with real-time output
 - 📊 Quick link to view report
 
-![Starlight Mission Control](launcher_screenshot.png)
+![Starlight Mission Control](assets/launcher_control_panel.png)
 
 ---
 
