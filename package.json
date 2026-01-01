@@ -1,6 +1,6 @@
 {
   "name": "cba",
-  "version": "2.7.0",
+  "version": "3.0.0",
   "description": "Constellation-Based Automation: A self-healing browser automation framework using the Starlight Protocol",
   "main": "src/hub.js",
   "directories": {
