@@ -11,11 +11,11 @@ const SITE_URL = 'https://www.dhirajdas.dev';
 
 ws.on('open', () => {
     console.log('[Intent] 🛰️ Connected to Starlight Hub');
-    console.log('[Intent] Mission: Navigate Dhiraj Das Portfolio');
+    console.log('[Intent] Mission: Navigate to website');
     console.log('='.repeat(50));
 
     // Step 1: Navigate to the website
-    console.log('[Intent] Step 1: Navigating to portfolio...');
+    console.log('[Intent] Step 1: Navigating to website...');
     ws.send(JSON.stringify({
         jsonrpc: '2.0',
         method: 'starlight.intent',

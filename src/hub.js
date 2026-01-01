@@ -4,6 +4,7 @@ const { nanoid } = require('nanoid');
 const fs = require('fs');
 const path = require('path');
 const TelemetryEngine = require('./telemetry');
+const ActionRecorder = require('./recorder');
 
 // Security: HTML escaping to prevent XSS
 function escapeHtml(str) {
@@ -45,6 +46,7 @@ class CBAHub {
         this.missionStartTime = null;
         this.isProcessing = false;
         this.isShuttingDown = false;
+        this.recorder = new ActionRecorder();  // Phase 13.5: Test Recorder
 
         if (!fs.existsSync(this.screenshotsDir)) fs.mkdirSync(this.screenshotsDir);
 
@@ -511,6 +513,54 @@ class CBAHub {
             case 'starlight.finish':
                 await this.shutdown();
                 break;
+            // Phase 13.5: Recording Protocol
+            case 'starlight.startRecording':
+                await this.handleStartRecording(id);
+                break;
+            case 'starlight.stopRecording':
+                await this.handleStopRecording(id, params);
+                break;
+            case 'starlight.getRecordedSteps':
+                this.broadcastToClient(id, { type: 'RECORDED_STEPS', steps: this.recorder.getSteps() });
+                break;
+        }
+    }
+
+    // Phase 13.5: Recording Handlers
+    async handleStartRecording(clientId) {
+        try {
+            // Auto-create browser if not exists
+            if (!this.page) {
+                console.log('[CBA Hub] Recording: Creating browser for recording session...');
+                this.browser = await chromium.launch({ headless: false });
+                const context = await this.browser.newContext();
+                this.page = await context.newPage();
+                await this.page.goto('about:blank');
+                console.log('[CBA Hub] Recording: Browser ready. Navigate to any site to start recording.');
+            }
+
+            await this.recorder.startRecording(this.page);
+            this.broadcastToClient(clientId, { type: 'RECORDING_STARTED' });
+            console.log('[CBA Hub] Recording started on page:', this.page.url());
+        } catch (e) {
+            console.error('[CBA Hub] Recording error:', e.message);
+            this.broadcastToClient(clientId, { type: 'RECORDING_ERROR', error: e.message });
+        }
+    }
+
+    async handleStopRecording(clientId, params) {
+        try {
+            this.recorder.stopRecording();
+            const testDir = path.join(process.cwd(), 'test');
+            const fileName = this.recorder.generateTestFile(testDir, params?.name);
+            this.broadcastToClient(clientId, {
+                type: 'RECORDING_STOPPED',
+                fileName,
+                steps: this.recorder.getSteps()
+            });
+        } catch (e) {
+            console.error('[CBA Hub] Stop recording error:', e.message);
+            this.broadcastToClient(clientId, { type: 'RECORDING_ERROR', error: e.message });
         }
     }
 

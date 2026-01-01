@@ -83,8 +83,12 @@
             <div class="quick-actions">
                 <button class="btn btn-secondary" onclick="startAll()">▶️ Start All</button>
                 <button class="btn btn-secondary" onclick="stopAll()">⏹️ Stop All</button>
+                <button class="btn btn-record" id="record-btn" onclick="toggleRecording()">🔴 Record</button>
                 <button class="btn btn-secondary" onclick="openReport()">📊 View Report</button>
                 <button class="btn btn-secondary" onclick="clearLogs()">🗑️ Clear Logs</button>
+            </div>
+            <div id="recording-indicator" style="display:none; color:#ff4444; font-weight:bold; margin-top:10px;">
+                ⏺️ Recording in progress... Click 🔴 to stop
             </div>
         </section>
 

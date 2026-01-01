@@ -1,16 +1,11 @@
 {
-  "totalMissions": 6,
-  "successfulMissions": 6,
-  "totalSavedSeconds": 1080,
-  "totalInterventions": 1,
-  "avgRecoveryTimeMs": 914,
-  "lastMissionTimestamp": "2025-12-31T15:04:58.438Z",
+  "totalMissions": 11,
+  "successfulMissions": 11,
+  "totalSavedSeconds": 2130,
+  "totalInterventions": 4,
+  "avgRecoveryTimeMs": 907.0999999999999,
+  "lastMissionTimestamp": "2026-01-01T13:16:36.065Z",
   "missionHistory": [
-    {
-      "timestamp": "2025-12-31T14:34:22.136Z",
-      "success": true,
-      "savedSeconds": 30
-    },
     {
       "timestamp": "2025-12-31T14:39:53.900Z",
       "success": true,
@@ -35,6 +30,31 @@
       "timestamp": "2025-12-31T15:04:58.438Z",
       "success": true,
       "savedSeconds": 330
+    },
+    {
+      "timestamp": "2026-01-01T11:53:03.297Z",
+      "success": true,
+      "savedSeconds": 30
+    },
+    {
+      "timestamp": "2026-01-01T11:57:13.042Z",
+      "success": true,
+      "savedSeconds": 990
+    },
+    {
+      "timestamp": "2026-01-01T12:10:34.720Z",
+      "success": true,
+      "savedSeconds": 30
+    },
+    {
+      "timestamp": "2026-01-01T12:51:03.488Z",
+      "success": true,
+      "savedSeconds": 0
+    },
+    {
+      "timestamp": "2026-01-01T13:16:36.065Z",
+      "success": true,
+      "savedSeconds": 0
     }
   ]
 }

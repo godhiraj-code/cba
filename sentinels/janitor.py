@@ -17,11 +17,22 @@ from sdk.starlight_sdk import SentinelBase
 class JanitorSentinel(SentinelBase):
     def __init__(self):
         super().__init__(layer_name="JanitorSentinel", priority=5)
-        # Logic Fix: Removed >>> patterns - they're Playwright-specific, not valid CSS
-        # Shadow DOM detection is handled by Hub's page.evaluate() traversal
+        # Comprehensive blocking patterns for common UI obstacles
         self.blocking_patterns = [
+            # Modals and Popups
             ".modal", ".popup", "#overlay", ".obstacle", "#stabilize-btn",
-            ".shadow-overlay", ".shadow-close-btn"
+            ".shadow-overlay", ".shadow-close-btn",
+            # Newsletter/Subscribe popups
+            ".newsletter", "#newsletter", ".subscribe-popup", "#subscribe-modal",
+            ".email-popup", ".signup-modal", ".newsletter-modal", ".newsletter-popup",
+            # Cookie consent
+            ".cookie-consent", "#cookie-banner", ".cookie-notice", ".gdpr-banner",
+            # Generic overlays
+            ".overlay", ".backdrop", ".lightbox", ".dialog",
+            # Toast/notification dismissals
+            ".toast", ".notification", ".snackbar", ".alert-dismissible",
+            # Common close button patterns
+            ".close-btn", ".dismiss-btn", "[data-dismiss]", ".btn-close"
         ]
         self.selectors = self.blocking_patterns 
         self.is_hijacking = False

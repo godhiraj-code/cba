@@ -28,6 +28,48 @@ const processStatus = {
     mission: 'stopped'
 };
 
+// Phase 13.5: Hub WebSocket connection for recording
+let hubWs = null;
+
+function connectToHub() {
+    if (hubWs && hubWs.readyState === WebSocket.OPEN) return;
+
+    try {
+        hubWs = new WebSocket('ws://localhost:8080');
+        hubWs.on('open', () => console.log('[Launcher] Connected to Hub'));
+        hubWs.on('message', (data) => {
+            try {
+                const msg = JSON.parse(data);
+                // Forward recording events to UI clients
+                if (msg.type?.startsWith('RECORDING_')) {
+                    broadcast(msg);
+                }
+            } catch (e) { }
+        });
+        hubWs.on('close', () => {
+            hubWs = null;
+            console.log('[Launcher] Hub connection closed');
+        });
+        hubWs.on('error', () => hubWs = null);
+    } catch (e) {
+        hubWs = null;
+    }
+}
+
+function forwardToHub(message, retries = 0) {
+    const maxRetries = 5;
+    if (!hubWs || hubWs.readyState !== WebSocket.OPEN) {
+        if (retries >= maxRetries) {
+            log('System', 'Could not connect to Hub - is it running?', 'error');
+            return;
+        }
+        connectToHub();
+        setTimeout(() => forwardToHub(message, retries + 1), 500);
+        return;
+    }
+    hubWs.send(JSON.stringify({ jsonrpc: '2.0', ...message, id: 'launcher-' + Date.now() }));
+}
+
 const telemetry = new TelemetryEngine(path.join(__dirname, '../telemetry.json'));
 
 // WebSocket server for real-time logs
@@ -99,6 +141,26 @@ function handleCommand(msg, ws) {
             break;
         case 'launch':
             launchMission(msg.mission);
+            break;
+        // Phase 13.5: Recording commands
+        case 'startRecording':
+            // Auto-start Hub if not running
+            if (!processes.hub) {
+                log('System', 'Starting Hub for recording...', 'info');
+                startProcess('hub');
+                // Wait for Hub to be ready before forwarding
+                setTimeout(() => {
+                    forwardToHub({ method: 'starlight.startRecording', params: {} });
+                    log('System', '🔴 Recording started - Browser will open!', 'success');
+                }, 2000);
+            } else {
+                forwardToHub({ method: 'starlight.startRecording', params: {} });
+                log('System', '🔴 Recording started', 'success');
+            }
+            break;
+        case 'stopRecording':
+            forwardToHub({ method: 'starlight.stopRecording', params: { name: msg.name } });
+            log('System', '⏹️ Recording stopped', 'success');
             break;
     }
 }

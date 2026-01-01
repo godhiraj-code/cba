@@ -89,6 +89,12 @@ function handleMessage(msg) {
         case 'telemetry':
             updateVitals(msg.data);
             break;
+        default:
+            // Phase 13.5: Handle recording events
+            if (msg.type?.startsWith('RECORDING_')) {
+                handleRecordingEvent(msg);
+            }
+            break;
     }
 }
 
@@ -190,6 +196,48 @@ function openReport() {
 
 function clearLogs() {
     logOutput.innerHTML = '<div class="log-entry log-info">[System] Logs cleared.</div>';
+}
+
+// Phase 13.5: Recording
+let isRecording = false;
+
+function toggleRecording() {
+    if (isRecording) {
+        // Stop recording
+        const name = prompt('Name for this test (leave empty for auto-generated):');
+        send({ cmd: 'stopRecording', name: name || null });
+        isRecording = false;
+        document.getElementById('record-btn').textContent = '🔴 Record';
+        document.getElementById('record-btn').classList.remove('recording');
+        document.getElementById('recording-indicator').style.display = 'none';
+        addLog('System', '⏹️ Recording stopped. Generating test file...', 'success');
+    } else {
+        // Start recording
+        send({ cmd: 'startRecording' });
+        isRecording = true;
+        document.getElementById('record-btn').textContent = '⏹️ Stop';
+        document.getElementById('record-btn').classList.add('recording');
+        document.getElementById('recording-indicator').style.display = 'block';
+        addLog('System', '🔴 Recording started. Navigate and interact on the browser.', 'success');
+    }
+}
+
+// Handle recording events from server
+function handleRecordingEvent(msg) {
+    if (msg.type === 'RECORDING_STOPPED' && msg.fileName) {
+        addLog('Recorder', `✅ Test file generated: ${msg.fileName}`, 'success');
+        // Add new test to dropdown
+        const option = document.createElement('option');
+        option.value = msg.fileName;
+        option.textContent = `📝 ${msg.fileName} (Recorded)`;
+        option.selected = true;
+        document.getElementById('mission-select').prepend(option);
+    } else if (msg.type === 'RECORDING_ERROR') {
+        addLog('Recorder', `❌ Error: ${msg.error}`, 'error');
+        isRecording = false;
+        document.getElementById('record-btn').textContent = '🔴 Record';
+        document.getElementById('recording-indicator').style.display = 'none';
+    }
 }
 
 // Initialize
