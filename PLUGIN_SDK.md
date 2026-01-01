@@ -49,13 +49,15 @@ class MyPluginSentinel(SentinelBase):
         self.capabilities = ["popup-detection"]
     
     async def on_pre_check(self, params, msg_id):
+        # Phase 16: Use stabilityHint for context-aware budgets
+        stability_hint = params.get("command", {}).get("stabilityHint", 0)
         blocking = params.get("blocking", [])
         
         # Check if any blocking elements match our selectors
         matches = [b for b in blocking if any(s in b.get("selector", "") for s in self.selectors)]
         
         if matches:
-            print(f"[{self.layer}] Obstacle detected! Hijacking...")
+            print(f"[{self.layer}] Obstacle detected! (Stability Hint: {stability_hint}ms)")
             await self.send_hijack("Popup blocking execution")
             
             # Clear the obstacle

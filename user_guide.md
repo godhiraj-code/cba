@@ -1,4 +1,4 @@
-# 🌌 Starlight Protocol: The GALAXY User Guide
+# 🌌 Starlight Protocol: The GALAXY User Guide (v3.0)
 
 Welcome to the future of browser automation. This guide explains **Constellation-Based Automation (CBA)**—a paradigm shift from traditional Page Object Models (POM) and flaky `wait_for` calls toward a sovereign, multi-agent ecosystem.
 
@@ -44,13 +44,14 @@ graph TD
 
 ### Running a Mission
 
-**Option A: One-Click Launch**
+**Option A: One-Command Execution (The Autonomous Way)**
 ```bash
-run_cba.bat
+# Hub + Sentinels + Intent in one command
+node bin/starlight.js test/intent_portfolio_v2.js --headless --verbose
 ```
-Select your mission from the menu.
+This script handles the entire lifecycle: spawning the constellation, running the mission, and cleaning up.
 
-**Option B: Manual Launch**
+**Option B: Manual Launch (For Development)**
 ```bash
 # Terminal 1: Hub
 node src/hub.js
@@ -164,18 +165,17 @@ Sentinels possess a **Persistent Memory Layer**:
 
 ---
 
-## 8. Phase 8: Quality & Configuration (NEW)
+## 8. Phase 16: The Autonomous Era (NEW)
 
-### What's New in v2.7
+### What's New in v3.0
 
 | Feature | Description |
 |---------|-------------|
-| **Centralized Config** | All settings in `config.json` |
-| **Screenshot Cleanup** | Auto-removes files older than 24h |
-| **Trace Rotation** | Limits `mission_trace.json` to 500 events |
-| **Graceful Shutdown** | Ctrl+C saves sentinel memory |
-| **Atomic File Writes** | Prevents memory corruption |
-| **Python Dependencies** | Pinned in `requirements.txt` |
+| **CLI Orchestrator** | `starlight.js` for zero-touch lifecycle management |
+| **Mutation Fingerprinting** | Captures page "stability signatures" during recording |
+| **Context-Aware Pulse** | Dynamic settle-time adjustment for heavy UIs |
+| **Failure-Safe Reports** | Immediate report generation on mission failure |
+| **Health Check** | `/health` endpoint for Hub system verification |
 
 ---
 

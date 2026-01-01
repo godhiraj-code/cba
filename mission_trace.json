@@ -1,7 +1,54 @@
 [
   {
-    "timestamp": 1767193492770,
-    "humanTime": "8:34:52 pm",
+    "timestamp": 1767280625305,
+    "humanTime": "8:47:05 pm",
+    "type": "RECV",
+    "layer": "Intent",
+    "method": "starlight.registration",
+    "params": {
+      "layer": "JanitorSentinel",
+      "priority": 5,
+      "selectors": [
+        ".modal",
+        ".popup",
+        "#overlay",
+        ".obstacle",
+        "#stabilize-btn",
+        ".shadow-overlay",
+        ".shadow-close-btn",
+        ".newsletter",
+        "#newsletter",
+        ".subscribe-popup",
+        "#subscribe-modal",
+        ".email-popup",
+        ".signup-modal",
+        ".newsletter-modal",
+        ".newsletter-popup",
+        ".cookie-consent",
+        "#cookie-banner",
+        ".cookie-notice",
+        ".gdpr-banner",
+        ".overlay",
+        ".backdrop",
+        ".lightbox",
+        ".dialog",
+        ".toast",
+        ".notification",
+        ".snackbar",
+        ".alert-dismissible",
+        ".close-btn",
+        ".dismiss-btn",
+        "[data-dismiss]",
+        ".btn-close"
+      ],
+      "capabilities": []
+    },
+    "id": "reg-1767280625",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280625319,
+    "humanTime": "8:47:05 pm",
     "type": "RECV",
     "layer": "Intent",
     "method": "starlight.registration",
@@ -15,12 +62,12 @@
         "network-idle"
       ]
     },
-    "id": "reg-1767193492",
+    "id": "reg-1767280625",
     "snapshot": null
   },
   {
-    "timestamp": 1767193493216,
-    "humanTime": "8:34:53 pm",
+    "timestamp": 1767280626796,
+    "humanTime": "8:47:06 pm",
     "type": "RECV",
     "layer": "Intent",
     "method": "starlight.registration",
@@ -33,267 +80,3467 @@
         "#overlay",
         ".obstacle",
         "#stabilize-btn",
-        ">>> .modal",
-        ">>> .popup",
-        ">>> #overlay",
         ".shadow-overlay",
-        ".shadow-close-btn"
+        ".shadow-close-btn",
+        ".newsletter",
+        "#newsletter",
+        ".subscribe-popup",
+        "#subscribe-modal",
+        ".email-popup",
+        ".signup-modal",
+        ".newsletter-modal",
+        ".newsletter-popup",
+        ".cookie-consent",
+        "#cookie-banner",
+        ".cookie-notice",
+        ".gdpr-banner",
+        ".overlay",
+        ".backdrop",
+        ".lightbox",
+        ".dialog",
+        ".toast",
+        ".notification",
+        ".snackbar",
+        ".alert-dismissible",
+        ".close-btn",
+        ".dismiss-btn",
+        "[data-dismiss]",
+        ".btn-close"
       ],
       "capabilities": []
     },
-    "id": "reg-1767193493",
+    "id": "reg-1767280626",
     "snapshot": null
   },
   {
-    "timestamp": 1767193494475,
-    "humanTime": "8:34:54 pm",
+    "timestamp": 1767280626796,
+    "humanTime": "8:47:06 pm",
+    "type": "RECV",
+    "layer": "Intent",
+    "method": "starlight.registration",
+    "params": {
+      "layer": "PulseSentinel",
+      "priority": 1,
+      "selectors": [],
+      "capabilities": [
+        "temporal-stability",
+        "settling",
+        "network-idle"
+      ]
+    },
+    "id": "reg-1767280626",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280627036,
+    "humanTime": "8:47:07 pm",
     "type": "RECV",
     "layer": "Intent",
     "method": "starlight.intent",
     "params": {
       "cmd": "goto",
-      "url": "file:///C:/cba/test/learning_test.html"
+      "url": "https://www.dhirajdas.dev"
     },
-    "id": 1,
-    "snapshot": "<html><head></head><body></body></html>"
+    "id": "cmd-1",
+    "snapshot": null
   },
   {
-    "timestamp": 1767193494484,
-    "humanTime": "8:34:54 pm",
+    "timestamp": 1767280627066,
+    "humanTime": "8:47:07 pm",
     "type": "SEND",
     "layer": "Intent",
     "method": "starlight.pre_check",
     "params": {
       "command": {
-        "clientId": "RUcRlHaXAbRzOD2q9LumP",
+        "clientId": "Icu-535EIbAJGIh2AZUcI",
         "cmd": "goto",
-        "url": "file:///C:/cba/test/learning_test.html",
-        "id": 1
+        "url": "https://www.dhirajdas.dev",
+        "id": "cmd-1"
       },
       "blocking": [],
       "screenshot": null,
       "page_text": ""
     },
-    "id": "Isd5zkWCCwFSSO086WetQ",
-    "snapshot": "<html><head></head><body></body></html>"
+    "id": "9KQ431ADjOYTyHBg0r91V",
+    "snapshot": null
   },
   {
-    "timestamp": 1767193494486,
-    "humanTime": "8:34:54 pm",
+    "timestamp": 1767280627067,
+    "humanTime": "8:47:07 pm",
     "type": "RECV",
     "layer": "JanitorSentinel",
     "method": "starlight.clear",
     "params": {},
-    "id": "1767193494486",
+    "id": "1767280627067",
     "snapshot": null
   },
   {
-    "timestamp": 1767193494487,
-    "humanTime": "8:34:54 pm",
+    "timestamp": 1767280627068,
+    "humanTime": "8:47:07 pm",
     "type": "RECV",
     "layer": "PulseSentinel",
     "method": "starlight.clear",
     "params": {},
-    "id": "1767193494487",
+    "id": "1767280627067",
     "snapshot": null
   },
   {
-    "timestamp": 1767193494566,
-    "humanTime": "8:34:54 pm",
+    "timestamp": 1767280627069,
+    "humanTime": "8:47:07 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280627068",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280627070,
+    "humanTime": "8:47:07 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280627070",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280627169,
+    "humanTime": "8:47:07 pm",
     "type": "SEND",
     "layer": "System",
     "method": "starlight.entropy_stream",
     "params": {
       "entropy": true
     },
-    "id": "_Qg-gIWoilDAuxZVlJ6bV",
+    "id": "ViDutTIh4uvWFmjbiicbJ",
     "snapshot": null
   },
   {
-    "timestamp": 1767193495182,
-    "humanTime": "8:34:55 pm",
+    "timestamp": 1767280627464,
+    "humanTime": "8:47:07 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "r_RUL9CMOtAb41HdZ9YGL",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280627676,
+    "humanTime": "8:47:07 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "FP8lz_gfioArB2oEO7f7R",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280628026,
+    "humanTime": "8:47:08 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "8mO7qwkxL1_vPcuhVs6yR",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280628126,
+    "humanTime": "8:47:08 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "FEKkG5MZqzI0cZSAHvmfW",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280628226,
+    "humanTime": "8:47:08 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "ge5PFPbCvQeCiV2p06AHg",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280628327,
+    "humanTime": "8:47:08 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "_A6rZlFcJGbA8ZZvH4v72",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280628429,
+    "humanTime": "8:47:08 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "pxCAra0vbNlLtMDUxP7I9",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280628529,
+    "humanTime": "8:47:08 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "BhzI4LqPuoErrFezEzZOh",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280628652,
+    "humanTime": "8:47:08 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "cABjB8Z4qXhoDAlXpWTOF",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280628663,
+    "humanTime": "8:47:08 pm",
     "type": "SEND",
     "layer": "Intent",
-    "id": 1,
+    "id": "cmd-1",
     "snapshot": null
   },
   {
-    "timestamp": 1767193495186,
-    "humanTime": "8:34:55 pm",
+    "timestamp": 1767280628667,
+    "humanTime": "8:47:08 pm",
     "type": "RECV",
     "layer": "Intent",
     "method": "starlight.intent",
     "params": {
-      "goal": "COLLECT DATA",
-      "selector": "button:has-text(\"MISSION GOAL: COLLECT DATA\")",
-      "selfHealed": false,
-      "cmd": "click"
-    },
-    "id": 2,
-    "snapshot": "<!DOCTYPE html><html><head>\n    <title>Starlight Learning Test</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            padding: 2rem;\n            background: #0f172a;\n            color: white;\n        }\n\n        .modal {\n            position: fixed;\n            top: 50%;\n            left: 50%;\n            transform: translate(-50%, -50%);\n            background: #1e293b;\n            padding: 2rem;\n            border: 2px solid #3b82f6;\n            border-radius: 8px;\n            z-index: 1000;\n        }\n\n        .overlay {\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: rgba(0, 0, 0, 0.8);\n            z-index: 999;\n        }\n\n        #custom-close {\n            background: #f43f5e;\n            color: white;\n            border: none;\n            padding: 0.5rem 1rem;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n\n        #secret-button {\n            padding: 1rem 2rem;\n            background: #10b981;\n            border: none;\n            color: white;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n    </style>\n</head>\n\n<body>\n    <h1>Phase 7.3: Sentinel Learning</h1>\n    <p>The Janitor must find the custom close button and remember it.</p>\n\n    <div id=\"modal-container\">\n        <div class=\"overlay\"></div>\n        <div class=\"modal\">\n            <h2>Obstacle Detected!</h2>\n            <p>I am a stubborn modal with a custom close button.</p>\n            <button id=\"custom-close\">DESTROY MODAL</button>\n        </div>\n    </div>\n\n    <button id=\"secret-button\">MISSION GOAL: COLLECT DATA</button>\n\n    <script>\n        document.getElementById('custom-close').onclick = () => {\n            document.getElementById('modal-container').style.display = 'none';\n        };\n\n        document.getElementById('secret-button').onclick = () => {\n            document.body.style.background = '#064e3b';\n            document.getElementById('secret-button').innerText = 'DATA COLLECTED';\n        };\n    </script>\n\n\n</body></html>"
-  },
-  {
-    "timestamp": 1767193495199,
-    "humanTime": "8:34:55 pm",
-    "type": "SEND",
-    "layer": "Intent",
-    "method": "starlight.pre_check",
-    "params": {
-      "command": {
-        "clientId": "RUcRlHaXAbRzOD2q9LumP",
-        "goal": "COLLECT DATA",
-        "selector": "button:has-text(\"MISSION GOAL: COLLECT DATA\")",
-        "selfHealed": false,
-        "cmd": "click",
-        "id": 2,
-        "_preCheckRetries": 1
-      },
-      "blocking": [
-        {
-          "selector": ".modal",
-          "id": "",
-          "className": "modal",
-          "display": "block",
-          "rect": "425x201",
-          "inShadow": false
-        }
-      ],
-      "screenshot": null,
-      "page_text": ""
-    },
-    "id": "n-fKwvlznHuT6whZ18FYv",
-    "snapshot": "<!DOCTYPE html><html><head>\n    <title>Starlight Learning Test</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            padding: 2rem;\n            background: #0f172a;\n            color: white;\n        }\n\n        .modal {\n            position: fixed;\n            top: 50%;\n            left: 50%;\n            transform: translate(-50%, -50%);\n            background: #1e293b;\n            padding: 2rem;\n            border: 2px solid #3b82f6;\n            border-radius: 8px;\n            z-index: 1000;\n        }\n\n        .overlay {\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: rgba(0, 0, 0, 0.8);\n            z-index: 999;\n        }\n\n        #custom-close {\n            background: #f43f5e;\n            color: white;\n            border: none;\n            padding: 0.5rem 1rem;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n\n        #secret-button {\n            padding: 1rem 2rem;\n            background: #10b981;\n            border: none;\n            color: white;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n    </style>\n</head>\n\n<body>\n    <h1>Phase 7.3: Sentinel Learning</h1>\n    <p>The Janitor must find the custom close button and remember it.</p>\n\n    <div id=\"modal-container\">\n        <div class=\"overlay\"></div>\n        <div class=\"modal\">\n            <h2>Obstacle Detected!</h2>\n            <p>I am a stubborn modal with a custom close button.</p>\n            <button id=\"custom-close\">DESTROY MODAL</button>\n        </div>\n    </div>\n\n    <button id=\"secret-button\">MISSION GOAL: COLLECT DATA</button>\n\n    <script>\n        document.getElementById('custom-close').onclick = () => {\n            document.getElementById('modal-container').style.display = 'none';\n        };\n\n        document.getElementById('secret-button').onclick = () => {\n            document.body.style.background = '#064e3b';\n            document.getElementById('secret-button').innerText = 'DATA COLLECTED';\n        };\n    </script>\n\n\n</body></html>"
-  },
-  {
-    "timestamp": 1767193495200,
-    "humanTime": "8:34:55 pm",
-    "type": "RECV",
-    "layer": "JanitorSentinel",
-    "method": "starlight.hijack",
-    "params": {
-      "reason": "Predictive remediation for .modal"
-    },
-    "id": "1767193495200",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767193495201,
-    "humanTime": "8:34:55 pm",
-    "type": "RECV",
-    "layer": "PulseSentinel",
-    "method": "starlight.clear",
-    "params": {},
-    "id": "1767193495200",
-    "snapshot": null
-  },
-  {
-    "timestamp": 1767193495202,
-    "humanTime": "8:34:55 pm",
-    "type": "RECV",
-    "layer": "JanitorSentinel",
-    "method": "starlight.action",
-    "params": {
       "cmd": "click",
-      "selector": "#custom-close >> visible=true"
+      "goal": "View Projects",
+      "context": {
+        "missionType": "portfolio-exploration"
+      },
+      "selector": "a:has-text(\"View Projects\")",
+      "selfHealed": false
     },
-    "id": "1767193495201",
+    "id": "cmd-2",
     "snapshot": null
   },
   {
-    "timestamp": 1767193495249,
-    "humanTime": "8:34:55 pm",
+    "timestamp": 1767280628765,
+    "humanTime": "8:47:08 pm",
     "type": "SEND",
     "layer": "System",
     "method": "starlight.entropy_stream",
     "params": {
       "entropy": true
     },
-    "id": "6IZHuhgbC_cLod90SBFXY",
+    "id": "pfMFo9MD1vHD_S-mb7GjJ",
     "snapshot": null
   },
   {
-    "timestamp": 1767193496215,
-    "humanTime": "8:34:56 pm",
-    "type": "RECV",
-    "layer": "JanitorSentinel",
-    "method": "starlight.resume",
+    "timestamp": 1767280628865,
+    "humanTime": "8:47:08 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
     "params": {
-      "re_check": true
+      "entropy": true
     },
-    "id": "1767193496214",
+    "id": "5otVL4DFBqInv4w3vU7Sw",
     "snapshot": null
   },
   {
-    "timestamp": 1767193497730,
-    "humanTime": "8:34:57 pm",
+    "timestamp": 1767280628966,
+    "humanTime": "8:47:08 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "-dskXTCNLJgasDMviDnbX",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280629066,
+    "humanTime": "8:47:09 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "t2Pu29yGJDUP7J29KKEeS",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280629167,
+    "humanTime": "8:47:09 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "LUwT_WMZyMhkBpJQPZKik",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280629283,
+    "humanTime": "8:47:09 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "2Blsc_QKk20dwr-qHnJVt",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280629383,
+    "humanTime": "8:47:09 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "2IFMybG5QLVQjRTXjW6Gx",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280629483,
+    "humanTime": "8:47:09 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "-n3A3M5bCcArzHsWSurDy",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280629599,
+    "humanTime": "8:47:09 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "rC2v-IaRm84tPt96pP6Eo",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280629698,
+    "humanTime": "8:47:09 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "OW1DmA-JSKE2buhHcaf_5",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280629800,
+    "humanTime": "8:47:09 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "Kqd9kguiwnFcLcfkpbFqh",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280629899,
+    "humanTime": "8:47:09 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "yPLbCiweFFE-nsTiOQvMy",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280630015,
+    "humanTime": "8:47:10 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "2cnaLoRLZT6hNJVFlsR-J",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280630114,
+    "humanTime": "8:47:10 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "-7OkysckrVQJB08FbJ5DS",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280630189,
+    "humanTime": "8:47:10 pm",
     "type": "SEND",
     "layer": "Intent",
     "method": "starlight.pre_check",
     "params": {
       "command": {
-        "clientId": "RUcRlHaXAbRzOD2q9LumP",
-        "goal": "COLLECT DATA",
-        "selector": "button:has-text(\"MISSION GOAL: COLLECT DATA\")",
-        "selfHealed": false,
+        "clientId": "Icu-535EIbAJGIh2AZUcI",
         "cmd": "click",
-        "id": 2,
-        "_preCheckRetries": 1
+        "goal": "View Projects",
+        "context": {
+          "missionType": "portfolio-exploration"
+        },
+        "selector": "a:has-text(\"View Projects\")",
+        "selfHealed": false,
+        "id": "cmd-2",
+        "_preCheckRetries": 3
       },
       "blocking": [],
       "screenshot": null,
       "page_text": ""
     },
-    "id": "dIegAz3pRIyXPufdFxRhd",
-    "snapshot": "<!DOCTYPE html><html><head>\n    <title>Starlight Learning Test</title>\n    <style>\n        body {\n            font-family: sans-serif;\n            padding: 2rem;\n            background: #0f172a;\n            color: white;\n        }\n\n        .modal {\n            position: fixed;\n            top: 50%;\n            left: 50%;\n            transform: translate(-50%, -50%);\n            background: #1e293b;\n            padding: 2rem;\n            border: 2px solid #3b82f6;\n            border-radius: 8px;\n            z-index: 1000;\n        }\n\n        .overlay {\n            position: fixed;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            background: rgba(0, 0, 0, 0.8);\n            z-index: 999;\n        }\n\n        #custom-close {\n            background: #f43f5e;\n            color: white;\n            border: none;\n            padding: 0.5rem 1rem;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n\n        #secret-button {\n            padding: 1rem 2rem;\n            background: #10b981;\n            border: none;\n            color: white;\n            border-radius: 4px;\n            cursor: pointer;\n        }\n    </style>\n</head>\n\n<body>\n    <h1>Phase 7.3: Sentinel Learning</h1>\n    <p>The Janitor must find the custom close button and remember it.</p>\n\n    <div id=\"modal-container\" style=\"display: none;\">\n        <div class=\"overlay\" style=\"display: none;\"></div>\n        <div class=\"modal\" style=\"display: none;\">\n            <h2>Obstacle Detected!</h2>\n            <p>I am a stubborn modal with a custom close button.</p>\n            <button id=\"custom-close\">DESTROY MODAL</button>\n        </div>\n    </div>\n\n    <button id=\"secret-button\">MISSION GOAL: COLLECT DATA</button>\n\n    <script>\n        document.getElementById('custom-close').onclick = () => {\n            document.getElementById('modal-container').style.display = 'none';\n        };\n\n        document.getElementById('secret-button').onclick = () => {\n            document.body.style.background = '#064e3b';\n            document.getElementById('secret-button').innerText = 'DATA COLLECTED';\n        };\n    </script>\n\n\n</body></html>"
-  },
-  {
-    "timestamp": 1767193497731,
-    "humanTime": "8:34:57 pm",
-    "type": "RECV",
-    "layer": "PulseSentinel",
-    "method": "starlight.clear",
-    "params": {},
-    "id": "1767193497731",
+    "id": "Ze5CDZ2IYRgQwguIPSRXb",
     "snapshot": null
   },
   {
-    "timestamp": 1767193497732,
-    "humanTime": "8:34:57 pm",
+    "timestamp": 1767280630190,
+    "humanTime": "8:47:10 pm",
     "type": "RECV",
     "layer": "JanitorSentinel",
     "method": "starlight.clear",
     "params": {},
-    "id": "1767193497731",
+    "id": "1767280630190",
     "snapshot": null
   },
   {
-    "timestamp": 1767193497834,
-    "humanTime": "8:34:57 pm",
+    "timestamp": 1767280630191,
+    "humanTime": "8:47:10 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 424
+    },
+    "id": "1767280630190",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280630191,
+    "humanTime": "8:47:10 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 424
+    },
+    "id": "1767280630190",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280630191,
+    "humanTime": "8:47:10 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280630190",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280630217,
+    "humanTime": "8:47:10 pm",
     "type": "SEND",
     "layer": "System",
     "method": "starlight.entropy_stream",
     "params": {
       "entropy": true
     },
-    "id": "TLNTX6saVCnYCmPDDfleS",
+    "id": "nNhoZhNC2B_AaQqM8HIGk",
     "snapshot": null
   },
   {
-    "timestamp": 1767193498428,
-    "humanTime": "8:34:58 pm",
+    "timestamp": 1767280630332,
+    "humanTime": "8:47:10 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "pv0lKoBHpiRid4FWYd00e",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280630432,
+    "humanTime": "8:47:10 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "ZdPrwWdKuLeFwpGlrvHaK",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280630531,
+    "humanTime": "8:47:10 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "H6Lp_kvIZyj_ZzVt4tyPx",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280630639,
+    "humanTime": "8:47:10 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "DZseKjedrMaLf9Tu1Gk-q",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280630749,
+    "humanTime": "8:47:10 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "lEsOoam-nuBF2DFlz9XZU",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280630850,
+    "humanTime": "8:47:10 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "cLK5QAu5cfG7NaBWVfvEg",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280630950,
+    "humanTime": "8:47:10 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "zZjxmemay-2Igtl_4tA5H",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280631050,
+    "humanTime": "8:47:11 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "KdTiQVTguHLM_skydd457",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280631164,
+    "humanTime": "8:47:11 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "TBjbBQqxXqxDVUdTq_Tkb",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280631265,
+    "humanTime": "8:47:11 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "yLduh0P00TPTzycd-tU5-",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280631365,
+    "humanTime": "8:47:11 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "rF_rq0B6PKGzwHXVs4JLz",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280631465,
+    "humanTime": "8:47:11 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "mdrtqNreR41iVBqHch2Mo",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280631566,
+    "humanTime": "8:47:11 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "-YrThMutEWlzAOuKIQkn6",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280631627,
+    "humanTime": "8:47:11 pm",
     "type": "SEND",
     "layer": "Intent",
-    "id": 2,
+    "method": "starlight.pre_check",
+    "params": {
+      "command": {
+        "clientId": "Icu-535EIbAJGIh2AZUcI",
+        "cmd": "click",
+        "goal": "View Projects",
+        "context": {
+          "missionType": "portfolio-exploration"
+        },
+        "selector": "a:has-text(\"View Projects\")",
+        "selfHealed": false,
+        "id": "cmd-2",
+        "_preCheckRetries": 3
+      },
+      "blocking": [],
+      "screenshot": null,
+      "page_text": ""
+    },
+    "id": "Mfo6ivR4NQnGRDX6Morrc",
     "snapshot": null
   },
   {
-    "timestamp": 1767193498429,
-    "humanTime": "8:34:58 pm",
+    "timestamp": 1767280631629,
+    "humanTime": "8:47:11 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280631628",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280631629,
+    "humanTime": "8:47:11 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 437
+    },
+    "id": "1767280631628",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280631629,
+    "humanTime": "8:47:11 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280631628",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280631629,
+    "humanTime": "8:47:11 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 437
+    },
+    "id": "1767280631628",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280631672,
+    "humanTime": "8:47:11 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "ossyUY1AI5AzTpYC7rTeZ",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280631782,
+    "humanTime": "8:47:11 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "0gY04woD3r9b8o_GUengW",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280631898,
+    "humanTime": "8:47:11 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "NChY2QY5V5NdV1kPHiQCb",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280631997,
+    "humanTime": "8:47:11 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "3WBQqXbS99zNbDUDFYqUA",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280632097,
+    "humanTime": "8:47:12 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "R3kQ_wiOXqEd2P51AuDgh",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280632199,
+    "humanTime": "8:47:12 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "r5BhW-TjptrPR6jBLaswp",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280632299,
+    "humanTime": "8:47:12 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "ZAKG0w0KSUu1Ly-Tchv4V",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280632414,
+    "humanTime": "8:47:12 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "oK8vpwOa3kxs0qdhYFj--",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280632514,
+    "humanTime": "8:47:12 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "HQegISgDoaxIeh1cjraz0",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280632615,
+    "humanTime": "8:47:12 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "vL8yix0ivGhhzaMLIP1He",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280632715,
+    "humanTime": "8:47:12 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "6RoIT04R4OYLAvLZ1lsSS",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280632815,
+    "humanTime": "8:47:12 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "Yb9lwTuLU-HaE12C1eXYD",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280632915,
+    "humanTime": "8:47:12 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "jcsdNlfkfIrw5CSjsqluF",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633016,
+    "humanTime": "8:47:13 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "Qj5V3H7p6GE-URJSvZBDA",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633078,
+    "humanTime": "8:47:13 pm",
+    "type": "SEND",
+    "layer": "Intent",
+    "method": "starlight.pre_check",
+    "params": {
+      "command": {
+        "clientId": "Icu-535EIbAJGIh2AZUcI",
+        "cmd": "click",
+        "goal": "View Projects",
+        "context": {
+          "missionType": "portfolio-exploration"
+        },
+        "selector": "a:has-text(\"View Projects\")",
+        "selfHealed": false,
+        "id": "cmd-2",
+        "_preCheckRetries": 3
+      },
+      "blocking": [],
+      "screenshot": null,
+      "page_text": ""
+    },
+    "id": "wvXQax2KT9Q6ODWLq6zZi",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633079,
+    "humanTime": "8:47:13 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280633078",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633079,
+    "humanTime": "8:47:13 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 437
+    },
+    "id": "1767280633078",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633079,
+    "humanTime": "8:47:13 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280633078",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633079,
+    "humanTime": "8:47:13 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 437
+    },
+    "id": "1767280633078",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633116,
+    "humanTime": "8:47:13 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "rQ2-W4y9dQZGC0h5hFfMO",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633215,
+    "humanTime": "8:47:13 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "HydeEeKWCjuXclIdc50dQ",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633331,
+    "humanTime": "8:47:13 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "BgEVsq9pIjXhDMisQytKP",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633432,
+    "humanTime": "8:47:13 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "iXHsLD5M-o70KPTK_MQ14",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633546,
+    "humanTime": "8:47:13 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "0NEVwVJATqofSPZi21-4y",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633648,
+    "humanTime": "8:47:13 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "r-xfZB30XrneijTN-iUaf",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633748,
+    "humanTime": "8:47:13 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "vKcIJJucdxyTzS0cFFKGn",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633847,
+    "humanTime": "8:47:13 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "XLt985SZ1wQfk1YkpH3a1",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280633958,
+    "humanTime": "8:47:13 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "792lAspOkGCqfqo0msE2B",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634066,
+    "humanTime": "8:47:14 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "A-7AW2JSyNr876fZOkbCm",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634177,
+    "humanTime": "8:47:14 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "OsgJEk1gTcbSerFURjs_A",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634278,
+    "humanTime": "8:47:14 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "xX42V4pxijTNdB1anwkpS",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634379,
+    "humanTime": "8:47:14 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "7VRBaT1yLiA22OIryTfeq",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634491,
+    "humanTime": "8:47:14 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "UkZF0SB3_eUutxJ3WmW2A",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634615,
+    "humanTime": "8:47:14 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "0ahF-yv8Zj5pkBqfluqOx",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634722,
+    "humanTime": "8:47:14 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "q_hF2Owm4wJ3I-FjAR3xa",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634831,
+    "humanTime": "8:47:14 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "QPGpuY9CMTftDmGY-G228",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634906,
+    "humanTime": "8:47:14 pm",
+    "type": "SEND",
+    "layer": "Intent",
+    "id": "cmd-2",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634908,
+    "humanTime": "8:47:14 pm",
+    "type": "RECV",
+    "layer": "Intent",
+    "method": "starlight.intent",
+    "params": {
+      "cmd": "click",
+      "goal": "Blog",
+      "context": {
+        "section": "navigation"
+      },
+      "selector": "a:has-text(\"Blog\")",
+      "selfHealed": false
+    },
+    "id": "cmd-3",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634917,
+    "humanTime": "8:47:14 pm",
+    "type": "SEND",
+    "layer": "Intent",
+    "method": "starlight.pre_check",
+    "params": {
+      "command": {
+        "clientId": "Icu-535EIbAJGIh2AZUcI",
+        "cmd": "click",
+        "goal": "Blog",
+        "context": {
+          "section": "navigation"
+        },
+        "selector": "a:has-text(\"Blog\")",
+        "selfHealed": false,
+        "id": "cmd-3",
+        "_preCheckRetries": 3
+      },
+      "blocking": [],
+      "screenshot": null,
+      "page_text": ""
+    },
+    "id": "efxdySiOddGF3VRRpr5rZ",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634918,
+    "humanTime": "8:47:14 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280634917",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634918,
+    "humanTime": "8:47:14 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 414
+    },
+    "id": "1767280634917",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634918,
+    "humanTime": "8:47:14 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280634917",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634918,
+    "humanTime": "8:47:14 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 414
+    },
+    "id": "1767280634917",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280634944,
+    "humanTime": "8:47:14 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "t6Bd3k_7x-ghl0CQKpeoq",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280635060,
+    "humanTime": "8:47:15 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "CsHHXm7b1NyWUhUQIOj-r",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280635163,
+    "humanTime": "8:47:15 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "IEVzNn29agD_E6M6h8PLc",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280635283,
+    "humanTime": "8:47:15 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "mIz5V7hw47mEpwO21Y5ut",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280635406,
+    "humanTime": "8:47:15 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "bp7LL3R_iwP09eBORL458",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280635509,
+    "humanTime": "8:47:15 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "83X_44OIw1TK17cFPzWN8",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280635636,
+    "humanTime": "8:47:15 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "Ix8qeJKy_LPYbUDquJuPF",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280635736,
+    "humanTime": "8:47:15 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "enbX2m-FXATY18EG3wmeY",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280635851,
+    "humanTime": "8:47:15 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "xJiLzI_s7bgEAocxnCzb1",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280635951,
+    "humanTime": "8:47:15 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "QUk-5UlMMfMkSNHuM04tR",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280636071,
+    "humanTime": "8:47:16 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "gqBSp99H3QZu1rDt8spvI",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280636175,
+    "humanTime": "8:47:16 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "wLgnz9smJ3q9DLziiF5Wj",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280636285,
+    "humanTime": "8:47:16 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "syCJAWJYtzoiIyl8Gk6z5",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280636404,
+    "humanTime": "8:47:16 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "STYgq0iPmhZLZh1eemQXr",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280636514,
+    "humanTime": "8:47:16 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "tN3OuPjn_E-79ixeZ-B9s",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280636622,
+    "humanTime": "8:47:16 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "mKqPVWnyDTGz1EdAS7uF5",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280636738,
+    "humanTime": "8:47:16 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "vyK1pWKWGBL4FIQ5UGdyw",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280636849,
+    "humanTime": "8:47:16 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "gu0FA1CVTvq9OUA7LDvLY",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280636961,
+    "humanTime": "8:47:16 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "2tSv95pokRBWi_0WmVx_g",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280637069,
+    "humanTime": "8:47:17 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "PoQ0Jh6erZ5uf8kzqdBEw",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280637207,
+    "humanTime": "8:47:17 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "nA37_Xv6t0RP5eP3muiP5",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280637335,
+    "humanTime": "8:47:17 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "WFfV3o7LHuT6N7au23ef3",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280637440,
+    "humanTime": "8:47:17 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "R_6ZLxqu00Iv-Qvk_Vf_7",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280637562,
+    "humanTime": "8:47:17 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "YZqa6iiCAXLJK93GETB4H",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280637663,
+    "humanTime": "8:47:17 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "qJGaeLJTlp3w6Coxx0fR_",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280637777,
+    "humanTime": "8:47:17 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "_gdLh-_laYArurzx-0Vy4",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280637842,
+    "humanTime": "8:47:17 pm",
+    "type": "SEND",
+    "layer": "Intent",
+    "method": "starlight.pre_check",
+    "params": {
+      "command": {
+        "clientId": "Icu-535EIbAJGIh2AZUcI",
+        "cmd": "click",
+        "goal": "Blog",
+        "context": {
+          "section": "navigation"
+        },
+        "selector": "a:has-text(\"Blog\")",
+        "selfHealed": false,
+        "id": "cmd-3",
+        "_preCheckRetries": 3
+      },
+      "blocking": [],
+      "screenshot": null,
+      "page_text": ""
+    },
+    "id": "Ri6Kwi900dcXMDIjXCHP3",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280637843,
+    "humanTime": "8:47:17 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280637842",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280637843,
+    "humanTime": "8:47:17 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 434
+    },
+    "id": "1767280637842",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280637843,
+    "humanTime": "8:47:17 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280637843",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280637843,
+    "humanTime": "8:47:17 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 434
+    },
+    "id": "1767280637843",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280637879,
+    "humanTime": "8:47:17 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "FohMWF6l5WnyPHVOk1Urt",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280637985,
+    "humanTime": "8:47:17 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "CssFmxYUsevQMoaCSLyif",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280638089,
+    "humanTime": "8:47:18 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "CT4mjFRXIYPpxk-YIb6cl",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280638188,
+    "humanTime": "8:47:18 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "aOUPmuBi4_VMsQ8qiTfCL",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280638288,
+    "humanTime": "8:47:18 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "p4Um6rgpnM-Crv7Bn0RbN",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280638409,
+    "humanTime": "8:47:18 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "Nng_MvVWo89w4gdS2Cv4u",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280638536,
+    "humanTime": "8:47:18 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "qPPDRVYgVdp_OSWviQ_o3",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280638662,
+    "humanTime": "8:47:18 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "mmGUsYNjv5E9W73L2QP9W",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280638788,
+    "humanTime": "8:47:18 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "mtuBlnWTj-C4ZSmOLHhYm",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280638894,
+    "humanTime": "8:47:18 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "PqaETh9pu_rq0em0taft9",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280639001,
+    "humanTime": "8:47:19 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "bi913qlQjBLXB9eqJFi_D",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280639159,
+    "humanTime": "8:47:19 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "6LLQLGMjoCYYhwhfeIZnA",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280639264,
+    "humanTime": "8:47:19 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "RdNgUqv8fc-pyQ6DP1KCX",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280639378,
+    "humanTime": "8:47:19 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "vxr3yl_2Pv36_xELruosH",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280639499,
+    "humanTime": "8:47:19 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "REqdFDaft8GcJqVSd7elH",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280639611,
+    "humanTime": "8:47:19 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "3d-shNU-Ro1yfMvfKYwCj",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280639716,
+    "humanTime": "8:47:19 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "YYFhL3DV50vJSmeYDrqZS",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280639822,
+    "humanTime": "8:47:19 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "2lIcmTkkOuDUDdK3XciUD",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280639924,
+    "humanTime": "8:47:19 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "MdzzOGmExH4-SieWsIJds",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280640033,
+    "humanTime": "8:47:20 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "NrNxrPi9ISl88paxJ90hN",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280640145,
+    "humanTime": "8:47:20 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "AqNuD7OsW-6jjh5ItwqMj",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280640250,
+    "humanTime": "8:47:20 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "D2p_updFTy37lAqeq-c5b",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280640362,
+    "humanTime": "8:47:20 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "Z2jmAFnswV-DCiVrsuJk8",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280640471,
+    "humanTime": "8:47:20 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "kYQUGlWmCmMhTvLmKciF8",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280640580,
+    "humanTime": "8:47:20 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "pAhxtezCWtAZWwKAJFCdt",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280640700,
+    "humanTime": "8:47:20 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "gcZ4I16o9UOksHeU9YL02",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280640802,
+    "humanTime": "8:47:20 pm",
+    "type": "SEND",
+    "layer": "Intent",
+    "method": "starlight.pre_check",
+    "params": {
+      "command": {
+        "clientId": "Icu-535EIbAJGIh2AZUcI",
+        "cmd": "click",
+        "goal": "Blog",
+        "context": {
+          "section": "navigation"
+        },
+        "selector": "a:has-text(\"Blog\")",
+        "selfHealed": false,
+        "id": "cmd-3",
+        "_preCheckRetries": 3
+      },
+      "blocking": [],
+      "screenshot": null,
+      "page_text": ""
+    },
+    "id": "LWNIZet5hk-AqXBkYn0i1",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280640803,
+    "humanTime": "8:47:20 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280640803",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280640804,
+    "humanTime": "8:47:20 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 396
+    },
+    "id": "1767280640803",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280640804,
+    "humanTime": "8:47:20 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280640803",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280640804,
+    "humanTime": "8:47:20 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 396
+    },
+    "id": "1767280640803",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280640818,
+    "humanTime": "8:47:20 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "yTZAmcQZu3xxm7KXErWD_",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280640931,
+    "humanTime": "8:47:20 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "StQzHLCTx1ePO53RPgTJp",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280641043,
+    "humanTime": "8:47:21 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "QRF48uYir0gXM2L5P0qek",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280641146,
+    "humanTime": "8:47:21 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "BaaF6JRZIsgKmbZlf8zfp",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280641247,
+    "humanTime": "8:47:21 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "mE9dDu6Mk2uOsRpb_dAPq",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280641366,
+    "humanTime": "8:47:21 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "qUcu1YhlsYvq5xnVlDzzi",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280641468,
+    "humanTime": "8:47:21 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "32PyFf3z__SK52Nq43acX",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280641579,
+    "humanTime": "8:47:21 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "MVrPZZcubFqfGcIJxwClq",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280641681,
+    "humanTime": "8:47:21 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "cfxTnypzR8c7t0AaULyND",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280641780,
+    "humanTime": "8:47:21 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "vsC8q6DLSku2nk4vhCs_O",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280641888,
+    "humanTime": "8:47:21 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "2gBgRjq3uPxRwIjg2xlks",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280642007,
+    "humanTime": "8:47:22 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "JocCDnmSM8XXU8sjFMAK-",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280642130,
+    "humanTime": "8:47:22 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "KD9xJRRzk4nIZdOUyN-ms",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280642141,
+    "humanTime": "8:47:22 pm",
+    "type": "SEND",
+    "layer": "Intent",
+    "id": "cmd-3",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280642143,
+    "humanTime": "8:47:22 pm",
+    "type": "RECV",
+    "layer": "Intent",
+    "method": "starlight.intent",
+    "params": {
+      "cmd": "click",
+      "goal": "Contact",
+      "context": {
+        "section": "navigation"
+      },
+      "selector": "a:has-text(\"Contact\")",
+      "selfHealed": false
+    },
+    "id": "cmd-4",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280642229,
+    "humanTime": "8:47:22 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "CKItU5RAvZ3hmmX-TdbLg",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280642346,
+    "humanTime": "8:47:22 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "LUzFJP3RjIkbnsxAMdqX1",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280642458,
+    "humanTime": "8:47:22 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "0lbXPFo2iHY-i9HWAL_09",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280642558,
+    "humanTime": "8:47:22 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "ZmbSiqM9bP04xmH5htvq0",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280642925,
+    "humanTime": "8:47:22 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "58Vu1y_9yfxg36kK2VYN9",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280643672,
+    "humanTime": "8:47:23 pm",
+    "type": "SEND",
+    "layer": "Intent",
+    "method": "starlight.pre_check",
+    "params": {
+      "command": {
+        "clientId": "Icu-535EIbAJGIh2AZUcI",
+        "cmd": "click",
+        "goal": "Contact",
+        "context": {
+          "section": "navigation"
+        },
+        "selector": "a:has-text(\"Contact\")",
+        "selfHealed": false,
+        "id": "cmd-4"
+      },
+      "blocking": [],
+      "screenshot": null,
+      "page_text": ""
+    },
+    "id": "56zk8oi_JQG3LM5JL9kvM",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280643673,
+    "humanTime": "8:47:23 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280643673",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280643673,
+    "humanTime": "8:47:23 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280643673",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280643673,
+    "humanTime": "8:47:23 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280643673",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280643674,
+    "humanTime": "8:47:23 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280643673",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280643677,
+    "humanTime": "8:47:23 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "ZIXdSHZZJ2C7hSMISRqZn",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280643827,
+    "humanTime": "8:47:23 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "XnKvpUAQc44C_qlT79UhC",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280643963,
+    "humanTime": "8:47:23 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "t_R6fFinSgKqIkRAX8qPI",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280644083,
+    "humanTime": "8:47:24 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "5MXpYMVMCQ1KE_y7x5InD",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280644188,
+    "humanTime": "8:47:24 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "LxCMxeylAS82PjJnzsQG9",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280644292,
+    "humanTime": "8:47:24 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "C6E2nY5jGdaPqdwDzdqc9",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280644481,
+    "humanTime": "8:47:24 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "Di3Su5re-C4IRXpPfEZk7",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280644646,
+    "humanTime": "8:47:24 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "0drhKuHzBo_AJLdPLjGw8",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280644652,
+    "humanTime": "8:47:24 pm",
+    "type": "SEND",
+    "layer": "Intent",
+    "id": "cmd-4",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280644654,
+    "humanTime": "8:47:24 pm",
+    "type": "RECV",
+    "layer": "Intent",
+    "method": "starlight.intent",
+    "params": {
+      "cmd": "click",
+      "goal": "Say Hello",
+      "context": {
+        "action": "contact-cta"
+      },
+      "selector": "a:has-text(\"Say Hello\")",
+      "selfHealed": false
+    },
+    "id": "cmd-5",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280644931,
+    "humanTime": "8:47:24 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "ORCpLqNC_m4VpvB85Br4B",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280645030,
+    "humanTime": "8:47:25 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "zLJ3LcsBk3A1guDiYNfH-",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280645138,
+    "humanTime": "8:47:25 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "Ir3tz34eHQi50lT3ruWSx",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280645243,
+    "humanTime": "8:47:25 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "kR8kNVNUIaoqly9OMNBtM",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280645354,
+    "humanTime": "8:47:25 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "K3SUhorItYoUxzmTm8QYn",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280645463,
+    "humanTime": "8:47:25 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "jg35thI0uMgtFO6cQDNCt",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280645565,
+    "humanTime": "8:47:25 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "Nf2GEIbOxsus7bSvwKqdw",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280645667,
+    "humanTime": "8:47:25 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "eH-NNQK49Q2ddz0bJnNgb",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280645769,
+    "humanTime": "8:47:25 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "VBqYKkn2dpX61fecRcQLW",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280645882,
+    "humanTime": "8:47:25 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "WxEW6UhxFFQxHhD0FFUCR",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280645982,
+    "humanTime": "8:47:25 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "7LYCQSNa5Xoynm8oRoWPL",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280646083,
+    "humanTime": "8:47:26 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "BK0l3n_i1jzyoNX4P3ztq",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280646168,
+    "humanTime": "8:47:26 pm",
+    "type": "SEND",
+    "layer": "Intent",
+    "method": "starlight.pre_check",
+    "params": {
+      "command": {
+        "clientId": "Icu-535EIbAJGIh2AZUcI",
+        "cmd": "click",
+        "goal": "Say Hello",
+        "context": {
+          "action": "contact-cta"
+        },
+        "selector": "a:has-text(\"Say Hello\")",
+        "selfHealed": false,
+        "id": "cmd-5",
+        "_preCheckRetries": 3
+      },
+      "blocking": [],
+      "screenshot": null,
+      "page_text": ""
+    },
+    "id": "GQqOvCWz7WON4-1zJ0OG6",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280646169,
+    "humanTime": "8:47:26 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280646169",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280646169,
+    "humanTime": "8:47:26 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280646169",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280646169,
+    "humanTime": "8:47:26 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 414
+    },
+    "id": "1767280646169",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280646169,
+    "humanTime": "8:47:26 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 414
+    },
+    "id": "1767280646169",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280646183,
+    "humanTime": "8:47:26 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "6m7k215FY2b7RFwALuM3-",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280646299,
+    "humanTime": "8:47:26 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "EeqPQ2TmyBOxmzbFWlDjJ",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280646399,
+    "humanTime": "8:47:26 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "wp9zDwXPAGFIz1V90J6Jd",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280646498,
+    "humanTime": "8:47:26 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "MwTZibDRE11U249gTY0JT",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280646598,
+    "humanTime": "8:47:26 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "PeZ2BLYI4-JNm_ntGDd11",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280646704,
+    "humanTime": "8:47:26 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "VWr0YekKzbxYUYJGZzLRP",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280646816,
+    "humanTime": "8:47:26 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "mP4VRSgl1k9whdUY0TqNt",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280646915,
+    "humanTime": "8:47:26 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "hBiDJIDtCgeSagqKzayLi",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280647025,
+    "humanTime": "8:47:27 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "WpE6K8S0ygwV0Q2XBT8xn",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280647131,
+    "humanTime": "8:47:27 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "wJWdFSjYXn9O6nYtkRxJc",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280647251,
+    "humanTime": "8:47:27 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "kk27s6VTgvQHIO103QqSO",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280647355,
+    "humanTime": "8:47:27 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "9or984Hg2fNlWcew8CaeJ",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280647474,
+    "humanTime": "8:47:27 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "VWJ6V1ghg3ODBkR2zq2By",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280647618,
+    "humanTime": "8:47:27 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "cIUduCb_4otSFrJ02nDOC",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280647737,
+    "humanTime": "8:47:27 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "ShVd4loNIDPLaHDx0lSp-",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280647838,
+    "humanTime": "8:47:27 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "XNCf53UqOU8j4S5jbHXAN",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280647955,
+    "humanTime": "8:47:27 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "RkEi7Ish_D9m_SvTaSH2l",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280648071,
+    "humanTime": "8:47:28 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "JgfSoQSmIRtc2zUxSQ9Ze",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280648190,
+    "humanTime": "8:47:28 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "Mu0QYMAJ-uv0jOzn6wLi8",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280648304,
+    "humanTime": "8:47:28 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "eHVgW87dt7bO1kytHgA6C",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280648418,
+    "humanTime": "8:47:28 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "u1S_z_I0SAfffwGuKgb8p",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280648539,
+    "humanTime": "8:47:28 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "6xwCgRheK-ztN0y26E1zf",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280648686,
+    "humanTime": "8:47:28 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "K_o0pldbIPNx6sVhOEfUF",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280648807,
+    "humanTime": "8:47:28 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "gYCSbj7iANB408snX2voB",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280648925,
+    "humanTime": "8:47:28 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "R-a5-25TPurzCqiXrIvbm",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280649042,
+    "humanTime": "8:47:29 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "8T3xHwKrdCH1VoETFuttw",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280649107,
+    "humanTime": "8:47:29 pm",
+    "type": "SEND",
+    "layer": "Intent",
+    "method": "starlight.pre_check",
+    "params": {
+      "command": {
+        "clientId": "Icu-535EIbAJGIh2AZUcI",
+        "cmd": "click",
+        "goal": "Say Hello",
+        "context": {
+          "action": "contact-cta"
+        },
+        "selector": "a:has-text(\"Say Hello\")",
+        "selfHealed": false,
+        "id": "cmd-5",
+        "_preCheckRetries": 3
+      },
+      "blocking": [],
+      "screenshot": null,
+      "page_text": ""
+    },
+    "id": "c0vZgJyB8pYcl0igP8APL",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280649108,
+    "humanTime": "8:47:29 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280649108",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280649108,
+    "humanTime": "8:47:29 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280649108",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280649108,
+    "humanTime": "8:47:29 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 435
+    },
+    "id": "1767280649108",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280649108,
+    "humanTime": "8:47:29 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 435
+    },
+    "id": "1767280649108",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280649145,
+    "humanTime": "8:47:29 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "uXT3O4h9W_RTZwXKtLoBx",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280649253,
+    "humanTime": "8:47:29 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "oalQ7yKIH-ihRmhY21uUY",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280649370,
+    "humanTime": "8:47:29 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "8_Knr_2zvdSCe9VQI_sTw",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280649476,
+    "humanTime": "8:47:29 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "t6FwFuI3TzturnL19j8q8",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280649597,
+    "humanTime": "8:47:29 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "y9NH8alzzvQOPTgRI9t4t",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280649698,
+    "humanTime": "8:47:29 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "SwgvZdOQEkbFY5trktQ7p",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280649799,
+    "humanTime": "8:47:29 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "gQZ73KsmX5SRO7YP_LWrf",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280649898,
+    "humanTime": "8:47:29 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "G_1F71kv7G3BHzr2t6w21",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280650025,
+    "humanTime": "8:47:30 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "pOUvTgeAhicCT8N8Vbgyb",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280650124,
+    "humanTime": "8:47:30 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "CllQIi6gi-cNbXM2Fib3W",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280650228,
+    "humanTime": "8:47:30 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "ns0lnRnGY1PGhcTBIf82v",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280650345,
+    "humanTime": "8:47:30 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "6ywIKd4qNFkQ8Uk5q9YVJ",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280650468,
+    "humanTime": "8:47:30 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "ofwCh-xSPZXnqptO_4W8l",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280650557,
+    "humanTime": "8:47:30 pm",
+    "type": "SEND",
+    "layer": "Intent",
+    "method": "starlight.pre_check",
+    "params": {
+      "command": {
+        "clientId": "Icu-535EIbAJGIh2AZUcI",
+        "cmd": "click",
+        "goal": "Say Hello",
+        "context": {
+          "action": "contact-cta"
+        },
+        "selector": "a:has-text(\"Say Hello\")",
+        "selfHealed": false,
+        "id": "cmd-5",
+        "_preCheckRetries": 3
+      },
+      "blocking": [],
+      "screenshot": null,
+      "page_text": ""
+    },
+    "id": "wGnQj6DFjVfZOEL-8iArW",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280650558,
+    "humanTime": "8:47:30 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280650558",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280650558,
+    "humanTime": "8:47:30 pm",
+    "type": "RECV",
+    "layer": "JanitorSentinel",
+    "method": "starlight.clear",
+    "params": {},
+    "id": "1767280650558",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280650559,
+    "humanTime": "8:47:30 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 409
+    },
+    "id": "1767280650558",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280650559,
+    "humanTime": "8:47:30 pm",
+    "type": "RECV",
+    "layer": "PulseSentinel",
+    "method": "starlight.wait",
+    "params": {
+      "retryAfterMs": 410
+    },
+    "id": "1767280650558",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280650572,
+    "humanTime": "8:47:30 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "kcsPuImu9BLVfS6YaafKH",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280650689,
+    "humanTime": "8:47:30 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "4GF7rI5lEZDlFg3MtQQBX",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280650805,
+    "humanTime": "8:47:30 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "IuW5W1mr_EU77e1EDIg4-",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280650915,
+    "humanTime": "8:47:30 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "mcO1mTKFZE6ukZjpkLDhG",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280651073,
+    "humanTime": "8:47:31 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "6SCYvZssPXHYcs7BTbKTA",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280651185,
+    "humanTime": "8:47:31 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "W6KmN_w02fBuotLrQoOvD",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280651284,
+    "humanTime": "8:47:31 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "oFsdFOOAaJJOO3ibUoZ8k",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280651390,
+    "humanTime": "8:47:31 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "4a2VyvUfuQzs3gxJwbV4W",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280651497,
+    "humanTime": "8:47:31 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "6oLn0ijv-01n6LwkesMtg",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280651598,
+    "humanTime": "8:47:31 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "drMUrFi-1fg772aG3i67p",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280651700,
+    "humanTime": "8:47:31 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "4KMQ_zqWpFj6ByEd3rSEC",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280651801,
+    "humanTime": "8:47:31 pm",
+    "type": "SEND",
+    "layer": "System",
+    "method": "starlight.entropy_stream",
+    "params": {
+      "entropy": true
+    },
+    "id": "i27UZfL7TEWcx_KmIAPPB",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280651812,
+    "humanTime": "8:47:31 pm",
+    "type": "SEND",
+    "layer": "Intent",
+    "id": "cmd-5",
+    "snapshot": null
+  },
+  {
+    "timestamp": 1767280651814,
+    "humanTime": "8:47:31 pm",
     "type": "RECV",
     "layer": "Intent",
     "method": "starlight.finish",
-    "params": {},
-    "id": 3,
+    "params": {
+      "reason": "Portfolio exploration complete"
+    },
+    "id": "shutdown-1",
     "snapshot": null
   }
 ]

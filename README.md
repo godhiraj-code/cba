@@ -1,7 +1,7 @@
 # 🛰️ Constellation-Based Automation (CBA)
-## Starlight Protocol v2.8 — The Sovereign Security Era
+## Starlight Protocol v3.0 — The Autonomous Era
 
-[![Version](https://img.shields.io/badge/version-2.8.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
 [![Python](https://img.shields.io/badge/python-%3E%3D3.9-blue.svg)](https://python.org)
@@ -30,7 +30,14 @@ CBA uses a **Decentralized Sidecar Architecture** communicating over a JSON-RPC 
 
 ---
 
-## ✨ What's New in v2.8
+### 🌌 Phase 16: The Autonomous Era (World-Class Recorder)
+
+| Feature | Description |
+|---------|-------------|
+| **Mutation Fingerprinting** | Captures page "stability signatures" during recording |
+| **Autonomous CLI** | `bin/starlight.js` for zero-touch mission execution |
+| **Context-Aware Pulse** | Dynamic settle-time adjustment based on stability hints |
+| **Failure-Safe Reports** | Immediate "Hero Story" generation on mission error |
 
 ### 🛡️ Phase 9: Sovereign Security & Compliance
 
@@ -136,6 +143,21 @@ The `report.html` quantifies business value:
 
 ---
 
+## ⚖️ Sovereignty vs. Simplicity
+
+Starlight is an Enterprise-grade engine designed for high-stakes, dynamic environments. It is important to understand the trade-offs:
+
+| ✅ Good For | ❌ Not Recommended For |
+| :--- | :--- |
+| **Noisy UIs**: Sites with frequent popups, banners, and modals. | **Stable UIs**: Simple, static sites where a CSS selector never changes. |
+| **Enterprise CI/CD**: High-frequency runs where stability ROI is paramount. | **Small Projects**: One-off scripts or hobby projects. |
+| **Context-Aware Quality**: When you need tests that "understand" page stability. | **Resource-Constrained**: Low-RAM environments (running AI agents has overhead). |
+
+> [!IMPORTANT]
+> **The Starlight Paradigm Shift**: You are moving from *maintaining fragile scripts* to *managing a fleet of intelligent agents*. While the "up-front" setup is higher, the long-term ROI in reduced triaging and refactoring is what defines the "Autonomous Era."
+
+---
+
 ## 🎮 GUI Launcher (Mission Control)
 
 A visual control panel for starting Hub, Sentinels, and running missions:
@@ -174,16 +196,23 @@ pip install -r requirements.txt
 npx playwright install chromium
 ```
 
-### Run the Demo
+### Run the Demo (The Autonomous Way)
 ```bash
-# Windows (recommended)
-run_cba.bat
+# Start a mission with one command (Hub + Sentinels + Intent)
+node bin/starlight.js test/intent_portfolio_v2.js --headless --verbose
+```
 
-# Manual
-node src/hub.js          # Terminal 1
-python sentinels/pulse_sentinel.py   # Terminal 2
-python sentinels/janitor.py          # Terminal 3
-node src/intent.js       # Terminal 4
+### Manual Mode (Development)
+```bash
+# Terminal 1: Hub
+node src/hub.js
+
+# Terminal 2: Sentinels
+python sentinels/pulse_sentinel.py
+python sentinels/janitor.py
+
+# Terminal 3: Mission
+node test/intent_portfolio_v2.js
 ```
 
 ---

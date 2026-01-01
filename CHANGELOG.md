@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.0.0] - 2026-01-01
+
+### 🌌 Phase 16: The Autonomous Era (World-Class Recorder)
+
+#### Added
+- **Mutation Fingerprinting**: Test Recorder now captures environmental "stability signatures"
+  - Injected `MutationObserver` measures DOM settle time after every user interaction
+  - Encodes `stabilityHint` metadata into generated intent scripts
+- **Autonomous CLI Orchestrator (`starlight.js`)**: Zero-touch lifecycle management
+  - Single command `node bin/starlight.js <mission>` launches Hub and all Sentinels
+  - Automatic process cleanup and standardized exit codes (0 for success, 1 for failure)
+  - Headless mode support for CI/CD environments
+- **Hub Health Check**: New `http://localhost:8080/health` endpoint for orchestration polling
+- **GitHub Actions Integration**: Sample workflow for automated Starlight missions
+- **Failure-Safe Reporting**: Hub now generates a "Mission Failure" report immediately on error, ensuring evidence is captured even in catastrophic runs.
+
+#### Changed
+- **PulseSentinel**: Now context-aware; dynamically adjusts settlement windows based on `stabilityHint`
+- **IntentRunner**: Automatically closes WebSocket connections on mission finish, preventing process hanging
+- **Mission Control UI**: Now dynamically discovers new recording scripts and hydrates the mission dropdown in real-time.
+
+---
+
 ## [2.8.0] - 2024-12-31
 
 ### 🛡️ Phase 9: Sovereign Security & Compliance (Shadow DOM)

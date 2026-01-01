@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const TelemetryEngine = require('./telemetry');
 const ActionRecorder = require('./recorder');
+const http = require('http');
 
 // Security: HTML escaping to prevent XSS
 function escapeHtml(str) {
@@ -16,14 +17,25 @@ function escapeHtml(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
 }
-
 class CBAHub {
-    constructor(port = 8080) {
+    constructor(port = 8080, headless = false) {
         // Load configuration
         this.config = this.loadConfig();
+        this.headless = headless || this.config.hub?.headless || false;
 
         this.port = this.config.hub?.port || port;
-        this.wss = new WebSocketServer({ port: this.port });
+
+        this.server = http.createServer((req, res) => {
+            if (req.url === '/health') {
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end('OK');
+            } else {
+                res.writeHead(404);
+                res.end();
+            }
+        });
+
+        this.wss = new WebSocketServer({ server: this.server });
         this.browser = null;
         this.page = null;
         this.sentinels = new Map();
@@ -134,8 +146,13 @@ class CBAHub {
             this.shutdown();
         }, missionTimeout);
 
-        console.log(`[CBA Hub] Starting Starlight Hub: The Hero's Journey...`);
-        this.browser = await chromium.launch({ headless: false });
+        // Initialize HTTP server
+        this.server.listen(this.port, () => {
+            console.log(`[CBA Hub] Starting Starlight Hub: The Hero's Journey...`);
+            console.log(`[CBA Hub] WebSocket/HTTP Server listening on port ${this.port}`);
+        });
+
+        this.browser = await chromium.launch({ headless: this.headless });
         this.page = await this.browser.newPage();
 
         // Phase 9: Traffic Sovereign - Network Interception
@@ -495,6 +512,11 @@ class CBAHub {
                         msg.params.selfHealed = result.selfHealed;
                         msg.params.cmd = 'click'; // Default semantic action
 
+                        // Propagate hint from semantic context if available
+                        if (result.stabilityHint) {
+                            msg.params.stabilityHint = result.stabilityHint;
+                        }
+
                         // ROI: If semantic resolution used history, count it as saved triage time
                         if (result.selfHealed) {
                             this.totalSavedTime += 120; // ROI: 2 mins triage avoided
@@ -611,9 +633,11 @@ class CBAHub {
 
         if (this.page) await this.page.close();
         if (this.browser) await this.browser.close();
-        this.wss.close(() => {
-            console.log("[CBA Hub] Hub shutdown complete.");
-            process.exit(0);
+        this.server.close(() => {
+            this.wss.close(() => {
+                console.log("[CBA Hub] Hub shutdown complete.");
+                process.exit(0);
+            });
         });
     }
 
@@ -803,7 +827,8 @@ class CBAHub {
         if (this.isShuttingDown) return true;
 
         const syncBudget = this.config.hub?.syncBudget || 30000;
-        console.log(`[CBA Hub] Awaiting Handshake for ${msg.cmd} (Budget: ${syncBudget / 1000}s)...`);
+        const hint = msg.stabilityHint ? ` (Hint: ${msg.stabilityHint}ms)` : '';
+        console.log(`[CBA Hub] Awaiting Handshake for ${msg.cmd}${hint} (Budget: ${syncBudget / 1000}s)...`);
 
         const relevantSentinels = Array.from(this.sentinels.entries())
             .filter(([id, s]) => s.priority <= 10);
@@ -1274,4 +1299,8 @@ class CBAHub {
     }
 }
 
-new CBAHub();
+const args = process.argv.slice(2);
+const headless = args.includes('--headless');
+const port = args.find(a => a.startsWith('--port='))?.split('=')[1] || 8080;
+
+new CBAHub(parseInt(port), headless);

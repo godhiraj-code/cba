@@ -145,6 +145,7 @@ class IntentRunner {
 
         // Give Hub time to process
         await new Promise(r => setTimeout(r, 500));
+        this.close();
     }
 
     /**

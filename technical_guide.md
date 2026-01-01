@@ -1,4 +1,4 @@
-# CBA Technical Guide: Architecture & Implementation
+# CBA Technical Guide: Architecture & Implementation (v3.0)
 
 This document provides a deep technical overview of Constellation-Based Automation (CBA), including the protocol specification, implementation details, and configuration reference.
 
@@ -70,7 +70,7 @@ graph TD
 
 ---
 
-## 3. The Starlight Protocol (v2.7)
+## 3. The Starlight Protocol (v3.0)
 
 ### Message Format (JSON-RPC 2.0)
 ```json
@@ -88,7 +88,7 @@ graph TD
 | :--- | :--- | :--- |
 | `starlight.registration` | Sentinel | Register with Hub |
 | `starlight.pulse` | Sentinel | Heartbeat signal |
-| `starlight.intent` | Intent | Issue goal or command |
+| `starlight.intent` | Intent | Issue goal or command (with optional `stabilityHint`) |
 | `starlight.pre_check` | Hub | Handshake before execution |
 | `starlight.clear` | Sentinel | Approve execution |
 | `starlight.wait` | Sentinel | Veto (stability concern) |
@@ -122,7 +122,7 @@ CBA v2.8 uses `config.json` for all settings:
         }
     },
     "aura": {
-        "predictiveWaitMs": 1500,
+        "preventiveWaitMs": 1500,
         "bucketSizeMs": 500
     },
     "sentinel": {
@@ -202,6 +202,34 @@ function hideObstacles(root) {
 }
 hideObstacles(document);
 ```
+
+---
+
+## 4.6 Phase 16: Mutation Fingerprinting (Stability Sensing)
+
+Starlight v3.0 introduces **Stability Sensing** to eliminate manual waits.
+
+### The Mutation Observer
+The Test Recorder injects a `MutationObserver` that monitors DOM entropy after every interaction:
+1. **Trigger**: User clicks or types.
+2. **Track**: High-resolution tracking of all mutations (attributes, children, subtree).
+3. **Analyze**: Defines "Settled" as a 500ms window with zero mutations.
+4. **Encode**: Saves the `settleTime` (Action to Silence) as a metadata hint.
+
+### Context-Aware Waiting
+The **Pulse Sentinel** consumes this hint to dynamically adjust its `settleWindow`. If the hint is `450ms`, the Sentinel adds this to its baseline, ensuring it doesn't grant execution consent until the environmental jitter has subsided.
+
+---
+
+## 4.7 bin/starlight.js: The Autonomous Orchestrator
+
+The unified CLI entry point for CI/CD environments.
+
+### Orchestration Lifecycle
+1. **Hub Launch**: Spawns Hub process + waits for `/health` response.
+2. **Constellation Assembly**: Launches configured Sentinels (Pulse, Janitor).
+3. **Mission Execution**: Spawns the intent script.
+4. **Graceful Cleanup**: Kills all child processes (using `taskkill /t` on Windows) to ensure telemetry and reports are saved.
 
 ---
 
@@ -358,4 +386,4 @@ sequenceDiagram
 
 ---
 
-*Starlight Protocol v2.7 — The Sovereign Era*
+*Starlight Protocol v3.0 — The Autonomous Era*

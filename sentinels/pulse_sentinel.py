@@ -53,11 +53,25 @@ class PulseSentinel(SentinelBase):
             self.veto_count = 0
             self.current_command_id = cmd_key
         
+        # Phase 16: Dynamic Settlement Adjustment
+        stability_hint = params.get("command", {}).get("stabilityHint", 0)
+        base_window = self.config.get("sentinel", {}).get("settlementWindow", 0.5)
+        
+        # Calculate dynamic window (Hint is in ms, SDK uses seconds)
+        # We use the hint as a weight, adding it to the baseline but capping at 2.0s
+        dynamic_window = max(base_window, min(2.0, (stability_hint / 1000.0) + 0.1))
+        
+        if stability_hint > 0:
+             # Only use hint if it's significantly different from baseline
+             current_window = dynamic_window
+        else:
+             current_window = base_window
+
         # Proactively check stability
         silence_duration = time.time() - self.last_entropy_time
-        if silence_duration >= self.settlement_window:
+        if silence_duration >= current_window:
             if not self.is_stable:
-                print(f"[{self.layer}] Environment SETTLED ({silence_duration:.1f}s of silence).")
+                print(f"[{self.layer}] Environment SETTLED for {cmd} ({silence_duration:.1f}s silence, Target: {current_window:.1f}s).")
             self.is_stable = True
         
         if self.is_stable:

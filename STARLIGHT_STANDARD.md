@@ -1,4 +1,4 @@
-# 🛰️ The Starlight Protocol Standard (v2.5)
+# 🛰️ The Starlight Protocol Standard (v3.0)
 
 The **Starlight Protocol** is a high-fidelity communication standard for autonomous automation agents. It ensures that **Intent** (user goals) remains decoupled from the **Environment** (UI entropy, network jitter, popups).
 
@@ -23,10 +23,20 @@ All communication MUST follow the JSON-RPC 2.0 specification.
 | `starlight.hijack` | Sentinel -> Hub | Lock browser control to perform corrective action. |
 | `starlight.intent` | Intent -> Hub | Issue a semantic goal or selector-based command. |
 
+**`starlight.intent` Parameters:**
+- `cmd`: Action to perform (`click`, `fill`, `goto`, `clear`)
+- `goal`: Semantic description of the objective (e.g., "Login Button")
+- `selector`: (Optional) CSS/XPath selector for the target
+- `value`: (Optional) Data for `fill` actions
+- `stabilityHint`: (Optional) Recorded settlement time in milliseconds [Phase 16]
+- `layer`: The intended Sentinel layer for this action
+
 ## 3. The Handshake Lifecycle
 Every `starlight.intent` MUST trigger a Handshake:
 1.  **Broadcast**: Hub sends `starlight.pre_check` to all Registered Sentinels (Priority <= 10).
 2.  **Review**: Sentinels scan for obstacles (DOM matches or Visual analysis).
+    - Sentinels respond with detection results.
+    - `params.command` contains the original intent (including `stabilityHint`).
 3.  **Consensus**:
     - If all Sentinels return `starlight.clear`, execution proceeds.
     - If any Sentinel returns `starlight.wait`, Hub pauses and retries.

@@ -42,9 +42,10 @@ class ActionRecorder {
                     goal: data.goal,
                     selector: data.selector,
                     tagName: data.tagName,
+                    stabilityHint: data.stability?.settleTime || 0,
                     timestamp: Date.now()
                 });
-                console.log(`[Recorder] Click: "${data.goal}"`);
+                console.log(`[Recorder] Click: "${data.goal}" [Stability: ${data.stability?.settleTime || 0}ms]`);
             });
         } catch (e) {
             // Function might already be exposed
@@ -58,9 +59,10 @@ class ActionRecorder {
                     goal: data.goal,
                     selector: data.selector,
                     value: data.value,
+                    stabilityHint: data.stability?.settleTime || 0,
                     timestamp: Date.now()
                 });
-                console.log(`[Recorder] Fill: "${data.goal}" = "${data.value}"`);
+                console.log(`[Recorder] Fill: "${data.goal}" [Stability: ${data.stability?.settleTime || 0}ms]`);
             });
         } catch (e) {
             console.log('[Recorder] Fill function already exposed');
@@ -74,87 +76,113 @@ class ActionRecorder {
                     if (window.__cba_recording_injected) return;
                     window.__cba_recording_injected = true;
 
-                    // Click handler with improved goal extraction
-                    document.addEventListener('click', (e) => {
-                        const el = e.target;
+                    // Phase 16: Mutation Fingerprinting (Stability Sensing)
+                    let lastInteractionTime = 0;
+                    let lastMutationTime = 0;
+                    let mutationCount = 0;
 
-                        // Smart goal extraction - prioritize clean, short text
+                    const observer = new MutationObserver(() => {
+                        lastMutationTime = Date.now();
+                        mutationCount++;
+                    });
+                    observer.observe(document, { childList: true, subtree: true, attributes: true });
+
+                    async function getStabilityHint() {
+                        const start = Date.now();
+                        const checkInterval = 100;
+                        const settleWindow = 500; // 500ms of silence = settled
+                        const maxWait = 2000;      // Max 2s of tracking
+
+                        return new Promise(resolve => {
+                            const check = setInterval(() => {
+                                const now = Date.now();
+                                const timeSinceLastMutation = now - lastMutationTime;
+                                const totalTime = now - start;
+
+                                if (timeSinceLastMutation >= settleWindow || totalTime >= maxWait) {
+                                    clearInterval(check);
+                                    const settleTime = lastInteractionTime > 0 ? (lastMutationTime - lastInteractionTime) : 0;
+                                    resolve({
+                                        settleTime: Math.max(0, settleTime),
+                                        mutationCount: mutationCount
+                                    });
+                                }
+                            }, checkInterval);
+                        });
+                    }
+
+                    // Click handler with improved goal extraction
+                    document.addEventListener('click', async (e) => {
+                        const el = e.target;
+                        lastInteractionTime = Date.now();
+                        mutationCount = 0; // Reset for this action
+
+                        // ... extractGoal logic ...
                         function extractGoal(element) {
-                            // 1. Prefer aria-label (always clean)
                             const ariaLabel = element.getAttribute('aria-label');
                             if (ariaLabel) return ariaLabel;
-
-                            // 2. Prefer title attribute
                             const title = element.getAttribute('title');
                             if (title) return title;
-
-                            // 3. Get text but clean it up
                             let text = element.innerText || element.textContent || '';
-
-                            // Take only the first line (avoid nav menus)
                             text = text.split('\n')[0];
-
-                            // Remove emojis and special characters
                             text = text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '');
-
-                            // Clean whitespace
                             text = text.replace(/\s+/g, ' ').trim();
-
-                            // If text is too long or empty, try alternatives
                             if (!text || text.length > 50) {
-                                // Try the element's id or class
                                 if (element.id) return element.id;
                                 if (element.className && typeof element.className === 'string') {
                                     return element.className.split(' ')[0];
                                 }
                                 return element.tagName.toLowerCase();
                             }
-
                             return text.substring(0, 40);
                         }
 
                         const goal = extractGoal(el);
-
                         const selector = el.id ? `#${el.id}` :
                             el.className && typeof el.className === 'string'
                                 ? `.${el.className.split(' ').filter(c => c).join('.')}`
                                 : el.tagName.toLowerCase();
 
+                        // Wait for stability hint
+                        const stability = await getStabilityHint();
+
                         if (typeof window.__cba_recordClick === 'function') {
                             window.__cba_recordClick({
                                 goal: goal,
                                 selector: selector,
-                                tagName: el.tagName.toLowerCase()
+                                tagName: el.tagName.toLowerCase(),
+                                stability: stability
                             });
                         }
                     }, true);
 
                     // Input handler
-                    document.addEventListener('change', (e) => {
+                    document.addEventListener('change', async (e) => {
                         const el = e.target;
                         if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                            const goal = el.placeholder ||
-                                el.getAttribute('aria-label') ||
-                                el.name ||
-                                el.id ||
-                                el.type;
+                            lastInteractionTime = Date.now();
+                            mutationCount = 0;
 
+                            const goal = el.placeholder || el.getAttribute('aria-label') || el.name || el.id || el.type;
                             const selector = el.id ? `#${el.id}` :
                                 el.name ? `[name="${el.name}"]` :
                                     el.placeholder ? `[placeholder="${el.placeholder}"]` :
                                         el.tagName.toLowerCase();
 
+                            const stability = await getStabilityHint();
+
                             if (typeof window.__cba_recordFill === 'function') {
                                 window.__cba_recordFill({
                                     goal: goal,
                                     selector: selector,
-                                    value: el.value
+                                    value: el.value,
+                                    stability: stability
                                 });
                             }
                         }
                     }, true);
 
-                    console.log('[CBA Recorder] Event listeners injected');
+                    console.log('[CBA Recorder] Event listeners injected with Stability Sensing');
                 });
             } catch (e) {
                 console.log('[Recorder] Could not inject script:', e.message);
@@ -296,11 +324,13 @@ class ActionRecorder {
                 return `    await runner.goto('${step.url}');`;
             } else if (step.action === 'click') {
                 const goal = sanitizeGoal(step.goal);
-                return `    await runner.clickGoal('${goal}');`;
+                const hint = step.stabilityHint ? `, { stabilityHint: ${step.stabilityHint} }` : '';
+                return `    await runner.clickGoal('${goal}'${hint});`;
             } else if (step.action === 'fill') {
                 const goal = sanitizeGoal(step.goal);
                 const value = (step.value || '').replace(/'/g, "\\'");
-                return `    await runner.fill('${step.selector}', '${value}');  // ${goal}`;
+                const hint = step.stabilityHint ? `, { stabilityHint: ${step.stabilityHint} }` : '';
+                return `    await runner.fill('${step.selector}', '${value}'${hint});  // ${goal}`;
             }
             return '';
         }).filter(s => s).join('\n');
