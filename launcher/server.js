@@ -43,6 +43,9 @@ function connectToHub() {
                 // Forward recording events to UI clients
                 if (msg.type?.startsWith('RECORDING_')) {
                     broadcast(msg);
+                    if (msg.type === 'RECORDING_STOPPED') {
+                        broadcast({ type: 'missionList', missions: discoverMissions() });
+                    }
                 }
             } catch (e) { }
         });
@@ -80,9 +83,10 @@ wss.on('connection', (ws) => {
     clients.add(ws);
     console.log('[Launcher] Client connected');
 
-    // Send current status and telemetry
+    // Send current status, telemetry and discovery
     ws.send(JSON.stringify({ type: 'status', status: processStatus }));
     ws.send(JSON.stringify({ type: 'telemetry', data: telemetry.getStats() }));
+    ws.send(JSON.stringify({ type: 'missionList', missions: discoverMissions() }));
 
     ws.on('message', (data) => {
         try {
@@ -141,6 +145,9 @@ function handleCommand(msg, ws) {
             break;
         case 'launch':
             launchMission(msg.mission);
+            break;
+        case 'refreshMissions':
+            broadcast({ type: 'missionList', missions: discoverMissions() });
             break;
         // Phase 13.5: Recording commands
         case 'startRecording':
@@ -360,3 +367,18 @@ process.on('SIGINT', () => {
         process.exit(0);
     }, 1000);
 });
+function discoverMissions() {
+    const testDir = path.join(__dirname, '../test');
+    try {
+        if (!fs.existsSync(testDir)) return [];
+        const files = fs.readdirSync(testDir);
+        return files.filter(f => f.startsWith('intent_') && f.endsWith('.js'));
+    } catch (e) {
+        console.error('[Launcher] Discovery error:', e.message);
+        return [];
+    }
+}
+
+// Start discovery on load
+const missions = discoverMissions();
+console.log(`[Launcher] Discovered ${missions.length} mission scripts.`);

@@ -89,6 +89,9 @@ function handleMessage(msg) {
         case 'telemetry':
             updateVitals(msg.data);
             break;
+        case 'missionList':
+            updateMissionDropdown(msg.missions);
+            break;
         default:
             // Phase 13.5: Handle recording events
             if (msg.type?.startsWith('RECORDING_')) {
@@ -121,6 +124,31 @@ function updateStatus(status) {
     } else {
         launchBtn.textContent = '🚀 Launch Mission';
         launchBtn.disabled = false;
+    }
+}
+
+function updateMissionDropdown(missions) {
+    if (!missions) return;
+    const select = document.getElementById('mission-select');
+    const currentValue = select.value;
+
+    // Clear existing
+    select.innerHTML = '';
+
+    // Add missions
+    missions.forEach(mission => {
+        const option = document.createElement('option');
+        option.value = mission;
+        option.textContent = mission;
+        if (mission === currentValue) option.selected = true;
+        select.appendChild(option);
+    });
+
+    if (missions.length === 0) {
+        const option = document.createElement('option');
+        option.textContent = 'No missions found';
+        option.disabled = true;
+        select.appendChild(option);
     }
 }
 

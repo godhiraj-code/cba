@@ -326,6 +326,7 @@ ${stepsCode}
         await runner.finish('Recorded test complete');
     } catch (error) {
         console.error('[Mission] ❌ Test failed:', error.message);
+        await runner.finish('Mission failed: ' + error.message);
         process.exit(1);
     }
 }

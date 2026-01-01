@@ -51,6 +51,7 @@ async function runMission() {
 
     } catch (error) {
         console.error('[Mission] ❌ Mission failed:', error.message);
+        await runner.finish('Mission failed: ' + error.message);
         process.exit(1);
     }
 }

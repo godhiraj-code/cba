@@ -511,7 +511,7 @@ class CBAHub {
                 await this.executeSentinelAction(id, params);
                 break;
             case 'starlight.finish':
-                await this.shutdown();
+                await this.shutdown(params.reason || params.error);
                 break;
             // Phase 13.5: Recording Protocol
             case 'starlight.startRecording':
@@ -564,10 +564,29 @@ class CBAHub {
         }
     }
 
-    async shutdown() {
+    async shutdown(reason = null) {
         if (this.isShuttingDown) return; // Prevent double shutdown
+        console.log(`[CBA Hub] Shutdown initiated. Reason: ${reason || 'Normal'}`);
         this.isShuttingDown = true;
-        console.log("[CBA Hub] Test Finished. Closing gracefully...");
+
+        // Only log as FAILURE if it actually contains failure markers or is an Error object
+        const isActualFailure = reason && (
+            reason.toLowerCase().includes('failed') ||
+            reason.toLowerCase().includes('error') ||
+            reason.toLowerCase().includes('timeout') ||
+            reason.toLowerCase().includes('aborted')
+        );
+
+        if (isActualFailure) {
+            console.log(`[CBA Hub] Mission Failure Recorded: ${reason}`);
+            this.reportData.push({
+                type: 'FAILURE',
+                reason: reason,
+                timestamp: new Date().toLocaleTimeString()
+            });
+        }
+
+        console.log("[CBA Hub] Closing gracefully...");
 
         // Clear the queue - no more processing
         this.commandQueue = [];
@@ -1192,6 +1211,15 @@ class CBAHub {
                                     <h3>Sovereign Correction: ${escapeHtml(item.sentinel)}</h3>
                                     <p><strong>Reason:</strong> ${escapeHtml(item.reason)}</p>
                                     <img src="screenshots/${escapeHtml(item.screenshot)}" alt="Obstacle Detected" />
+                                </div>
+                            `;
+            } else if (item.type === 'FAILURE') {
+                return `
+                                <div class="card command" style="border-left: 4px solid #f43f5e; background: rgba(244, 63, 94, 0.05);">
+                                    <span class="tag" style="background: #f43f5e; color: white;">Mission Failure</span>
+                                    <div class="meta">${escapeHtml(item.timestamp)}</div>
+                                    <h3 style="color: #f43f5e;">⚠️ Termination Reason</h3>
+                                    <p style="font-size: 1.1rem; font-weight: 600;">${escapeHtml(item.reason)}</p>
                                 </div>
                             `;
             } else {
