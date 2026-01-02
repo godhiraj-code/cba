@@ -305,8 +305,51 @@ const projectRoot = path.join(__dirname, '..');
 const server = http.createServer((req, res) => {
     let filePath;
 
+    // API: Export sentinel
+    if (req.method === 'POST' && req.url === '/api/sentinel/export') {
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', () => {
+            try {
+                const { filename, code } = JSON.parse(body);
+
+                if (!filename || !code) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, error: 'Missing filename or code' }));
+                    return;
+                }
+
+                // Sanitize filename
+                const safeName = filename.replace(/[^a-z0-9_\-\.]/gi, '_');
+                const sentinelsDir = path.join(projectRoot, 'sentinels');
+                const filePath = path.join(sentinelsDir, safeName);
+
+                // Ensure sentinels directory exists
+                if (!fs.existsSync(sentinelsDir)) {
+                    fs.mkdirSync(sentinelsDir, { recursive: true });
+                }
+
+                // Write the file
+                fs.writeFileSync(filePath, code, 'utf8');
+
+                console.log(`[Launcher] Sentinel exported: ${safeName}`);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, path: `sentinels/${safeName}` }));
+            } catch (e) {
+                console.error('[Launcher] Export error:', e.message);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: e.message }));
+            }
+        });
+        return;
+    }
+
+    // Serve sentinel editor
+    if (req.url === '/sentinel-editor' || req.url === '/sentinel-editor.html') {
+        filePath = path.join(__dirname, 'sentinel_editor.html');
+    }
     // Serve launcher UI files from launcher/ directory
-    if (req.url === '/' || req.url.startsWith('/client.js') || req.url.startsWith('/styles.css')) {
+    else if (req.url === '/' || req.url.startsWith('/client.js') || req.url.startsWith('/styles.css')) {
         filePath = path.join(__dirname, req.url === '/' ? 'index.html' : req.url);
     } else {
         // Serve other files (report.html, screenshots/) from project root

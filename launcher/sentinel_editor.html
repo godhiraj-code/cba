@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starlight Sentinel Editor</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Editor-specific styles */
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .editor-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .editor-panel {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .editor-panel h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-emerald);
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .priority-slider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .priority-slider input[type="range"] {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            padding: 0;
+        }
+
+        .priority-slider input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-emerald);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .priority-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent-emerald);
+            min-width: 2rem;
+            text-align: center;
+        }
+
+        /* Selector List */
+        .selector-list {
+            background: var(--bg-primary);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .selector-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .selector-item:last-child {
+            border-bottom: none;
+        }
+
+        .selector-item code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-blue);
+        }
+
+        .selector-item button {
+            background: none;
+            border: none;
+            color: var(--accent-red);
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .selector-item button:hover {
+            opacity: 1;
+        }
+
+        .add-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .add-selector input {
+            flex: 1;
+        }
+
+        .add-selector button {
+            padding: 0.75rem 1.25rem;
+            background: var(--accent-emerald);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .add-selector button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Capability Checkboxes */
+        .capability-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .capability-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .capability-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-emerald);
+        }
+
+        /* Action Config */
+        .action-config {
+            background: var(--bg-primary);
+            border-radius: 10px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .action-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .action-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .action-row input[type="radio"] {
+            accent-color: var(--accent-emerald);
+        }
+
+        .action-row input[type="text"] {
+            flex: 1;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        /* Preview Panel */
+        .preview-panel {
+            background: #050505;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .preview-header {
+            background: var(--bg-secondary);
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .preview-header span {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .preview-code {
+            padding: 1rem;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .preview-code .keyword {
+            color: #C678DD;
+        }
+
+        .preview-code .string {
+            color: #98C379;
+        }
+
+        .preview-code .function {
+            color: #61AFEF;
+        }
+
+        .preview-code .comment {
+            color: #5C6370;
+        }
+
+        /* Template Pills */
+        .template-pills {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .template-pill {
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .template-pill:hover {
+            border-color: var(--accent-emerald);
+            color: var(--accent-emerald);
+        }
+
+        .template-pill.active {
+            background: var(--accent-emerald);
+            color: var(--bg-primary);
+            border-color: var(--accent-emerald);
+        }
+
+        /* Export Actions */
+        .export-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn-export {
+            padding: 1rem 2.5rem;
+            background: var(--accent-emerald);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-export:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px var(--glow);
+        }
+
+        .btn-back {
+            padding: 1rem 2rem;
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-back:hover {
+            border-color: var(--accent-emerald);
+            color: var(--text-primary);
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--accent-emerald);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .success-message.visible {
+            display: block;
+        }
+
+        .success-message h4 {
+            color: var(--accent-emerald);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state {
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="hero-header">
+            <h1>🛠️ Sentinel Editor</h1>
+            <p>Create custom sentinels without writing code</p>
+        </header>
+
+        <!-- Template Selection -->
+        <div class="editor-panel" style="margin-bottom: 2rem;">
+            <h3>🎯 Start with a Template</h3>
+            <div class="template-pills">
+                <button class="template-pill" data-template="blank">Blank</button>
+                <button class="template-pill" data-template="cookie">Cookie Banner</button>
+                <button class="template-pill" data-template="modal">Modal Popup</button>
+                <button class="template-pill" data-template="login">Login Wall</button>
+                <button class="template-pill" data-template="rate-limit">Rate Limiter</button>
+            </div>
+        </div>
+
+        <!-- Editor Grid -->
+        <div class="editor-container">
+            <!-- Left Panel: Configuration -->
+            <div class="editor-panel">
+                <h3>⚙️ Sentinel Configuration</h3>
+
+                <div class="form-group">
+                    <label>Sentinel Name</label>
+                    <input type="text" id="sentinel-name" placeholder="e.g., CookieBlocker">
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="sentinel-desc" placeholder="What does this sentinel do?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Priority (1 = Highest, 10 = Lowest)</label>
+                    <div class="priority-slider">
+                        <input type="range" id="sentinel-priority" min="1" max="10" value="5">
+                        <span class="priority-value" id="priority-display">5</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Capabilities</label>
+                    <div class="capability-grid">
+                        <label class="capability-item">
+                            <input type="checkbox" value="popup-detection" checked> Popup Detection
+                        </label>
+                        <label class="capability-item">
+                            <input type="checkbox" value="stability-monitoring"> Stability
+                        </label>
+                        <label class="capability-item">
+                            <input type="checkbox" value="ai-vision"> AI Vision
+                        </label>
+                        <label class="capability-item">
+                            <input type="checkbox" value="form-filling"> Form Filling
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Patterns -->
+            <div class="editor-panel">
+                <h3>🔍 Detection Patterns</h3>
+
+                <div class="form-group">
+                    <label>CSS Selectors to Watch</label>
+                    <div class="selector-list" id="selector-list">
+                        <div class="empty-state">No selectors added yet</div>
+                    </div>
+                    <div class="add-selector">
+                        <input type="text" id="new-selector" placeholder=".cookie-banner, #popup">
+                        <button id="add-selector-btn">+ Add</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Response Action</label>
+                    <div class="action-config">
+                        <div class="action-row">
+                            <input type="radio" name="action" value="click" id="action-click" checked>
+                            <label for="action-click">Click element</label>
+                            <input type="text" id="action-click-selector" placeholder=".accept-btn, #close">
+                        </div>
+                        <div class="action-row">
+                            <input type="radio" name="action" value="hide" id="action-hide">
+                            <label for="action-hide">Hide element</label>
+                        </div>
+                        <div class="action-row">
+                            <input type="radio" name="action" value="wait" id="action-wait">
+                            <label for="action-wait">Wait and retry</label>
+                            <input type="text" id="action-wait-ms" placeholder="500" style="width: 80px;">
+                            <span style="color: var(--text-secondary);">ms</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="editor-panel">
+            <h3>📄 Generated Python Code</h3>
+            <div class="preview-panel">
+                <div class="preview-header">
+                    <span id="preview-filename">my_sentinel.py</span>
+                    <button class="btn-secondary" id="copy-code"
+                        style="padding: 0.5rem 1rem; font-size: 0.8rem;">Copy</button>
+                </div>
+                <pre class="preview-code" id="code-preview">
+# Configure your sentinel above to see the generated code
+                </pre>
+            </div>
+        </div>
+
+        <!-- Export Actions -->
+        <div class="export-actions">
+            <a href="/" class="btn-back">← Back to Mission Control</a>
+            <button class="btn-export" id="export-btn">🚀 Export Sentinel</button>
+        </div>
+
+        <!-- Success Message -->
+        <div class="success-message" id="success-message">
+            <h4>✅ Sentinel Created Successfully!</h4>
+            <p>Your sentinel has been saved to <code id="export-path">sentinels/</code></p>
+            <p style="margin-top: 0.5rem; color: var(--text-secondary);">Run it with:
+                <code>python sentinels/your_sentinel.py</code></p>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Built with ❤️ by <a href="https://www.dhirajdas.dev" target="_blank">Dhiraj Das</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // State
+        const state = {
+            name: '',
+            description: '',
+            priority: 5,
+            capabilities: ['popup-detection'],
+            selectors: [],
+            action: {
+                type: 'click',
+                clickSelector: '.accept-btn',
+                waitMs: 500
+            }
+        };
+
+        // Templates
+        const templates = {
+            blank: {
+                name: '',
+                description: '',
+                priority: 5,
+                capabilities: ['popup-detection'],
+                selectors: [],
+                action: { type: 'click', clickSelector: '', waitMs: 500 }
+            },
+            cookie: {
+                name: 'CookieBlocker',
+                description: 'Automatically dismisses cookie consent banners',
+                priority: 3,
+                capabilities: ['popup-detection'],
+                selectors: ['.cookie-banner', '#cookie-consent', '[data-cookie]', '.cc-banner'],
+                action: { type: 'click', clickSelector: '.accept-btn, #accept-cookies, [data-accept]', waitMs: 500 }
+            },
+            modal: {
+                name: 'ModalDismisser',
+                description: 'Closes popup modals and overlays',
+                priority: 4,
+                capabilities: ['popup-detection'],
+                selectors: ['.modal', '.popup', '.overlay', '[role="dialog"]'],
+                action: { type: 'click', clickSelector: '.close, .dismiss, [data-dismiss], .modal-close', waitMs: 500 }
+            },
+            login: {
+                name: 'LoginWallHandler',
+                description: 'Detects login walls and paywalls',
+                priority: 2,
+                capabilities: ['popup-detection'],
+                selectors: ['.login-required', '.paywall', '#signin-modal', '.auth-wall'],
+                action: { type: 'wait', clickSelector: '', waitMs: 2000 }
+            },
+            'rate-limit': {
+                name: 'RateLimitHandler',
+                description: 'Handles rate limiting and CAPTCHA challenges',
+                priority: 1,
+                capabilities: ['popup-detection', 'stability-monitoring'],
+                selectors: ['.rate-limit', '.captcha', '#challenge', '.too-many-requests'],
+                action: { type: 'wait', clickSelector: '', waitMs: 5000 }
+            }
+        };
+
+        // DOM Elements
+        const nameInput = document.getElementById('sentinel-name');
+        const descInput = document.getElementById('sentinel-desc');
+        const priorityInput = document.getElementById('sentinel-priority');
+        const priorityDisplay = document.getElementById('priority-display');
+        const selectorList = document.getElementById('selector-list');
+        const newSelectorInput = document.getElementById('new-selector');
+        const addSelectorBtn = document.getElementById('add-selector-btn');
+        const codePreview = document.getElementById('code-preview');
+        const previewFilename = document.getElementById('preview-filename');
+        const exportBtn = document.getElementById('export-btn');
+        const successMessage = document.getElementById('success-message');
+        const exportPath = document.getElementById('export-path');
+        const copyCodeBtn = document.getElementById('copy-code');
+        const capabilityCheckboxes = document.querySelectorAll('.capability-item input');
+        const actionRadios = document.querySelectorAll('input[name="action"]');
+        const templatePills = document.querySelectorAll('.template-pill');
+
+        // Apply template
+        function applyTemplate(template) {
+            const t = templates[template];
+            if (!t) return;
+
+            state.name = t.name;
+            state.description = t.description;
+            state.priority = t.priority;
+            state.capabilities = [...t.capabilities];
+            state.selectors = [...t.selectors];
+            state.action = { ...t.action };
+
+            // Update UI
+            nameInput.value = t.name;
+            descInput.value = t.description;
+            priorityInput.value = t.priority;
+            priorityDisplay.textContent = t.priority;
+
+            capabilityCheckboxes.forEach(cb => {
+                cb.checked = t.capabilities.includes(cb.value);
+            });
+
+            actionRadios.forEach(r => {
+                r.checked = r.value === t.action.type;
+            });
+
+            document.getElementById('action-click-selector').value = t.action.clickSelector || '';
+            document.getElementById('action-wait-ms').value = t.action.waitMs || 500;
+
+            templatePills.forEach(p => p.classList.remove('active'));
+            document.querySelector(`[data-template="${template}"]`)?.classList.add('active');
+
+            renderSelectors();
+            updatePreview();
+        }
+
+        // Render selectors
+        function renderSelectors() {
+            if (state.selectors.length === 0) {
+                selectorList.innerHTML = '<div class="empty-state">No selectors added yet</div>';
+                return;
+            }
+
+            selectorList.innerHTML = state.selectors.map((sel, i) => `
+                <div class="selector-item">
+                    <code>${escapeHtml(sel)}</code>
+                    <button onclick="removeSelector(${i})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function removeSelector(index) {
+            state.selectors.splice(index, 1);
+            renderSelectors();
+            updatePreview();
+        }
+
+        // Add selector
+        addSelectorBtn.addEventListener('click', () => {
+            const value = newSelectorInput.value.trim();
+            if (value) {
+                // Split by comma for multiple selectors
+                const parts = value.split(',').map(s => s.trim()).filter(s => s);
+                state.selectors.push(...parts);
+                newSelectorInput.value = '';
+                renderSelectors();
+                updatePreview();
+            }
+        });
+
+        newSelectorInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addSelectorBtn.click();
+        });
+
+        // Generate Python code
+        function generateCode() {
+            const className = toPascalCase(state.name || 'My') + 'Sentinel';
+            const filename = toSnakeCase(state.name || 'my') + '_sentinel.py';
+            previewFilename.textContent = filename;
+
+            const actionCode = generateActionCode();
+
+            return `"""
+${className} - Auto-generated by Starlight Visual Editor
+${state.description || 'Custom CBA Sentinel'}
+"""
+
+import asyncio
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from sdk.starlight_sdk import SentinelBase
+
+
+class ${className}(SentinelBase):
+    def __init__(self):
+        super().__init__(layer_name="${className}", priority=${state.priority})
+        self.selectors = ${JSON.stringify(state.selectors)}
+        self.capabilities = ${JSON.stringify(state.capabilities)}
+
+    async def on_pre_check(self, params, msg_id):
+        blocking = params.get("blocking", [])
+        
+        # Check for matching patterns
+        matches = [b for b in blocking 
+                   if any(s in b.get("selector", "") for s in self.selectors)]
+        
+        if matches:
+            print(f"[{self.layer}] Pattern detected: {len(matches)} match(es)")
+            await self.send_hijack("Obstacle blocking execution")
+            
+${actionCode}
+            
+            await self.send_resume()
+        else:
+            await self.send_clear()
+
+
+if __name__ == "__main__":
+    sentinel = ${className}()
+    asyncio.run(sentinel.start())
+`;
+        }
+
+        function generateActionCode() {
+            const indent = '            ';
+            switch (state.action.type) {
+                case 'click':
+                    const clickSel = state.action.clickSelector || 'matches[0]["selector"]';
+                    if (state.action.clickSelector) {
+                        return `${indent}# Click the dismiss button\n${indent}for sel in ${JSON.stringify(state.action.clickSelector.split(',').map(s => s.trim()))}:\n${indent}    await self.send_action("click", sel)`;
+                    }
+                    return `${indent}# Click the detected element\n${indent}await self.send_action("click", matches[0]["selector"])`;
+                case 'hide':
+                    return `${indent}# Hide the blocking element\n${indent}await self.send_action("evaluate", "el => el.style.display = 'none'", matches[0]["selector"])`;
+                case 'wait':
+                    return `${indent}# Wait before retrying\n${indent}await asyncio.sleep(${(state.action.waitMs || 500) / 1000})`;
+                default:
+                    return `${indent}pass`;
+            }
+        }
+
+        function toPascalCase(str) {
+            return str.replace(/[_\-\s]+(.)?/g, (_, c) => c ? c.toUpperCase() : '').replace(/^./, s => s.toUpperCase());
+        }
+
+        function toSnakeCase(str) {
+            return str.replace(/[\s\-]+/g, '_').replace(/([A-Z])/g, '_$1').toLowerCase().replace(/^_/, '').replace(/_+/g, '_');
+        }
+
+        function updatePreview() {
+            codePreview.textContent = generateCode();
+        }
+
+        // Event listeners
+        nameInput.addEventListener('input', (e) => {
+            state.name = e.target.value;
+            updatePreview();
+        });
+
+        descInput.addEventListener('input', (e) => {
+            state.description = e.target.value;
+            updatePreview();
+        });
+
+        priorityInput.addEventListener('input', (e) => {
+            state.priority = parseInt(e.target.value);
+            priorityDisplay.textContent = e.target.value;
+            updatePreview();
+        });
+
+        capabilityCheckboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                state.capabilities = Array.from(capabilityCheckboxes)
+                    .filter(c => c.checked)
+                    .map(c => c.value);
+                updatePreview();
+            });
+        });
+
+        actionRadios.forEach(r => {
+            r.addEventListener('change', () => {
+                state.action.type = r.value;
+                updatePreview();
+            });
+        });
+
+        document.getElementById('action-click-selector').addEventListener('input', (e) => {
+            state.action.clickSelector = e.target.value;
+            updatePreview();
+        });
+
+        document.getElementById('action-wait-ms').addEventListener('input', (e) => {
+            state.action.waitMs = parseInt(e.target.value) || 500;
+            updatePreview();
+        });
+
+        templatePills.forEach(pill => {
+            pill.addEventListener('click', () => applyTemplate(pill.dataset.template));
+        });
+
+        // Copy code
+        copyCodeBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(generateCode());
+                copyCodeBtn.textContent = 'Copied!';
+                setTimeout(() => { copyCodeBtn.textContent = 'Copy'; }, 2000);
+            } catch (e) {
+                console.error('Copy failed:', e);
+            }
+        });
+
+        // Export sentinel
+        exportBtn.addEventListener('click', async () => {
+            if (!state.name) {
+                alert('Please enter a sentinel name');
+                return;
+            }
+
+            const code = generateCode();
+            const filename = toSnakeCase(state.name) + '_sentinel.py';
+
+            try {
+                const response = await fetch('/api/sentinel/export', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename, code })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    exportPath.textContent = result.path;
+                    successMessage.classList.add('visible');
+                    setTimeout(() => successMessage.classList.remove('visible'), 5000);
+                } else {
+                    alert('Export failed: ' + result.error);
+                }
+            } catch (e) {
+                alert('Export failed: ' + e.message);
+            }
+        });
+
+        // Initialize
+        applyTemplate('blank');
+    </script>
+</body>
+
+</html>
