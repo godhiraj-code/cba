@@ -8,16 +8,16 @@
 # Table of Contents
 
 1. [Introduction: Why Starlight?](#chapter-1-introduction)
-2. [The Core Philosophy](#chapter-2-philosophy)
-3. [Architecture Deep Dive](#chapter-3-architecture)
+2. [The Core Philosophy](#chapter-2-the-core-philosophy)
+3. [Architecture Deep Dive](#chapter-3-architecture-deep-dive)
 4. [The Hub: The Orchestrator](#chapter-4-the-hub)
 5. [Sentinels: The Guardians](#chapter-5-sentinels)
-6. [The Protocol: JSON-RPC Messages](#chapter-6-protocol)
-7. [Self-Healing Intelligence](#chapter-7-self-healing)
-8. [Building Custom Sentinels](#chapter-8-custom-sentinels)
-9. [Mission Control & Tooling](#chapter-9-tooling)
-10. [Enterprise Deployment](#chapter-10-enterprise)
-11. [The Future: Phase 17 & Beyond](#chapter-11-future)
+6. [The Protocol: JSON-RPC Messages](#chapter-6-the-protocol)
+7. [Self-Healing Intelligence](#chapter-7-self-healing-intelligence)
+8. [Building Custom Sentinels](#chapter-8-building-custom-sentinels)
+9. [Mission Control & Tooling](#chapter-9-mission-control--tooling)
+10. [Enterprise Deployment](#chapter-10-enterprise-deployment)
+11. [The Future: Phase 17 & Beyond](#chapter-11-the-future)
 
 ---
 
@@ -540,7 +540,7 @@ The roadmap includes:
 
 ## The Vision
 
-Starlight is evolving from a framework into a **protocol**—a standard for how autonomous agents collaborate to achieve goals in chaotic environments.
+Starlight IS a protocol—a formal open standard for how autonomous agents collaborate to achieve goals in chaotic environments. With the release of the Starlight Protocol Specification v1.0.0, we have established a foundation for interoperability, extensibility, and community adoption.
 
 The ultimate vision: you describe what you want in natural language, and a constellation of specialized agents figures out how to make it happen, adapting in real-time to whatever the environment throws at them.
 
