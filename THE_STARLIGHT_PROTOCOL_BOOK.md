@@ -21,7 +21,7 @@
 
 ---
 
-# Chapter 1: Introduction {#chapter-1-introduction}
+# Chapter 1: Introduction
 
 ## The Problem with Traditional Automation
 
@@ -53,7 +53,7 @@ This is Constellation-Based Automation (CBA).
 
 ---
 
-# Chapter 2: The Core Philosophy {#chapter-2-philosophy}
+# Chapter 2: The Core Philosophy
 
 ## Decoupling Intent from Environment
 
@@ -110,7 +110,7 @@ No single agent is responsible for environment health. A mesh of specialized Sen
 
 ---
 
-# Chapter 3: Architecture Deep Dive {#chapter-3-architecture}
+# Chapter 3: Architecture Deep Dive
 
 ## The Three Layers
 
@@ -181,7 +181,7 @@ Every action in Starlight follows this lifecycle:
 
 ---
 
-# Chapter 4: The Hub {#chapter-4-the-hub}
+# Chapter 4: The Hub
 
 ## Core Responsibilities
 
@@ -244,7 +244,7 @@ All settings are externalized to `config.json`:
 
 ---
 
-# Chapter 5: Sentinels {#chapter-5-sentinels}
+# Chapter 5: Sentinels
 
 ## The Sentinel Base Class
 
@@ -309,7 +309,7 @@ Scans for sensitive data (emails, SSNs, credit cards) and alerts if found.
 
 ---
 
-# Chapter 6: The Protocol {#chapter-6-protocol}
+# Chapter 6: The Protocol
 
 ## Message Format (JSON-RPC 2.0)
 
@@ -389,7 +389,7 @@ All communication uses JSON-RPC 2.0:
 
 ---
 
-# Chapter 7: Self-Healing Intelligence {#chapter-7-self-healing}
+# Chapter 7: Self-Healing Intelligence
 
 ## Historical Memory
 
@@ -412,7 +412,7 @@ Sentinels persist their own memory (e.g., `JanitorSentinel_memory.json`), rememb
 
 ---
 
-# Chapter 8: Building Custom Sentinels {#chapter-8-custom-sentinels}
+# Chapter 8: Building Custom Sentinels
 
 ## Using the Visual Editor
 
@@ -456,7 +456,7 @@ if __name__ == "__main__":
 
 ---
 
-# Chapter 9: Mission Control & Tooling {#chapter-9-tooling}
+# Chapter 9: Mission Control & Tooling
 
 ## Mission Control UI
 
@@ -489,7 +489,7 @@ Open `triage.html`, load `mission_trace.json`, and:
 
 ---
 
-# Chapter 10: Enterprise Deployment {#chapter-10-enterprise}
+# Chapter 10: Enterprise Deployment
 
 ## Docker
 
@@ -526,7 +526,7 @@ CMD ["node", "bin/starlight.js", "test/my_mission.js", "--headless"]
 
 ---
 
-# Chapter 11: The Future {#chapter-11-future}
+# Chapter 11: The Future
 
 ## Phase 17: Deep Mesh Intelligence
 
