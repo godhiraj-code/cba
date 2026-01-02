@@ -1,4 +1,4 @@
-# 🌌 Starlight Protocol: The GALAXY User Guide (v3.0)
+# 🌌 Starlight Protocol: The GALAXY User Guide (v3.0.3)
 
 Welcome to the future of browser automation. This guide explains **Constellation-Based Automation (CBA)**—a paradigm shift from traditional Page Object Models (POM) and flaky `wait_for` calls toward a sovereign, multi-agent ecosystem.
 
@@ -215,7 +215,74 @@ CBA features **Time-Travel Triage**, allowing you to inspect missions with surgi
 
 ---
 
-## 10. Troubleshooting
+## 10. Phase 15: Visual Sentinel Editor & Fleet Manager (NEW in v3.0.3)
+
+### 🛠️ Creating Custom Sentinels (No-Code)
+
+The **Visual Sentinel Editor** lets anyone build a custom Sentinel without writing Python code.
+
+**How to Access:**
+1. Open Mission Control at `http://localhost:3000`
+2. Click **"🛠️ Create Sentinel"** button
+3. Or navigate directly to `http://localhost:3000/sentinel-editor`
+
+**Creating a Sentinel:**
+
+| Step | Action |
+|------|--------|
+| 1. Choose Template | Click "Cookie Banner", "Modal Popup", etc. (or start blank) |
+| 2. Configure | Set name, priority (1-10), and capabilities |
+| 3. Add Patterns | Enter CSS selectors to watch (e.g., `.cookie-banner`, `#popup`) |
+| 4. Set Action | Choose: Click element, Hide element, or Wait & retry |
+| 5. Preview | See the generated Python code in real-time |
+| 6. Export | Click "🚀 Export Sentinel" → Saved to `sentinels/` |
+
+**Built-in Templates:**
+- **Cookie Banner**: Dismisses GDPR/cookie consent popups
+- **Modal Popup**: Closes modals and overlays
+- **Login Wall**: Detects authentication blockers
+- **Rate Limiter**: Handles rate limits and CAPTCHAs
+
+### 🛰️ Sentinel Fleet Manager
+
+Mission Control now dynamically discovers ALL sentinels in the `sentinels/` directory.
+
+**Features:**
+- **Auto-Discovery**: Any `*.py` file in `sentinels/` appears as a card
+- **Start/Stop Individual**: Click the button on any sentinel card
+- **Start All**: Launches the entire constellation with one click
+- **Visual Status**: Green (running) or black (stopped) indicators
+
+**How It Works:**
+1. Sentinels connect to the Hub via WebSocket
+2. On each action, the Hub sends `PRE_CHECK` to ALL sentinels
+3. Each sentinel responds: `CLEAR` (no problem) or `HIJACK` (I'll handle this)
+4. Only relevant sentinels take action; others stay silent
+
+---
+
+## 11. Webhook Alerting (Phase 10)
+
+Get notified on Slack, Teams, or Discord when missions complete.
+
+**Configuration:**
+```json
+// config.json
+"webhooks": {
+    "enabled": true,
+    "urls": ["https://hooks.slack.com/services/XXX"],
+    "notifyOn": ["failure", "success"]
+}
+```
+
+**Payload includes:**
+- Mission name and status (success/failure)
+- Duration and intervention count
+- Mean Time To Recovery (MTTR)
+
+---
+
+## 12. Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
@@ -224,6 +291,8 @@ CBA features **Time-Travel Triage**, allowing you to inspect missions with surgi
 | System Unresponsive | Check Hub console for "UNRESPONSIVE" errors |
 | Sentinel Won't Connect | Verify Hub is running on port 8080 |
 | Memory Not Saved | Ensure graceful shutdown (Ctrl+C, not kill) |
+| Start All not working | Ensure sentinel filenames end in `.py` |
+| Custom Sentinel not appearing | Check it's in `sentinels/` directory |
 
 ---
 
