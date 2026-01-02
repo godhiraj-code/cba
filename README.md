@@ -299,9 +299,9 @@ Deploys a managed Hub and sentinel mesh for ephemeral CI/CD execution.
 ## 📚 The Sovereign Automation Series
 
 Follow the journey of the Starlight Protocol:
-- **[Part 1: The Inner Workings](latest_blog.md)**: Deep dive into Sentinels and the Hub.
-- **[Part 2: Watching the Constellation](latest_blog_part2.md)**: Exploring Mission Control and ROI reporting.
-- **[Part 3: The Autonomous Era](latest_blog_part3.md)**: v3.0 release, Mutation Fingerprinting, and CLI Orchestration.
+- **[Part 1: The Inner Workings](https://www.dhirajdas.dev/blog/constellation-based-automation-starlight-protocol)**: Deep dive into Sentinels and the Hub.
+- **[Part 2: Watching the Constellation](https://www.dhirajdas.dev/blog/starlight-mission-control-observability-roi)**: Exploring Mission Control and ROI reporting.
+- **[Part 3: The Autonomous Era](https://www.dhirajdas.dev/blog/starlight-part-3-autonomous-era)**: v3.0 release, Mutation Fingerprinting, and CLI Orchestration.
 
 ---
 
