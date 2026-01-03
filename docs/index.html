@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starlight Protocol - Resilient Browser Automation</title>
+    <meta name="description"
+        content="An open protocol for self-healing browser automation through autonomous Sentinel coordination.">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✨</text></svg>">
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --primary-dark: #5b21b6;
+            --bg-dark: #0f0f23;
+            --bg-card: #1a1a2e;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #22d3ee;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .hero {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            background: radial-gradient(ellipse at top, #1a1a3e 0%, var(--bg-dark) 70%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.3), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255, 255, 255, 0.2), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.4), transparent),
+                radial-gradient(2px 2px at 130px 80px, rgba(255, 255, 255, 0.2), transparent),
+                radial-gradient(1px 1px at 160px 120px, rgba(255, 255, 255, 0.3), transparent);
+            background-size: 200px 200px;
+            animation: twinkle 4s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+        }
+
+        .logo {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--text-muted);
+            color: var(--text);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .features {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+        }
+
+        .install {
+            background: var(--bg-card);
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .install h2 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .code-block {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 1.5rem 2rem;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 1.1rem;
+            display: inline-block;
+            color: var(--accent);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .architecture {
+            padding: 5rem 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .architecture h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .arch-diagram {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            white-space: pre;
+            overflow-x: auto;
+            line-height: 1.4;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .resources {
+            padding: 4rem 2rem;
+            background: var(--bg-card);
+        }
+
+        .resources h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .resource-link:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .tagline {
+                font-size: 1.1rem;
+            }
+
+            .logo {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <section class="hero">
+        <div class="hero-content">
+            <div class="logo">✨</div>
+            <h1>Starlight Protocol</h1>
+            <p class="tagline">Resilient browser automation through autonomous Sentinel coordination</p>
+            <div class="cta-buttons">
+                <a href="https://github.com/starlight-protocol/starlight" class="btn btn-primary">View on GitHub</a>
+                <a href="https://github.com/starlight-protocol/starlight/blob/main/spec/STARLIGHT_PROTOCOL_SPEC_v1.0.0.md"
+                    class="btn btn-outline">Read the Spec</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <h2>Why Starlight?</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3>Self-Healing Tests</h3>
+                <p>Autonomous Sentinels detect and clear popups, modals, and cookie banners without any code changes.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>No More Flaky Tests</h3>
+                <p>Entropy-based stability detection waits exactly as long as needed—no more hardcoded sleeps.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3>Language Agnostic</h3>
+                <p>JSON-RPC over WebSocket means you can implement Sentinels in any language.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧠</div>
+                <h3>Learns Over Time</h3>
+                <p>Sentinels remember successful remediation patterns and apply them instantly next time.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔌</div>
+                <h3>Open Protocol</h3>
+                <p>Formal JSON schemas, TCK validator, and governance model for community-driven evolution.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Rich Reporting</h3>
+                <p>Detailed mission reports with before/after screenshots and ROI metrics.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="install">
+        <h2>Get Started in Seconds</h2>
+        <div class="code-block">pip install starlight-protocol</div>
+    </section>
+
+    <section class="architecture">
+        <h2>How It Works</h2>
+        <div class="arch-diagram">
+            ┌─────────────────────────────────────────────────────────────────┐
+            │ INTENT LAYER │
+            │ (Your Test Script) │
+            └─────────────────────────────────────────────────────────────────┘
+            │ starlight.intent
+            ▼
+            ┌─────────────────────────────────────────────────────────────────┐
+            │ HUB │
+            │ (Orchestrator + Browser Control) │
+            │ Playwright / Puppeteer │
+            └─────────────────────────────────────────────────────────────────┘
+            ▲ ▲ ▲
+            │ clear/wait │ hijack/action │ vision
+            │ │ │
+            ┌───────────────┐ ┌─────────────┐ ┌─────────────┐
+            │ PulseSentinel│ │JanitorSent. │ │VisionSent. │
+            │ (Stability) │ │ (Obstacles) │ │ (AI) │
+            │ Priority: 1 │ │ Priority: 5 │ │ Priority: 7 │
+            └───────────────┘ └─────────────┘ └─────────────┘</div>
+    </section>
+
+    <section class="resources">
+        <h2>Resources</h2>
+        <div class="resource-grid">
+            <a href="https://github.com/starlight-protocol/starlight/blob/main/spec/STARLIGHT_PROTOCOL_SPEC_v1.0.0.md"
+                class="resource-link">
+                📖 Specification
+            </a>
+            <a href="https://pypi.org/project/starlight-protocol/" class="resource-link">
+                📦 Python SDK
+            </a>
+            <a href="https://github.com/starlight-protocol/starlight/tree/main/schemas" class="resource-link">
+                📋 JSON Schemas
+            </a>
+            <a href="https://github.com/starlight-protocol/starlight/tree/main/validator" class="resource-link">
+                🏆 TCK Validator
+            </a>
+            <a href="https://github.com/starlight-protocol/starlight/blob/main/GOVERNANCE.md" class="resource-link">
+                ⚖️ Governance
+            </a>
+            <a href="https://github.com/starlight-protocol/starlight" class="resource-link">
+                💻 Source Code
+            </a>
+        </div>
+    </section>
+
+    <footer>
+        <p>MIT License · Created by <a href="https://dhirajdas.dev">Dhiraj Das</a></p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+            © 2025-2026 Starlight Protocol
+        </p>
+    </footer>
+</body>
+
+</html>
