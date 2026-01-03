@@ -1,125 +1,135 @@
-# 🛰️ Constellation-Based Automation (CBA)
-## Starlight Protocol v3.0.3 — The Autonomous Era
+# 🛰️ Starlight Protocol
 
-[![Version](https://img.shields.io/badge/version-3.0.3-blue.svg)](CHANGELOG.md)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Starlight CBA Mission](https://github.com/godhiraj-code/cba/actions/workflows/starlight_ci.yml/badge.svg)](https://github.com/godhiraj-code/cba/actions/workflows/starlight_ci.yml)
-[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
-[![Python](https://img.shields.io/badge/python-%3E%3D3.9-blue.svg)](https://python.org)
+<p align="center">
+  <img src="assets/starlight-logo.png" alt="Starlight Protocol" width="150">
+</p>
 
-**"Don't look at the ground; look at the Starlight."**
+<p align="center">
+  <strong>An Open Standard for Autonomous Browser Automation</strong>
+</p>
 
-CBA is a philosophical shift in browser automation. Inspired by biological navigation (like the dung beetle using the Milky Way), this framework moves away from linear scripts that handle every possible UI obstacle. Instead, it uses a **Sovereign Constellation** of autonomous agents (Sentinels) that orient toward high-level goals.
+<p align="center">
+  <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/version-3.0.3-blue.svg" alt="Version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"></a>
+  <a href="https://github.com/godhiraj-code/cba/actions/workflows/starlight_ci.yml"><img src="https://github.com/godhiraj-code/cba/actions/workflows/starlight_ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg" alt="Node"></a>
+  <a href="https://python.org"><img src="https://img.shields.io/badge/python-%3E%3D3.9-blue.svg" alt="Python"></a>
+</p>
 
----
-
-## 🏗️ The Sovereign Constellation
-
-![Starlight Architecture](assets/architecture.png)
-
-CBA uses a **Decentralized Sidecar Architecture** communicating over a JSON-RPC message bus.
-
-| Layer | Role |
-| :--- | :--- |
-| **Intent Layer** | High-level business intent. Selector-less (e.g., `{ goal: 'Login' }`). |
-| **The Hub** | Orchestrates Playwright, resolves semantic goals, manages **Sovereign Context**. |
-| **Vision Sentinel** | Uses local SLMs (Moondream) for visual obstacle detection. |
-| **Janitor Sentinel** | Heuristic background process that clears modals and overlays. |
-| **Pulse Sentinel** | Monitors network/DOM jitter for **Wait-Less** temporal stability. |
-| **Data Sentinel** | Passively extracts metadata and injects it into the shared context. |
-| **PII Sentinel** | Detects and alerts on sensitive data exposure. |
+<p align="center">
+  <a href="#-quick-start">Quick Start</a> •
+  <a href="spec/STARLIGHT_PROTOCOL_SPEC_v1.0.0.md">Specification</a> •
+  <a href="docs/book/THE_STARLIGHT_PROTOCOL_BOOK.md">Book</a> •
+  <a href="docs/roadmap.md">Roadmap</a>
+</p>
 
 ---
 
-### 🌌 Phase 16: The Autonomous Era (World-Class Recorder)
+## What is the Starlight Protocol?
 
-| Feature | Description |
-|---------|-------------|
-| **Mutation Fingerprinting** | Captures page "stability signatures" during recording |
-| **Autonomous CLI** | `bin/starlight.js` for zero-touch mission execution |
-| **Context-Aware Pulse** | Dynamic settle-time adjustment based on stability hints |
-| **Failure-Safe Reports** | Immediate "Hero Story" generation on mission error |
-
-### � Phase 10: Enterprise Observability (NEW in v3.0.2)
-
-| Feature | Description |
-|---------|-------------|
-| **Webhook Alerts** | Slack/Teams/Discord notifications on mission completion |
-| **Real-Time Dashboard** | Live telemetry in Mission Control |
-| **MTTR Tracking** | Mean Time To Recovery metrics |
-
-**Quick Webhook Setup:**
-```json
-// config.json
-"webhooks": {
-    "enabled": true,
-    "urls": ["https://hooks.slack.com/services/XXX"],
-    "notifyOn": ["failure", "success"]
-}
-```
-
-### 🛠️ Phase 15: Visual Sentinel Editor & Fleet Manager (NEW in v3.0.3)
-
-| Feature | Description |
-|---------|-------------|
-| **Visual Editor** | No-code UI to create custom Sentinels at `/sentinel-editor` |
-| **Template Library** | Cookie Banner, Modal Popup, Login Wall, Rate Limiter |
-| **Fleet Manager** | Dynamic discovery & management of all sentinels |
-| **Start All** | Launches entire constellation with one click |
-
-**Create a Sentinel in 3 clicks:**
-1. Open Mission Control → Click "🛠️ Create Sentinel"
-2. Choose a template or configure from scratch
-3. Click "🚀 Export Sentinel" → Done!
-
-### �🛡️ Phase 9: Sovereign Security & Compliance
-
-| Feature | Description |
-|---------|-------------|
-| **Shadow DOM Penetration** | Deep-piercing `>>>` selectors for web components |
-| **PII Sentinel** | Privacy-first sensitive data detection |
-| **Traffic Sovereign** | Network blocking & chaos engineering |
-| **Shadow-Aware Janitor** | Clears obstacles inside shadow roots |
-
-### 🔮 Shadow DOM Support
+The Starlight Protocol decouples **intent** from **environment**. Your test scripts describe goals; autonomous Sentinels handle the chaos.
 
 ```javascript
-// CBA automatically pierces shadow boundaries
-{ goal: 'ESCAPE SHADOW' }  // Finds button inside <shadow-modal>
+// Traditional: Handle EVERYTHING yourself
+if (await page.$('.cookie-banner')) await page.click('.dismiss');
+if (await page.$('.popup')) await page.click('.close');
+await page.click('#submit');
+
+// Starlight: Express INTENT only
+await hub.send({ goal: 'Submit Form' });
+// Sentinels automatically clear obstacles
 ```
 
-See [CHANGELOG.md](CHANGELOG.md) for full history.
+---
+
+## 🏗️ Architecture
+
+<p align="center">
+  <img src="assets/architecture.png" alt="Architecture" width="600">
+</p>
+
+| Component | Role |
+|-----------|------|
+| **Hub** | Central orchestrator, manages Playwright browser |
+| **Pulse Sentinel** | Monitors DOM/Network stability |
+| **Janitor Sentinel** | Clears popups, modals, banners |
+| **Vision Sentinel** | AI-powered obstacle detection (Moondream) |
+| **Data Sentinel** | Context extraction & injection |
 
 ---
 
-## 🛰️ The Starlight Protocol
+## 🚀 Quick Start
 
-Standardized signals for zero-wait, selector-less autonomy:
+### Prerequisites
+- Node.js 18+ & Python 3.9+
+- [Ollama](https://ollama.ai/) (optional, for Vision)
+
+### Install
+```bash
+git clone https://github.com/godhiraj-code/cba.git
+cd cba
+npm install
+pip install -r requirements.txt
+npx playwright install chromium
+```
+
+### Run
+```bash
+# One command launches everything
+node bin/starlight.js test/intent_portfolio_v2.js --headless
+```
+
+### Mission Control (GUI)
+```bash
+node launcher/server.js
+# Open http://localhost:3000
+```
+
+---
+
+## 🛰️ The Protocol
+
+All communication uses JSON-RPC 2.0:
 
 | Method | Purpose |
-| :--- | :--- |
-| `starlight.intent` | Issues a high-level `goal` or `cmd`. |
-| `starlight.pre_check` | Handshake broadcast with screenshot for AI analysis. |
-| `starlight.wait` | Veto due to environmental instability. |
-| `starlight.hijack` | Request absolute browser lock for healing. |
-| `starlight.context_update` | Inject intelligence into the shared mission state. |
+|--------|---------|
+| `starlight.intent` | Issue a goal or command |
+| `starlight.pre_check` | Hub → Sentinels handshake |
+| `starlight.clear` | Sentinel approves action |
+| `starlight.wait` | Sentinel vetoes (retry later) |
+| `starlight.hijack` | Sentinel takes browser control |
+| `starlight.resume` | Sentinel releases control |
+
+📄 **[Full Specification](spec/STARLIGHT_PROTOCOL_SPEC_v1.0.0.md)**
 
 ---
 
-## 🛠️ The Starlight SDK (Python)
+## ✨ Key Features
 
-Build a sentinel in minutes:
+| Feature | Description |
+|---------|-------------|
+| **Self-Healing Selectors** | Learns alternatives when selectors fail |
+| **Animation Tolerance** | Handles CSS animations without blocking |
+| **No-Code Recorder** | Record tests by clicking through your site |
+| **Visual Sentinel Editor** | Create custom Sentinels without code |
+| **Shadow DOM Support** | Pierces web component boundaries |
+| **Webhook Alerts** | Slack/Teams notifications |
+| **ROI Dashboard** | Quantifies time saved |
+
+---
+
+## 🛠️ Build a Sentinel
 
 ```python
 from sdk.starlight_sdk import SentinelBase
 
 class MySentinel(SentinelBase):
     def __init__(self):
-        super().__init__(layer_name="MySentinel", priority=10)
-        self.capabilities = ["custom-healing"]
-
+        super().__init__("MySentinel", priority=5)
+        self.selectors = [".my-obstacle"]
+    
     async def on_pre_check(self, params, msg_id):
-        # Your custom healing logic here
+        # Your detection logic
         await self.send_clear()
 
 if __name__ == "__main__":
@@ -127,215 +137,47 @@ if __name__ == "__main__":
     asyncio.run(MySentinel().start())
 ```
 
-**SDK Features:**
-- ✅ Auto-reconnect on connection failure
-- ✅ Persistent memory (JSON-based)
-- ✅ Graceful shutdown (SIGINT/SIGTERM)
-- ✅ Atomic file writes
-- ✅ Config-driven settings
-
----
-
-## 🌌 Phase 7: The Galaxy Mesh
-
-CBA is a **Self-Learning Ecosystem** that gets smarter with every mission:
-
-### 🧠 Self-Healing Selectors
-When a selector fails, CBA automatically tries alternatives from memory:
-
-```
-Mission 1: Goal "Login" → #login-btn → SUCCESS ✓
-           (Learned and saved to memory)
-           
-Mission 2: Goal "Login" → #login-btn (changed to .new-login!)
-           FAIL → Hub checks historical memory
-           Tries #login-btn from memory → SUCCESS ✓
-           Report shows "SELF-HEALED" badge
-```
-
-### ⏱️ Animation Tolerance (v2.8)
-For animated sites, CBA force-proceeds after 3 stability checks:
-- **PulseSentinel** detects DOM mutations from animations
-- After 3 vetoes, Hub uses "Animation Tolerance" to continue
-- No more infinite blocking from CSS animations!
-
-### 🔮 Aura Throttling
-CBA learns when your site is historically unstable:
-- Tracks 500ms "entropy buckets" from past runs
-- Proactively slows down during known jitter windows
-- Prevents flakiness before it happens
-
-### 📈 ROI Dashboard
-The `tools/report.html` quantifies business value:
-- **Triage Savings**: Minutes saved per obstacle cleared
-- **Self-Healing Credits**: Automated selector fixes
-- **Aura Stabilization**: Predictive jitter avoidance
-- **Visual Proof**: Before/after screenshots
-
-![Starlight Report](assets/report_screencap.png)
-
----
-
-## ⚖️ Sovereignty vs. Simplicity
-
-Starlight is an Enterprise-grade engine designed for high-stakes, dynamic environments. It is important to understand the trade-offs:
-
-| ✅ Good For | ❌ Not Recommended For |
-| :--- | :--- |
-| **Noisy UIs**: Sites with frequent popups, banners, and modals. | **Stable UIs**: Simple, static sites where a CSS selector never changes. |
-| **Enterprise CI/CD**: High-frequency runs where stability ROI is paramount. | **Small Projects**: One-off scripts or hobby projects. |
-| **Context-Aware Quality**: When you need tests that "understand" page stability. | **Resource-Constrained**: Low-RAM environments (running AI agents has overhead). |
-
-> [!IMPORTANT]
-> **The Starlight Paradigm Shift**: You are moving from *maintaining fragile scripts* to *managing a fleet of intelligent agents*. While the "up-front" setup is higher, the long-term ROI in reduced triaging and refactoring is what defines the "Autonomous Era."
-
----
-
-## 🎮 GUI Launcher (Mission Control)
-
-A visual control panel for starting Hub, Sentinels, and running missions:
-
-```bash
-# Start the launcher
-node launcher/server.js
-
-# Open in browser
-http://localhost:3000
-```
-
-**Features:**
-- 🟢 Status indicators for Hub, PulseSentinel, JanitorSentinel
-- ▶️ Start All / Stop All buttons
-- 🚀 Mission dropdown with Launch button
-- 📋 Live logs console with real-time output
-- 📊 Quick link to view report
-- 🔴 **No-Code Recorder**: Record test scripts by clicking through your site
-
-### 🎬 No-Code Recorder (NEW in v3.0.1)
-1. Enter a URL and click `🔴 Record`
-2. A floating **Starlight HUD** appears in the browser
-3. Interact with the site - all clicks and inputs are captured
-4. Use `🏷️ Tag` to name important clicks, `🚩 Checkpoint` to mark milestones
-5. Click `⏹️ Stop` to generate an intent file automatically
-
-![Starlight Mission Control](assets/launcher_control_panel.png)
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js v18+ & Python 3.9+
-- [Ollama](https://ollama.ai/) (optional, for Vision Sentinel)
-
-### Setup
-```bash
-git clone <repo-url>
-cd cba
-npm install
-pip install -r requirements.txt
-npx playwright install chromium
-```
-
-### Run the Demo (The Autonomous Way)
-```bash
-# Start a mission with one command (Hub + Sentinels + Intent)
-node bin/starlight.js test/intent_portfolio_v2.js --headless --verbose
-```
-
-### Manual Mode (Development)
-```bash
-# Terminal 1: Hub
-node src/hub.js
-
-# Terminal 2: Sentinels
-python sentinels/pulse_sentinel.py
-python sentinels/janitor.py
-
-# Terminal 3: Mission
-node test/intent_portfolio_v2.js
-```
-
----
-
-## ⚙️ Configuration
-
-All settings are in `config.json`:
-
-```json
-{
-    "hub": {
-        "port": 8080,
-        "syncBudget": 30000,
-        "missionTimeout": 180000,
-        "shadowDom": {
-            "enabled": true,
-            "maxDepth": 5
-        }
-    },
-    "sentinel": {
-        "settlementWindow": 1.0,
-        "reconnectDelay": 3
-    },
-    "vision": {
-        "model": "moondream",
-        "timeout": 25
-    }
-}
-```
-
-See [docs/technical_guide.md](docs/technical_guide.md) for full reference.
-
 ---
 
 ## 📚 Documentation
 
 | Document | Description |
 |----------|-------------|
-| [User Guide](docs/user_guide.md) | Getting started, sentinel overview |
-| [Technical Guide](docs/technical_guide.md) | Protocol spec, SDK reference, Shadow DOM |
-| [CHANGELOG](CHANGELOG.md) | Version history |
-| [Protocol Spec](spec/STARLIGHT_PROTOCOL_SPEC_v1.0.0.md) | Formal protocol specification |
-| [Roadmap](docs/roadmap.md) | Future development plans |
-| [Book](docs/book/THE_STARLIGHT_PROTOCOL_BOOK.md) | Comprehensive Starlight guide |
+| [📖 Book](docs/book/THE_STARLIGHT_PROTOCOL_BOOK.md) | Comprehensive guide |
+| [📄 Specification](spec/STARLIGHT_PROTOCOL_SPEC_v1.0.0.md) | Formal protocol standard |
+| [📋 User Guide](docs/user_guide.md) | Getting started |
+| [⚙️ Technical Guide](docs/technical_guide.md) | SDK & configuration |
+| [🗺️ Roadmap](docs/roadmap.md) | Future plans |
+| [📝 Changelog](CHANGELOG.md) | Version history |
 
 ---
 
-## 🐳 Docker Deployment
+## 🐳 Docker
 
 ```bash
 docker-compose up --build
 ```
 
-Deploys a managed Hub and sentinel mesh for ephemeral CI/CD execution.
-
 ---
 
-## 📚 The Sovereign Automation Series
+## 📖 Blog Series
 
-Follow the journey of the Starlight Protocol:
-- **[Part 1: The Inner Workings](https://www.dhirajdas.dev/blog/constellation-based-automation-starlight-protocol)**: Deep dive into Sentinels and the Hub.
-- **[Part 2: Watching the Constellation](https://www.dhirajdas.dev/blog/starlight-mission-control-observability-roi)**: Exploring Mission Control and ROI reporting.
-- **[Part 3: The Autonomous Era](https://www.dhirajdas.dev/blog/starlight-part-3-autonomous-era)**: v3.0 release, Mutation Fingerprinting, and CLI Orchestration.
-
----
-
-## 🗺️ Roadmap
-
-| Phase | Status |
-|-------|--------|
-| Phase 1-6 | ✅ Complete |
-| Phase 7 (Galaxy Mesh) | ✅ Complete |
-| Phase 8 (Quality) | ✅ Complete |
-| Phase 9 (Security) | ✅ Complete |
-| Phase 10 (Observability) | 🔜 Coming Soon |
+- [Part 1: The Inner Workings](https://www.dhirajdas.dev/blog/constellation-based-automation-starlight-protocol)
+- [Part 2: Mission Control & ROI](https://www.dhirajdas.dev/blog/starlight-mission-control-observability-roi)
+- [Part 3: The Autonomous Era](https://www.dhirajdas.dev/blog/starlight-part-3-autonomous-era)
 
 ---
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE)
+MIT License - [LICENSE](LICENSE)
 
 ---
 
-*Built with ❤️ by [Dhiraj Das](https://www.dhirajdas.dev)*
+<p align="center">
+  <em>"Don't look at the ground; look at the Starlight."</em>
+</p>
+
+<p align="center">
+  Built with ❤️ by <a href="https://www.dhirajdas.dev">Dhiraj Das</a>
+</p>
