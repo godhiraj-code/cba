@@ -780,32 +780,6 @@ const server = http.createServer((req, res) => {
         return;
     }
 
-    // API: Launch readiness snapshot for Mission Control
-    if (req.method === 'GET' && requestPath === '/launch-readiness.json') {
-        const readinessPath = path.join(__dirname, 'launch_readiness.json');
-        const fallback = {
-            product: 'Starlight Protocol',
-            verdict: 'Launch readiness report has not been generated yet.',
-            paidWedge: 'Run npm run launch:report to generate the commercial product snapshot.',
-            icp: [],
-            cta: ['Run npm run launch:report', 'Refresh Mission Control', 'Record the demo'],
-            counts: { sentinels: 0, missions: 0, sdks: 0, schemas: 0 },
-            discovered: { sentinels: [], missions: [], sdks: [], schemas: [] }
-        };
-
-        try {
-            const payload = fs.existsSync(readinessPath)
-                ? fs.readFileSync(readinessPath, 'utf8')
-                : JSON.stringify(fallback, null, 2);
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(payload);
-        } catch (e) {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ ...fallback, error: e.message }));
-        }
-        return;
-    }
-
     // API: List available sentinels
     if (req.method === 'GET' && requestPath === '/api/sentinels') {
         const sentinels = discoverSentinels();

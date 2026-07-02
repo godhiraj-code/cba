@@ -446,59 +446,9 @@ function toggleOllama() {
     }
 }
 
-function renderLaunchReadiness(data) {
-    const target = document.getElementById('launch-readiness-content');
-    if (!target) return;
-
-    const counts = data.counts || {};
-    const cta = Array.isArray(data.cta) && data.cta.length > 0
-        ? data.cta.slice(0, 3)
-        : ['Generate the launch report', 'Run a demo mission', 'Offer a paid pilot'];
-
-    target.innerHTML = `
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 14px;">
-            <div class="vital-card"><div class="vital-label">Verdict</div><div style="font-weight:700; line-height:1.35;">${escapeHtml(data.verdict || 'Launch as AI QA reliability')}</div></div>
-            <div class="vital-card"><div class="vital-label">Sentinels</div><div class="vital-value">${counts.sentinels || 0}</div></div>
-            <div class="vital-card"><div class="vital-label">Demo Missions</div><div class="vital-value">${counts.missions || 0}</div></div>
-            <div class="vital-card"><div class="vital-label">SDKs</div><div class="vital-value">${counts.sdks || 0}</div></div>
-        </div>
-        <p><strong>Paid wedge:</strong> ${escapeHtml(data.paidWedge || 'Productized Sentinel reliability audits and managed agent QA runs.')}</p>
-        <p><strong>ICP:</strong> ${escapeHtml(Array.isArray(data.icp) ? data.icp[0] : 'QA teams with flaky browser automation and AI agents')}</p>
-        <ol style="margin-top: 10px; padding-left: 22px;">
-            ${cta.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
-        </ol>
-    `;
-}
-
-function escapeHtml(value) {
-    return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
-
-async function loadLaunchReadiness() {
-    const target = document.getElementById('launch-readiness-content');
-    if (!target) return;
-
-    try {
-        const response = await fetch('/launch-readiness.json', { cache: 'no-store' });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        renderLaunchReadiness(await response.json());
-    } catch (error) {
-        target.innerHTML = `
-            <p class="status-desc">Launch snapshot is not generated yet.</p>
-            <p>Run <code>npm run launch:report</code> and refresh Mission Control.</p>
-        `;
-    }
-}
-
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     connect();
-    loadLaunchReadiness();
 
     // Add keyboard shortcut for NLI input (Enter to execute)
     const nliInput = document.getElementById('nli-input');

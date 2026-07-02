@@ -167,24 +167,6 @@ All communication uses JSON-RPC 2.0:
 
 📄 **[Full Specification](spec/STARLIGHT_PROTOCOL_SPEC_v1.0.0.md)**
 
----
-
-## 💸 Commercial launch wedge
-
-Starlight should not launch as another generic browser automation tool. The sharper wedge is **Sentinel/Agent-powered AI QA reliability** for teams whose Playwright, Selenium, RPA, or AI-agent browser workflows are flaky, blocked by popups, leaking sensitive data, or hard to explain after failure.
-
-The paid offer should start as a productized service before broad SaaS: reliability audits, managed Sentinel regression runs, and custom Sentinels for one high-value customer journey. The open-source protocol creates trust and virality; the monetizable layer is outcome-based QA reliability, launch-readiness reports, and premium Sentinel/Agent implementation.
-
-Generate the current commercial snapshot with:
-
-```bash
-npm run launch:report
-```
-
-Then open Mission Control to see the Launch Readiness panel.
-
-For the first paid offer, see [docs/PILOT_OFFER.md](docs/PILOT_OFFER.md).
-
 ## ✨ Key Features
 
 | Feature | Description |
