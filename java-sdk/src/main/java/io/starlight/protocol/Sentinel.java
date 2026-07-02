@@ -53,6 +53,7 @@ public class Sentinel {
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final AtomicBoolean connected = new AtomicBoolean(false);
     private ScheduledExecutorService scheduler;
+    private ScheduledFuture<?> heartbeatTask;
     private String hubUrl;
     
     /**
@@ -220,16 +221,19 @@ public class Sentinel {
         try {
             RegistrationParams params = new RegistrationParams();
             params.setLayer(name);
+            params.setRole("sentinel");
             params.setPriority(priority);
             params.setCapabilities(capabilities);
             params.setSelectors(selectors);
+            params.setVersion("1.0.0");
             params.setAuthToken(authToken);
             
             sendMessage("starlight.registration", params);
             log.info("[{}] Registered with Hub (priority={})", name, priority);
             
             // Start heartbeat
-            scheduler.scheduleAtFixedRate(
+            if (heartbeatTask != null) heartbeatTask.cancel(false);
+            heartbeatTask = scheduler.scheduleAtFixedRate(
                 this::sendPulse,
                 heartbeatInterval.toMillis(),
                 heartbeatInterval.toMillis(),
@@ -255,6 +259,7 @@ public class Sentinel {
     @OnClose
     public void onClose(Session session, CloseReason reason) {
         connected.set(false);
+        if (heartbeatTask != null) heartbeatTask.cancel(false);
         log.info("[{}] Disconnected: {}", name, reason.getReasonPhrase());
     }
     
@@ -264,6 +269,13 @@ public class Sentinel {
     }
     
     private void handleMessage(Message msg) {
+        if (msg.getMethod() == null) {
+            if (msg.getError() != null) {
+                log.error("[{}] Hub request failed: {}", name, msg.getError().getMessage());
+            }
+            return;
+        }
+
         switch (msg.getMethod()) {
             case "starlight.pre_check":
                 if (onPreCheck != null) {
@@ -279,6 +291,16 @@ public class Sentinel {
                 if (onEntropyStream != null) {
                     EntropyStreamParams params = msg.getParamsAs(EntropyStreamParams.class);
                     onEntropyStream.accept(params);
+                }
+                break;
+
+            case "starlight.ping":
+                try {
+                    sendMessage("starlight.pong", java.util.Map.of(
+                        "timestamp", System.currentTimeMillis()
+                    ));
+                } catch (Exception e) {
+                    log.warn("[{}] Failed to send pong: {}", name, e.getMessage());
                 }
                 break;
                 
@@ -307,7 +329,10 @@ public class Sentinel {
     
     void sendWait(String msgId, int retryAfterMs) {
         try {
-            sendResponse(msgId, "starlight.wait", java.util.Map.of("retryAfterMs", retryAfterMs));
+            sendResponse(msgId, "starlight.wait", java.util.Map.of(
+                "retryAfterMs", retryAfterMs,
+                "severity", "soft"
+            ));
         } catch (Exception e) {
             log.error("[{}] Failed to send wait: {}", name, e.getMessage());
         }

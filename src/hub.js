@@ -8,11 +8,13 @@ const ActionRecorder = require('./recorder');
 const WebhookNotifier = require('./webhook');
 const http = require('http');
 const https = require('https');
+const crypto = require('crypto');
+const { version: PACKAGE_VERSION } = require('../package.json');
 
 // Phase 1 Security: Import security modules
 const { JWTHandler } = require('./auth/jwt_handler');
 const { SchemaValidator } = require('./validation/schema_validator');
-const { PIIRedactor, redact } = require('./utils/pii_redactor');
+const { PIIRedactor } = require('./utils/pii_redactor');
 const { AtomicLock } = require('./sync/atomic_lock');
 const { InteractiveElementCache } = require('./cache/element_cache');
 
@@ -27,29 +29,6 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
-// Phase 1 Security: Selector sanitization to prevent CSS injection
-function sanitizeSelector(input) {
-    if (typeof input !== 'string') return '';
-    // Remove characters that could be used for CSS injection
-    // Allow alphanumeric, spaces, hyphens, underscores (common in button text)
-    // Block: # . [ ] : \ / ( ) ' " < > { } @ $ % ^ & * + = | ` ~
-    return input
-        .replace(/[#\.\[\]:;\\\/\(\)'"<>{}\@\$%\^&\*\+=\|`~]/g, '')
-        .trim()
-        .substring(0, 200); // Limit length
-}
-
-// CRITICAL Security: Escape CSS attribute values to prevent injection
-function escapeCssString(str) {
-    if (typeof str !== 'string') return '';
-    return str
-        .replace(/\\/g, '\\\\')     // Escape backslashes first
-        .replace(/"/g, '\\"')       // Escape quotes
-        .replace(/'/g, "\\'")       // Escape single quotes
-        .replace(/\n/g, '\\n')      // Escape newlines
-        .replace(/\r/g, '\\r')      // Escape carriage returns
-        .replace(/\t/g, '\\t');     // Escape tabs
-}
 class CBAHub {
     constructor(port = 8080, headless = false) {
         // Load configuration
@@ -57,15 +36,21 @@ class CBAHub {
         this.headless = headless || this.config.hub?.headless || false;
 
         this.port = port || this.config.hub?.port || 8080;
-        this.authToken = this.config.hub?.security?.authToken || null;
+        this.host = process.env.STARLIGHT_HOST || this.config.hub?.host || '127.0.0.1';
+        this.authToken = process.env.STARLIGHT_AUTH_TOKEN || this.config.hub?.security?.authToken || null;
+        this.authRequired = this.config.hub?.security?.authRequired === true ||
+            !!this.authToken ||
+            !!(this.config.hub?.security?.jwtSecret || process.env.STARLIGHT_JWT_SECRET);
+        this.clients = new Map();
 
         // Create HTTP or HTTPS server based on SSL config
         const sslConfig = this.config.hub?.security?.ssl;
         const requestHandler = (req, res) => {
             if (req.url === '/health') {
                 const status = {
-                    status: 'healthy',
-                    version: '3.0.3',
+                    status: this.isShuttingDown ? 'shutting_down' : (this.ready ? 'healthy' : 'starting'),
+                    ready: this.ready,
+                    version: PACKAGE_VERSION,
                     protocol: 'starlight/1.0.0',
                     uptime: process.uptime(),
                     sentinels: Array.from(this.sentinels?.values() || []).map(s => ({
@@ -79,7 +64,7 @@ class CBAHub {
                         isLocked: this.isLocked || false
                     },
                     security: {
-                        authEnabled: !!this.authToken,
+                        authEnabled: this.authRequired,
                         sslEnabled: sslConfig?.enabled || false
                     }
                 };
@@ -102,7 +87,19 @@ class CBAHub {
             this.server = http.createServer(requestHandler);
         }
 
-        this.wss = new WebSocketServer({ server: this.server });
+        const maxPayload = this.config.hub?.security?.maxMessageBytes || 1024 * 1024;
+        this.wss = new WebSocketServer({
+            server: this.server,
+            maxPayload,
+            verifyClient: ({ origin }, done) => {
+                const allowedOrigins = this.config.hub?.security?.allowedOrigins || [];
+                if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+                    done(true);
+                    return;
+                }
+                done(false, 403, 'Origin not allowed');
+            }
+        });
         this.browserAdapter = null;  // Phase 14.1: Cross-browser adapter
         this.browser = null;
         this.page = null;
@@ -112,6 +109,8 @@ class CBAHub {
         this.lockTimeout = null;
         this.commandQueue = [];
         this.pendingRequests = new Map();
+        this.activeRequestIds = new Set();
+        this.retryTimers = new Set();
         this.heartbeatTimeout = this.config.hub?.heartbeatTimeout || 5000;
         this.systemHealthy = true;
         this.reportData = [];
@@ -124,6 +123,7 @@ class CBAHub {
         this.historicalMemory = new Map();
         this.historicalAuras = new Set();
         this.missionStartTime = null;
+        this.ready = false;
         this.isProcessing = false;
         this.isShuttingDown = false;
         this.recorder = new ActionRecorder();  // Phase 13.5: Test Recorder
@@ -152,32 +152,23 @@ class CBAHub {
 
     loadConfig() {
         const configPath = path.join(process.cwd(), 'config.json');
+        if (!fs.existsSync(configPath)) return {};
+
+        let config;
         try {
-            if (fs.existsSync(configPath)) {
-                const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-
-                // Phase 8.5: Config Schema Validation (Issue 9)
-                try {
-                    const { validateConfig } = require('./validation/config_schema');
-                    const validation = validateConfig(config);
-                    if (!validation.valid) {
-                        console.error('[CBA Hub] ❌ Configuration Error(s):');
-                        validation.errors.forEach(err => console.error(`  - ${err}`));
-                        console.warn('[CBA Hub] ⚠️ Proceeding with potentially invalid configuration (Check config.json)');
-                        // Alternative: throw new Error('Invalid Configuration');
-                    } else {
-                        console.log('[CBA Hub] ✓ Configuration validated successfully');
-                    }
-                } catch (e) {
-                    // Ignore if validation module missing during dev
-                }
-
-                return config;
-            }
-        } catch (e) {
-            console.warn('[CBA Hub] Warning: Could not load config.json:', e.message);
+            config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        } catch (error) {
+            throw new Error(`Could not parse config.json: ${error.message}`);
         }
-        return {};
+
+        const { validateConfig } = require('./validation/config_schema');
+        const validation = validateConfig(config);
+        if (!validation.valid) {
+            throw new Error(`Invalid config.json:\n- ${validation.errors.join('\n- ')}`);
+        }
+
+        console.log('[CBA Hub] Configuration validated successfully');
+        return config;
     }
 
     cleanupScreenshots() {
@@ -242,15 +233,30 @@ class CBAHub {
     async init() {
         // Mission Safety Timeout from config
         const missionTimeout = this.config.hub?.missionTimeout || 180000;
-        setTimeout(() => {
+        this.missionTimeoutHandle = setTimeout(() => {
             console.warn("[CBA Hub] MISSION TIMEOUT REACHED. Closing browser...");
-            this.shutdown();
+            this.shutdown('Mission timeout');
         }, missionTimeout);
 
         // Initialize HTTP server
-        this.server.listen(this.port, () => {
-            console.log(`[CBA Hub] Starting Starlight Hub: The Hero's Journey...`);
-            console.log(`[CBA Hub] WebSocket/HTTP Server listening on port ${this.port}`);
+        if (!this.isLoopbackHost(this.host) && !this.authRequired) {
+            throw new Error('Authentication is required when the Hub listens on a non-loopback host');
+        }
+
+        await new Promise((resolve, reject) => {
+            const onError = error => {
+                this.server.off('listening', onListening);
+                reject(error);
+            };
+            const onListening = () => {
+                this.server.off('error', onError);
+                console.log(`[CBA Hub] Starting Starlight Hub: The Hero's Journey...`);
+                console.log(`[CBA Hub] WebSocket/HTTP Server listening on ${this.host}:${this.port}`);
+                resolve();
+            };
+            this.server.once('error', onError);
+            this.server.once('listening', onListening);
+            this.server.listen(this.port, this.host);
         });
 
         // Phase 14.1/14.2: Cross-Browser & Mobile Support via Adapter Pattern
@@ -288,11 +294,23 @@ class CBAHub {
 
         this.wss.on('connection', (ws) => {
             const id = nanoid();
+            this.clients.set(id, {
+                id,
+                ws,
+                authenticated: false,
+                role: null,
+                layer: null,
+                registeredAt: null
+            });
             ws.on('message', async (data) => {
                 try {
                     const msg = JSON.parse(data);
                     if (!this.validateProtocol(msg)) {
-                        console.error(`[CBA Hub] RECV INVALID PROTOCOL from ${id}:`, msg);
+                        console.error(
+                            `[CBA Hub] RECV INVALID PROTOCOL from ${id}:`,
+                            this.piiRedactor.redactObject(msg)
+                        );
+                        this.sendRpcError(ws, msg?.id, -32600, 'Invalid Request');
                         return;
                     }
                     if (msg.method !== 'starlight.pulse') {
@@ -302,15 +320,18 @@ class CBAHub {
                     await this.handleMessage(id, ws, msg);
                 } catch (e) {
                     console.error(`[CBA Hub] Parse Error from ${id}:`, e.message);
+                    this.sendRpcError(ws, null, -32700, 'Parse error');
                 }
             });
             ws.on('close', () => this.handleDisconnect(id));
         });
 
-        setInterval(() => this.checkSystemHealth(), 1000);
+        this.healthCheckInterval = setInterval(() => this.checkSystemHealth(), 1000);
 
         // Setup the initial page with all handlers
         await this.setupPage();
+        this.ready = true;
+        console.log('[CBA Hub] Protocol runtime is ready.');
     }
 
     /**
@@ -396,6 +417,11 @@ class CBAHub {
         const target = await this.page.evaluate(({ goalText, shadowEnabled, maxDepth }) => {
 
             const normalizedGoal = goalText.toLowerCase();
+
+            function escapeCssText(text) {
+                if (!text) return '';
+                return text.replace(/["\\]/g, '\\$&').replace(/\n/g, ' ').trim();
+            }
 
             // Helper: Recursively collect elements from shadow roots
             function collectElements(root, selector, depth = 0) {
@@ -632,12 +658,6 @@ class CBAHub {
 
                 const tagName = match.tagName.toLowerCase();
 
-                // SECURITY: Escape CSS special characters in attribute values
-                function escapeCssText(text) {
-                    if (!text) return '';
-                    return text.replace(/["\\]/g, '\\$&').replace(/\n/g, ' ').trim();
-                }
-
                 // For input elements, use value attribute if present
                 if (tagName === 'input' && match.value) {
                     const inputType = match.type || 'text';
@@ -762,7 +782,7 @@ class CBAHub {
 
             // Fuzzy matching with scoring
             function fuzzyMatchForm(goal, texts) {
-                const goalWords = goal.split(/[\s\/]+/).filter(w => w.length > 1);
+                const goalWords = goal.split(/[\s/]+/).filter(w => w.length > 1);
 
                 for (const text of texts) {
                     if (text === goal) return { score: 100 };
@@ -1108,9 +1128,9 @@ class CBAHub {
     broadcastToSentinels(msg) {
         const payload = JSON.stringify(msg);
 
-        // Convert map to array and sort by priority (descending)
+        // Lower numbers are higher priority in the Starlight specification.
         const sortedSentinels = Array.from(this.sentinels.values())
-            .sort((a, b) => (b.priority || 0) - (a.priority || 0));
+            .sort((a, b) => (a.priority || 10) - (b.priority || 10));
 
         for (const s of sortedSentinels) {
             if (s.ws.readyState === WebSocket.OPEN) {
@@ -1122,10 +1142,7 @@ class CBAHub {
     /**
      * Periodic system health check & Heartbeat
      */
-    checkSystemHealth() {
-        const now = Date.now();
-
-        // 1. Heartbeat - Ping Sentinels
+    checkSentinelConnections(now = Date.now()) {
         for (const [id, s] of this.sentinels) {
             if (now - s.lastSeen > (this.config.hub?.heartbeatTimeout || 30000)) {
                 console.warn(`[CBA Hub] Sentinel ${s.layer} timed out (${Math.round((now - s.lastSeen) / 1000)}s silent). Terminating.`);
@@ -1139,11 +1156,6 @@ class CBAHub {
             }
         }
 
-        // 2. Lock TTL Check
-        if (this.isLocked && this.lockTimeout && now > this.lockTimeout) {
-            console.warn('[CBA Hub] Lock TTL expired. Forcing release.');
-            this.releaseLock('TTL Expired');
-        }
     }
 
     broadcastContextUpdate() {
@@ -1160,20 +1172,21 @@ class CBAHub {
 
     async recordTrace(type, sentinelId, data, includeSnapshot = false) {
         if (data.method === 'starlight.pulse') return;
-        const sentinel = this.sentinels.get(sentinelId);
-        const snapshot = includeSnapshot ? await this.takeDOMSnapshot() : null;
+        const safeData = this.piiRedactor.redactObject(data);
+        const rawSnapshot = includeSnapshot ? await this.takeDOMSnapshot() : null;
+        const snapshot = rawSnapshot ? this.piiRedactor.redact(rawSnapshot) : null;
 
         this.missionTrace.push({
             timestamp: Date.now(),
             humanTime: new Date().toLocaleTimeString(),
-            method: data.method || type,
-            params: data.params || data,
+            method: safeData.method || type,
+            params: safeData.params || safeData,
             snapshot
         });
 
         // Immediate learning from recordings:
-        if (type === 'RECORDER' && data.params?.goal && data.params?.selector) {
-            this.historicalMemory.set(data.params.goal, data.params.selector);
+        if (type === 'RECORDER' && safeData.params?.goal && safeData.params?.selector) {
+            this.historicalMemory.set(safeData.params.goal, safeData.params.selector);
         }
 
         // Trace rotation: keep only the last N events
@@ -1303,7 +1316,7 @@ class CBAHub {
                     if (result.products.length >= MAX_ITEMS) return;
 
                     // Look for price
-                    const priceEl = el.querySelector('[class*="price"], .price, [data-price], span:contains("$"), span:contains("€"), span:contains("£")');
+                    const priceEl = el.querySelector('[class*="price"], .price, [data-price]');
                     const priceText = priceEl ? priceEl.textContent.trim() : null;
 
                     // Look for product name
@@ -1341,11 +1354,113 @@ class CBAHub {
     }
 
     validateProtocol(msg) {
-        // Starlight v2.0: JSON-RPC 2.0 Validation
-        return msg.jsonrpc === '2.0' && msg.method && msg.method.startsWith('starlight.') && msg.params;
+        return this.schemaValidator.validate(msg).valid;
+    }
+
+    isLoopbackHost(host) {
+        return ['127.0.0.1', 'localhost', '::1'].includes(String(host).toLowerCase());
+    }
+
+    timingSafeTokenEqual(actual, expected) {
+        if (typeof actual !== 'string' || typeof expected !== 'string') return false;
+        const actualBuffer = Buffer.from(actual);
+        const expectedBuffer = Buffer.from(expected);
+        return actualBuffer.length === expectedBuffer.length &&
+            crypto.timingSafeEqual(actualBuffer, expectedBuffer);
+    }
+
+    authenticateRegistration(params) {
+        if (!this.authRequired) {
+            return { authenticated: true, tokenPayload: null };
+        }
+
+        const token = params.authToken;
+        if (!token) {
+            return { authenticated: false, error: 'Authentication token required' };
+        }
+
+        if (this.authToken && this.timingSafeTokenEqual(token, this.authToken)) {
+            return { authenticated: true, tokenPayload: null };
+        }
+
+        try {
+            return { authenticated: true, tokenPayload: this.jwtHandler.verifyToken(token) };
+        } catch (error) {
+            return { authenticated: false, error: error.message };
+        }
+    }
+
+    inferClientRole(params, tokenPayload = null) {
+        const requestedRole = params.role || params.clientType;
+        const tokenRole = tokenPayload?.role;
+        const role = tokenRole || requestedRole ||
+            (params.capabilities?.includes('intent') || params.layer === 'IntentLayer' ? 'intent' : 'sentinel');
+        return ['sentinel', 'intent', 'admin'].includes(role) ? role : null;
+    }
+
+    isMethodAllowed(role, method) {
+        const permissions = {
+            sentinel: new Set([
+                'starlight.pulse', 'starlight.pong', 'starlight.context_update',
+                'starlight.clear', 'starlight.wait', 'starlight.hijack',
+                'starlight.resume', 'starlight.action', 'starlight.sidetalk',
+                'starlight.error'
+            ]),
+            intent: new Set([
+                'starlight.intent', 'starlight.finish', 'starlight.getPageContext',
+                'starlight.warp_capture', 'starlight.warp_restore'
+            ]),
+            admin: new Set([
+                'starlight.intent', 'starlight.finish', 'starlight.getPageContext',
+                'starlight.warp_capture', 'starlight.warp_restore',
+                'starlight.startRecording', 'starlight.stopRecording',
+                'starlight.getRecordedSteps'
+            ])
+        };
+        return permissions[role]?.has(method) || false;
+    }
+
+    sendRpcResult(ws, id, result) {
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        ws.send(JSON.stringify({ jsonrpc: '2.0', id, result }));
+    }
+
+    sendRpcError(ws, id, code, message, data = undefined) {
+        if (!ws || ws.readyState !== WebSocket.OPEN) return;
+        ws.send(JSON.stringify({
+            jsonrpc: '2.0',
+            id: id || null,
+            error: { code, message, ...(data === undefined ? {} : { data }) }
+        }));
+    }
+
+    completeCommand(clientId, requestId, result) {
+        this.activeRequestIds.delete(`${clientId}:${requestId}`);
+        const client = this.clients.get(clientId);
+        if (client?.ws) {
+            this.sendRpcResult(client.ws, requestId, result);
+        }
+
+        this.broadcastToSentinels({
+            type: 'COMMAND_COMPLETE',
+            id: requestId,
+            ...result
+        });
     }
 
     handleDisconnect(id) {
+        this.clients.delete(id);
+        this.commandQueue = this.commandQueue.filter(command => command.clientId !== id);
+        for (const [key, pending] of this.pendingRequests) {
+            if (key.endsWith(`:${id}`)) {
+                pending.reject?.(new Error('Sentinel disconnected'));
+                this.pendingRequests.delete(key);
+            }
+        }
+        for (const key of this.activeRequestIds) {
+            if (key.startsWith(`${id}:`)) this.activeRequestIds.delete(key);
+        }
+
         const s = this.sentinels.get(id);
         if (s) {
             console.log(`[CBA Hub] Sentinel Disconnected: ${s.layer}`);
@@ -1375,28 +1490,74 @@ class CBAHub {
             return;
         }
 
+        const client = this.clients.get(id);
         const sentinel = this.sentinels.get(id);
         const params = msg.params;
 
+        if (msg.method !== 'starlight.registration') {
+            if (!client?.authenticated || !client.role) {
+                this.sendRpcError(ws, msg.id, 4001, 'Registration required');
+                ws.close(4001, 'Registration required');
+                return;
+            }
+            if (!this.isMethodAllowed(client.role, msg.method)) {
+                this.sendRpcError(ws, msg.id, 4003, `Method not allowed for role ${client.role}`);
+                return;
+            }
+        }
+
         switch (msg.method) {
-            case 'starlight.registration':
-                // Security: Validate auth token if enabled
-                if (this.authToken && params.authToken !== this.authToken) {
-                    console.warn(`[CBA Hub] Rejected registration from ${params.layer}: Invalid auth token`);
-                    ws.close(4001, 'Unauthorized: Invalid auth token');
+            case 'starlight.registration': {
+                if (client?.authenticated) {
+                    this.sendRpcError(ws, msg.id, 4002, 'Client is already registered');
                     return;
                 }
-                this.sentinels.set(id, {
-                    ws,
-                    lastSeen: Date.now(),
+
+                const authResult = this.authenticateRegistration(params);
+                if (!authResult.authenticated) {
+                    console.warn(`[CBA Hub] Rejected registration from ${params.layer}: ${authResult.error}`);
+                    this.sendRpcError(ws, msg.id, 4001, 'Unauthorized');
+                    ws.close(4001, 'Unauthorized');
+                    return;
+                }
+
+                const role = this.inferClientRole(params, authResult.tokenPayload);
+                if (!role) {
+                    this.sendRpcError(ws, msg.id, 4002, 'Invalid client role');
+                    ws.close(4002, 'Invalid client role');
+                    return;
+                }
+
+                Object.assign(client, {
+                    authenticated: true,
+                    role,
                     layer: params.layer,
-                    priority: params.priority,
-                    selectors: params.selectors,
-                    capabilities: params.capabilities,
-                    protocolVersion: params.version || '1.0.0'
+                    registeredAt: Date.now()
                 });
-                console.log(`[CBA Hub] Registered Sentinel: ${params.layer} (Priority: ${params.priority})`);
+
+                if (role === 'sentinel') {
+                    this.sentinels.set(id, {
+                        id,
+                        role,
+                        ws,
+                        lastSeen: Date.now(),
+                        layer: params.layer,
+                        priority: params.priority,
+                        selectors: params.selectors,
+                        capabilities: params.capabilities,
+                        protocolVersion: params.version || '1.0.0'
+                    });
+                }
+
+                console.log(`[CBA Hub] Registered ${role}: ${params.layer}`);
+                this.sendRpcResult(ws, msg.id, {
+                    registered: true,
+                    clientId: id,
+                    role,
+                    protocolVersion: '1.0.0'
+                });
                 break;
+            }
             case 'starlight.pulse':
                 if (sentinel) {
                     sentinel.lastSeen = Date.now();
@@ -1432,19 +1593,25 @@ class CBAHub {
                 }
                 break;
             case 'starlight.clear':
-                if (this.pendingRequests.has(id)) {
-                    this.pendingRequests.get(id).resolve(msg);
-                    this.pendingRequests.delete(id);
+                {
+                    const pendingKey = `${msg.id}:${id}`;
+                    if (this.pendingRequests.has(pendingKey)) {
+                        this.pendingRequests.get(pendingKey).resolve(msg);
+                        this.pendingRequests.delete(pendingKey);
+                    }
                 }
                 break;
             case 'starlight.wait':
-                if (this.pendingRequests.has(id)) {
-                    this.pendingRequests.get(id).resolve(msg);
-                    this.pendingRequests.delete(id);
+                {
+                    const pendingKey = `${msg.id}:${id}`;
+                    if (this.pendingRequests.has(pendingKey)) {
+                        this.pendingRequests.get(pendingKey).resolve(msg);
+                        this.pendingRequests.delete(pendingKey);
+                    }
                 }
                 break;
             case 'starlight.hijack':
-                await this.handleHijack(id, params);
+                await this.handleHijack(id, params, msg.id);
                 break;
             case 'starlight.resume':
                 this.handleResume(id, params);
@@ -1490,9 +1657,7 @@ class CBAHub {
                             afterScreenshot: null,
                             error: `Failed to resolve semantic goal: ${msg.params.goal}`
                         });
-                        this.broadcastToClient(id, {
-                            type: 'COMMAND_COMPLETE',
-                            id: msg.id,
+                        this.completeCommand(id, msg.id, {
                             success: false,
                             error: `Could not find element matching goal "${msg.params.goal}"`
                         });
@@ -1527,9 +1692,7 @@ class CBAHub {
                             afterScreenshot: null,
                             error: `Failed to resolve form goal: ${msg.params.goal}`
                         });
-                        this.broadcastToClient(id, {
-                            type: 'COMMAND_COMPLETE',
-                            id: msg.id,
+                        this.completeCommand(id, msg.id, {
                             success: false,
                             error: `Could not find form input matching "${msg.params.goal}"`
                         });
@@ -1546,8 +1709,8 @@ class CBAHub {
                         if (result.selfHealed) this.totalSavedTime += 120;
                     } else {
                         console.error(`[CBA Hub] FAILED to resolve select goal: ${msg.params.goal}`);
-                        this.broadcastToClient(id, {
-                            type: 'COMMAND_COMPLETE', id: msg.id, success: false,
+                        this.completeCommand(id, msg.id, {
+                            success: false,
                             error: `Could not find dropdown matching "${msg.params.goal}"`
                         });
                         return;
@@ -1563,8 +1726,8 @@ class CBAHub {
                         if (result.selfHealed) this.totalSavedTime += 120;
                     } else {
                         console.error(`[CBA Hub] FAILED to resolve checkbox goal: ${msg.params.goal}`);
-                        this.broadcastToClient(id, {
-                            type: 'COMMAND_COMPLETE', id: msg.id, success: false,
+                        this.completeCommand(id, msg.id, {
+                            success: false,
                             error: `Could not find checkbox matching "${msg.params.goal}"`
                         });
                         return;
@@ -1580,8 +1743,8 @@ class CBAHub {
                         if (result.selfHealed) this.totalSavedTime += 120;
                     } else {
                         console.error(`[CBA Hub] FAILED to resolve ${msg.params.cmd} goal: ${msg.params.goal}`);
-                        this.broadcastToClient(id, {
-                            type: 'COMMAND_COMPLETE', id: msg.id, success: false,
+                        this.completeCommand(id, msg.id, {
+                            success: false,
                             error: `Could not find element matching "${msg.params.goal}"`
                         });
                         return;
@@ -1597,8 +1760,8 @@ class CBAHub {
                         if (result.selfHealed) this.totalSavedTime += 120;
                     } else {
                         console.error(`[CBA Hub] FAILED to resolve upload goal: ${msg.params.goal}`);
-                        this.broadcastToClient(id, {
-                            type: 'COMMAND_COMPLETE', id: msg.id, success: false,
+                        this.completeCommand(id, msg.id, {
+                            success: false,
                             error: `Could not find file input matching "${msg.params.goal}"`
                         });
                         return;
@@ -1607,7 +1770,7 @@ class CBAHub {
                 this.enqueueCommand(id, { ...msg.params, id: msg.id });
                 break;
             case 'starlight.action':
-                await this.executeSentinelAction(id, params);
+                await this.executeSentinelAction(id, params, msg.id);
                 break;
             case 'starlight.finish':
                 await this.shutdown(params.reason || params.error);
@@ -1637,7 +1800,7 @@ class CBAHub {
                 break;
 
             // Phase 13: NLI Page Context Extraction
-            case 'starlight.getPageContext':
+            case 'starlight.getPageContext': {
                 const pageContext = await this.getPageContext();
                 ws.send(JSON.stringify({
                     jsonrpc: '2.0',
@@ -1645,6 +1808,7 @@ class CBAHub {
                     result: pageContext
                 }));
                 break;
+            }
 
             // Phase 8.5: Sentinel Error Protocol (Issue 16)
             case 'starlight.error':
@@ -1764,22 +1928,26 @@ class CBAHub {
 
     async shutdown(reason = null) {
         if (this.isShuttingDown) return; // Prevent double shutdown
-        console.log(`[CBA Hub] Shutdown initiated. Reason: ${reason || 'Normal'}`);
+        const reasonText = reason instanceof Error ? reason.message : String(reason || 'Normal');
+        console.log(`[CBA Hub] Shutdown initiated. Reason: ${reasonText}`);
         this.isShuttingDown = true;
+        this.ready = false;
 
         // Only log as FAILURE if it actually contains failure markers or is an Error object
+        const normalizedReason = reasonText.toLowerCase();
         const isActualFailure = reason && (
-            reason.toLowerCase().includes('failed') ||
-            reason.toLowerCase().includes('error') ||
-            reason.toLowerCase().includes('timeout') ||
-            reason.toLowerCase().includes('aborted')
+            reason instanceof Error ||
+            normalizedReason.includes('failed') ||
+            normalizedReason.includes('error') ||
+            normalizedReason.includes('timeout') ||
+            normalizedReason.includes('aborted')
         );
 
         if (isActualFailure) {
             console.log(`[CBA Hub] Mission Failure Recorded: ${reason}`);
             this.reportData.push({
                 type: 'FAILURE',
-                reason: reason,
+                reason: reasonText,
                 timestamp: new Date().toLocaleTimeString()
             });
 
@@ -1811,7 +1979,7 @@ class CBAHub {
                     timestamp: new Date().toLocaleTimeString(),
                     beforeScreenshot: interruptedScreenshot, // Show state at interruption
                     afterScreenshot: interruptedScreenshot,  // Same screenshot for both
-                    error: `Command interrupted: ${reason}`
+                    error: `Command interrupted: ${reasonText}`
                 });
                 this.currentCommand = null;
             }
@@ -1819,7 +1987,31 @@ class CBAHub {
 
         console.log("[CBA Hub] Closing gracefully...");
 
-        // Clear the queue - no more processing
+        clearTimeout(this.missionTimeoutHandle);
+        clearTimeout(this.lockTimeout);
+        clearInterval(this.healthCheckInterval);
+        this.memoryLock.shutdown();
+        this.elementCache.clear();
+        for (const pending of this.pendingRequests.values()) {
+            clearTimeout(pending.timeout);
+            pending.resolve?.({
+                jsonrpc: '2.0',
+                method: 'starlight.wait',
+                params: { severity: 'hard', reason: 'Hub shutting down' }
+            });
+        }
+        this.pendingRequests.clear();
+        for (const timer of this.retryTimers) clearTimeout(timer);
+        this.retryTimers.clear();
+
+        for (const command of this.commandQueue) {
+            if (!command.internal) {
+                this.completeCommand(command.clientId, command.id, {
+                    success: false,
+                    error: 'Hub shut down before command execution'
+                });
+            }
+        }
         this.commandQueue = [];
 
         // Wait for any in-flight processing to finish
@@ -1859,16 +2051,40 @@ class CBAHub {
         await this.saveHistoricalMemory();
         await this.saveTemporalMetrics();
 
-        if (this.page) await this.page.close();
+        if (this.page && !this.page.isClosed()) await this.page.close();
         if (this.browser) await this.browser.close();
-        this.server.close(() => {
-            this.wss.close(() => {
-                console.log("[CBA Hub] Hub shutdown complete.");
-                if (require.main === module) {
-                    process.exit(0);
+
+        for (const client of this.wss?.clients || []) {
+            client.terminate();
+        }
+
+        await new Promise(resolve => {
+            if (!this.wss) {
+                resolve();
+                return;
+            }
+            try {
+                this.wss.close(() => resolve());
+            } catch (error) {
+                console.warn('[CBA Hub] WebSocket server close warning:', error.message);
+                resolve();
+            }
+        });
+
+        await new Promise(resolve => {
+            if (!this.server?.listening) {
+                resolve();
+                return;
+            }
+            this.server.close(error => {
+                if (error) {
+                    console.warn('[CBA Hub] HTTP server close warning:', error.message);
                 }
+                resolve();
             });
         });
+
+        console.log("[CBA Hub] Hub shutdown complete.");
     }
 
     async takeScreenshot(name) {
@@ -1885,6 +2101,7 @@ class CBAHub {
 
     checkSystemHealth() {
         const now = Date.now();
+        this.checkSentinelConnections(now);
         let healthy = true;
         for (const [id, s] of this.sentinels.entries()) {
             if (s.priority <= 5 && (now - s.lastSeen > this.heartbeatTimeout)) {
@@ -1895,13 +2112,14 @@ class CBAHub {
         this.systemHealthy = healthy;
     }
 
-    async handleHijack(id, msg) {
+    async handleHijack(id, msg, requestId = null) {
         if (!this.systemHealthy) return;
         const requested = this.sentinels.get(id);
+        if (!requested) return;
 
         if (this.isLocked) {
             const current = this.sentinels.get(this.lockOwner);
-            if (requested.priority < current.priority) {
+            if (!current || requested.priority < current.priority) {
                 this.releaseLock('Preempted by higher priority');
             } else return;
         }
@@ -1936,13 +2154,22 @@ class CBAHub {
             }
         });
 
-        for (const req of this.pendingRequests.values()) req.reject();
-        this.pendingRequests.clear();
+        const pendingKey = requestId ? `${requestId}:${id}` : null;
+        if (pendingKey && this.pendingRequests.has(pendingKey)) {
+            this.pendingRequests.get(pendingKey).resolve({
+                method: 'starlight.wait',
+                params: {
+                    retryAfterMs: lockTTL,
+                    severity: 'soft',
+                    reason: `Hijacked by ${requested.layer}`
+                }
+            });
+        }
     }
 
     handleResume(id, msg) {
         if (this.lockOwner === id) {
-            console.log(`[CBA Hub] RESUME from ${this.sentinels.get(id).layer}`);
+            console.log(`[CBA Hub] RESUME from ${this.sentinels.get(id)?.layer || id}`);
 
             // ROI Tracking: Calculate duration
             const start = this.hijackStarts.get(id);
@@ -1962,13 +2189,30 @@ class CBAHub {
     releaseLock(reason) {
         this.isLocked = false;
         this.lockOwner = null;
-        if (this.lockTimeout) clearTimeout(this.lockTimeout);
+        if (this.lockTimeout) {
+            clearTimeout(this.lockTimeout);
+            this.lockTimeout = null;
+        }
         this.processQueue();
     }
 
     enqueueCommand(clientId, msg) {
+        const requestKey = `${clientId}:${msg.id}`;
+        if (this.activeRequestIds.has(requestKey)) {
+            this.sendRpcError(this.clients.get(clientId)?.ws, msg.id, 4009, 'Duplicate request ID');
+            return;
+        }
+        this.activeRequestIds.add(requestKey);
         this.commandQueue.push({ clientId, ...msg });
         this.processQueue();
+    }
+
+    scheduleQueueProcessing(delay = 0) {
+        const timer = setTimeout(() => {
+            this.retryTimers.delete(timer);
+            if (!this.isShuttingDown) this.processQueue();
+        }, delay);
+        this.retryTimers.add(timer);
     }
 
     async processQueue() {
@@ -2008,27 +2252,71 @@ class CBAHub {
                 this.totalSavedTime += 30;
             }
 
-            const clear = await this.broadcastPreCheck(msg);
-            let forcedProceed = false;
-            if (!clear) {
+            const preCheckResult = await this.broadcastPreCheck(msg);
+            const forcedProceed = false;
+            if (!preCheckResult.clear) {
+                if (preCheckResult.hardBlock) {
+                    const error = `Blocked by ${preCheckResult.sentinel || 'Sentinel'}: ${preCheckResult.reason}`;
+                    console.error(`[CBA Hub] HARD BLOCK: ${error}`);
+                    this.reportData.push({
+                        type: 'COMMAND',
+                        id: msg.id,
+                        cmd: msg.cmd,
+                        goal: msg.goal,
+                        selector: msg.selector,
+                        url: msg.url,
+                        success: false,
+                        hardBlocked: true,
+                        forcedProceed: false,
+                        selfHealed: false,
+                        predictiveWait,
+                        timestamp: new Date().toLocaleTimeString(),
+                        beforeScreenshot: null,
+                        afterScreenshot: null,
+                        error
+                    });
+                    this.completeCommand(msg.clientId, msg.id, {
+                        success: false,
+                        hardBlocked: true,
+                        error
+                    });
+                    this.isProcessing = false;
+                    this.scheduleQueueProcessing();
+                    return;
+                }
+
                 // Track pre-check retries for animation tolerance
                 msg._preCheckRetries = (msg._preCheckRetries || 0) + 1;
                 const maxRetries = this.config.hub?.maxPreCheckRetries || 3;
 
                 if (msg._preCheckRetries >= maxRetries) {
-                    console.log(`[CBA Hub] ANIMATION TOLERANCE: Max pre-check retries (${maxRetries}) reached. Force proceeding with ${msg.cmd}...`);
-                    forcedProceed = true;
-                    // Continue execution despite veto (animation tolerance)
+                    const error = `Pre-check failed after ${maxRetries} attempts: ${preCheckResult.reason}`;
+                    this.reportData.push({
+                        type: 'COMMAND',
+                        id: msg.id,
+                        cmd: msg.cmd,
+                        goal: msg.goal,
+                        selector: msg.selector,
+                        url: msg.url,
+                        success: false,
+                        hardBlocked: false,
+                        forcedProceed: false,
+                        selfHealed: false,
+                        predictiveWait,
+                        timestamp: new Date().toLocaleTimeString(),
+                        beforeScreenshot: null,
+                        afterScreenshot: null,
+                        error
+                    });
+                    this.completeCommand(msg.clientId, msg.id, { success: false, error });
+                    this.scheduleQueueProcessing();
+                    return;
                 } else {
-                    console.log(`[CBA Hub] Pre-check failed (${msg._preCheckRetries}/${maxRetries}) for ${msg.cmd}. Retrying in 1s...`);
+                    const retryAfterMs = preCheckResult.retryAfterMs ?? 1000;
+                    console.log(`[CBA Hub] Pre-check failed (${msg._preCheckRetries}/${maxRetries}) for ${msg.cmd}. Retrying in ${retryAfterMs}ms...`);
                     this.commandQueue.unshift(msg);
-                    // Stability: Reset isProcessing before scheduling retry
-                    // (early exit before try/finally completes)
                     this.isProcessing = false;
-                    setTimeout(() => {
-                        if (this.isShuttingDown) return;
-                        this.processQueue();
-                    }, 1000);
+                    this.scheduleQueueProcessing(retryAfterMs);
                     return;
                 }
             }
@@ -2074,9 +2362,7 @@ class CBAHub {
                 error: commandError
             });
 
-            this.broadcastToClient(null, {
-                type: 'COMMAND_COMPLETE',
-                id: msg.id,
+            this.completeCommand(msg.clientId, msg.id, {
                 success,
                 error: commandError || (success ? null : `Command "${msg.cmd}" failed on ${msg.goal || msg.selector}`),
                 context: this.sovereignState // Phase 4: Return shared context to Intent
@@ -2090,22 +2376,21 @@ class CBAHub {
 
     async broadcastPreCheck(msg) {
         // Exit early if shutting down to prevent page.evaluate after browser closes
-        if (this.isShuttingDown) return true;
+        if (this.isShuttingDown) return { clear: true };
 
         const syncBudget = this.config.hub?.syncBudget || 30000;
         const hint = msg.stabilityHint ? ` (Hint: ${msg.stabilityHint}ms)` : '';
         console.log(`[CBA Hub] Awaiting Handshake for ${msg.cmd}${hint} (Budget: ${syncBudget / 1000}s)...`);
 
-        const relevantSentinels = Array.from(this.sentinels.entries())
-            .filter(([id, s]) => s.priority <= 10);
+        const relevantSentinels = Array.from(this.sentinels.entries());
 
-        if (relevantSentinels.length === 0) return true;
+        if (relevantSentinels.length === 0) return { clear: true };
 
-        const allSelectors = [...new Set(relevantSentinels.flatMap(([id, s]) => s.selectors || []))];
+        const allSelectors = [...new Set(relevantSentinels.flatMap(([, s]) => s.selectors || []))];
 
         // v2.0 Phase 2: Add AI context (screenshot) if deep analysis is capability-flagged
         let screenshotB64 = null;
-        if (relevantSentinels.some(([id, s]) => s.capabilities?.includes('vision'))) {
+        if (relevantSentinels.some(([, s]) => s.capabilities?.includes('vision'))) {
             try {
                 const screenshotBuffer = await this.page.screenshot({ type: 'jpeg', quality: 80 });
                 screenshotB64 = screenshotBuffer.toString('base64');
@@ -2199,7 +2484,7 @@ class CBAHub {
 
         // Phase 9: Extract page text for PII detection
         let pageText = '';
-        if (relevantSentinels.some(([id, s]) => s.capabilities?.includes('pii-detection'))) {
+        if (relevantSentinels.some(([, s]) => s.capabilities?.includes('pii-detection'))) {
             try {
                 pageText = await this.page.evaluate(() => document.body.innerText || '');
                 console.log(`[CBA Hub] Page text extracted for PII scan (${pageText.length} chars)`);
@@ -2210,7 +2495,7 @@ class CBAHub {
 
         // Phase 12: Collect A11y snapshot for accessibility-capable Sentinels
         let a11ySnapshot = null;
-        if (relevantSentinels.some(([id, s]) => s.capabilities?.includes('accessibility'))) {
+        if (relevantSentinels.some(([, s]) => s.capabilities?.includes('accessibility'))) {
             try {
                 a11ySnapshot = await this.getA11ySnapshot();
                 console.log(`[CBA Hub] A11y snapshot collected (${a11ySnapshot.elements?.length || 0} elements)`);
@@ -2234,26 +2519,21 @@ class CBAHub {
             }
         }
 
-        // Standardize broadcast
-        // Standardize broadcast
-        this.broadcastToSentinels({
-            jsonrpc: '2.0',
-            method: 'starlight.pre_check',
-            params: {
-                command: msg,
-                blocking: blockingElements,
-                targetRect: targetRect,  // For obstacle overlap checking
-                screenshot: screenshotB64,
-                page_text: pageText,
-                a11y_snapshot: a11ySnapshot  // Phase 12: For accessibility auditing
-            },
-            id: nanoid()
-        });
+        let viewport = null;
+        try {
+            viewport = this.page.viewportSize?.() || await this.page.evaluate(() => ({
+                width: window.innerWidth,
+                height: window.innerHeight
+            }));
+        } catch (e) {
+            // Viewport is advisory; pre-checks can continue without it.
+        }
 
         const quorumThreshold = this.config.hub?.quorumThreshold || 1.0;
         const consensusTimeout = this.config.hub?.consensusTimeout || 5000;
         const totalSentinels = relevantSentinels.length;
         const requiredConfidence = totalSentinels * quorumThreshold;
+        const preCheckId = `precheck-${nanoid()}`;
 
         let receivedConfidence = 0;
         let receivedVeto = null;
@@ -2261,26 +2541,33 @@ class CBAHub {
 
         return new Promise((resolve) => {
             const cleanup = () => {
-                relevantSentinels.forEach(([id]) => this.pendingRequests.delete(id));
+                relevantSentinels.forEach(([id]) => {
+                    this.pendingRequests.delete(`${preCheckId}:${id}`);
+                });
                 clearTimeout(budgetTimer);
                 clearTimeout(consensusTimer);
             };
 
             const budgetTimer = setTimeout(() => {
                 const missing = relevantSentinels
-                    .filter(([id]) => this.pendingRequests.has(id))
+                    .filter(([id]) => this.pendingRequests.has(`${preCheckId}:${id}`))
                     .map(([_, s]) => s.layer);
                 if (missing.length > 0) {
                     console.warn(`[CBA Hub] Handshake TIMEOUT: Missing signals from [${missing.join(', ')}] after ${syncBudget}ms.`);
                 }
                 cleanup();
-                resolve(false);
+                resolve({
+                    clear: false,
+                    hardBlock: false,
+                    reason: `Handshake timeout: ${missing.join(', ')}`,
+                    retryAfterMs: 1000
+                });
             }, syncBudget);
 
             let consensusTimer = null;
 
             relevantSentinels.forEach(([id, s]) => {
-                this.pendingRequests.set(id, {
+                this.pendingRequests.set(`${preCheckId}:${id}`, {
                     layer: s.layer,
                     resolve: (response) => {
                         responsesCount++;
@@ -2290,11 +2577,13 @@ class CBAHub {
                             receivedVeto = response;
                             console.log(`[CBA Hub] Stability VETO from ${s.layer} (Confidence: ${confidence}).`);
                             cleanup();
-                            setTimeout(async () => {
-                                const delay = response.params?.retryAfterMs || 1000;
-                                await new Promise(r => setTimeout(r, delay));
-                                resolve(false);
-                            }, 0);
+                            resolve({
+                                clear: false,
+                                hardBlock: response.params?.severity === 'hard',
+                                reason: response.params?.reason || `Veto from ${s.layer}`,
+                                retryAfterMs: response.params?.retryAfterMs ?? 1000,
+                                sentinel: s.layer
+                            });
                             return;
                         }
 
@@ -2306,18 +2595,28 @@ class CBAHub {
                         if (receivedConfidence >= requiredConfidence && !receivedVeto) {
                             console.log(`[CBA Hub] Consensus MET (${receivedConfidence.toFixed(1)}/${requiredConfidence.toFixed(1)}). Proceeding...`);
                             cleanup();
-                            resolve(true);
+                            resolve({ clear: true });
                         } else if (responsesCount === totalSentinels) {
                             // All responded but quorum not reached (shouldn't happen with default 1.0 unless confidence < 1)
                             console.log(`[CBA Hub] Handshake COMPLETED. Final confidence: ${receivedConfidence.toFixed(1)}/${requiredConfidence.toFixed(1)}`);
                             cleanup();
-                            resolve(receivedConfidence >= requiredConfidence);
+                            resolve({
+                                clear: receivedConfidence >= requiredConfidence,
+                                hardBlock: false,
+                                reason: 'Insufficient consensus',
+                                retryAfterMs: 1000
+                            });
                         } else if (quorumThreshold < 1.0 && !consensusTimer) {
                             // Start consensus timeout once we have at least one response
                             consensusTimer = setTimeout(() => {
                                 console.log(`[CBA Hub] Consensus TIMEOUT (${receivedConfidence.toFixed(1)}/${requiredConfidence.toFixed(1)}).`);
                                 cleanup();
-                                resolve(receivedConfidence >= requiredConfidence);
+                                resolve({
+                                    clear: receivedConfidence >= requiredConfidence,
+                                    hardBlock: false,
+                                    reason: 'Consensus timeout',
+                                    retryAfterMs: 1000
+                                });
                             }, consensusTimeout);
                         }
                     },
@@ -2325,10 +2624,30 @@ class CBAHub {
                         responsesCount++;
                         if (responsesCount === totalSentinels && !receivedVeto) {
                             cleanup();
-                            resolve(receivedConfidence >= requiredConfidence);
+                            resolve({
+                                clear: receivedConfidence >= requiredConfidence,
+                                hardBlock: false,
+                                reason: 'Sentinel disconnected during pre-check',
+                                retryAfterMs: 1000
+                            });
                         }
                     }
                 });
+            });
+
+            this.broadcastToSentinels({
+                jsonrpc: '2.0',
+                method: 'starlight.pre_check',
+                params: {
+                    command: msg,
+                    blocking: blockingElements,
+                    targetRect,
+                    viewport,
+                    screenshot: screenshotB64,
+                    page_text: pageText,
+                    a11y_snapshot: a11ySnapshot
+                },
+                id: preCheckId
             });
         });
     }
@@ -2424,64 +2743,82 @@ class CBAHub {
         }
     }
 
-    async executeSentinelAction(id, msg) {
-        if (this.lockOwner !== id) return;
-        console.log(`[CBA Hub] Sentinel Action: ${msg.cmd} ${msg.selector} `);
-        try {
-            if (msg.cmd === 'click') {
-                console.log(`[CBA Hub]Force - clicking Sentinel target: ${msg.selector} `);
-                try {
-                    await this.page.click(msg.selector, { timeout: 2000, force: true });
-                } catch (clickErr) {
-                    console.warn(`[CBA Hub] Standard click failed, using dispatchEvent fallback...`);
-                    await this.page.dispatchEvent(msg.selector, 'click');
-                }
-                console.log(`[CBA Hub] Sentinel Action SUCCESS: ${msg.selector} `);
-            }
-
-            // Phase 12: A11y Sentinel DOM Snapshot
-            if (msg.cmd === 'get_a11y_snapshot') {
-                console.log(`[CBA Hub] A11y Snapshot requested...`);
-                const snapshot = await this.getA11ySnapshot();
-                const sentinel = this.sentinels.get(id);
-                if (sentinel?.ws?.readyState === 1) {
-                    sentinel.ws.send(JSON.stringify({
-                        jsonrpc: '2.0',
-                        method: 'starlight.a11y_snapshot',
-                        params: snapshot,
-                        id: msg.id
-                    }));
-                }
-                return;
-            }
-        } catch (e) {
-            console.error(`[CBA Hub] Sentinel action failed: ${e.message} `);
+    async executeSentinelAction(id, msg, requestId) {
+        const client = this.clients.get(id);
+        if (this.lockOwner !== id) {
+            this.sendRpcError(client?.ws, requestId, 4003, 'Sentinel does not own the remediation lock');
+            return;
         }
 
-        // ABSOLUTE SOVEREIGN REMEDIATION: Definitively clear the obstacle via JS
-        // Phase 9: Enhanced to traverse Shadow DOM
-        if (msg.selector.includes('modal') || msg.selector.includes('overlay') || msg.selector.includes('close') || msg.selector.includes('shadow')) {
-            console.log(`[CBA Hub] SOVEREIGN REMEDIATION: Definitively hiding elements matching ${msg.selector}...`);
-            await this.page.evaluate(() => {
-                // Helper: recursively find and hide elements in shadow roots
-                function hideObstacles(root) {
-                    const selectors = '.modal, .overlay, .popup, .shadow-overlay';
-                    const elements = root.querySelectorAll(selectors);
-                    elements.forEach(el => {
-                        const style = window.getComputedStyle(el);
-                        if (style.display !== 'none') el.style.display = 'none';
-                    });
-
-                    // Traverse shadow roots
-                    const allElements = root.querySelectorAll('*');
-                    for (const el of allElements) {
-                        if (el.shadowRoot) {
-                            hideObstacles(el.shadowRoot);
-                        }
+        console.log(`[CBA Hub] Sentinel Action: ${msg.cmd} ${msg.selector || ''}`);
+        try {
+            switch (msg.cmd) {
+                case 'click':
+                    try {
+                        await this.page.click(msg.selector, { timeout: 2000, force: true });
+                    } catch {
+                        await this.page.dispatchEvent(msg.selector, 'click');
                     }
-                }
-                hideObstacles(document);
-            });
+                    break;
+                case 'fill':
+                    await this.page.fill(msg.selector, msg.text);
+                    break;
+                case 'select':
+                    await this.page.selectOption(msg.selector, msg.value);
+                    break;
+                case 'hover':
+                    await this.page.hover(msg.selector);
+                    break;
+                case 'check':
+                    await this.page.check(msg.selector);
+                    break;
+                case 'uncheck':
+                    await this.page.uncheck(msg.selector);
+                    break;
+                case 'scroll':
+                    if (msg.selector) {
+                        await this.page.locator(msg.selector).scrollIntoViewIfNeeded();
+                    } else {
+                        await this.page.evaluate(() => window.scrollBy(0, window.innerHeight));
+                    }
+                    break;
+                case 'press':
+                    if (msg.selector) await this.page.press(msg.selector, msg.key);
+                    else await this.page.keyboard.press(msg.key);
+                    break;
+                case 'type':
+                    if (msg.selector) await this.page.type(msg.selector, msg.text);
+                    else await this.page.keyboard.type(msg.text);
+                    break;
+                case 'upload':
+                    await this.page.setInputFiles(msg.selector, msg.files);
+                    break;
+                case 'hide':
+                    await this.page.locator(msg.selector).evaluateAll(elements => {
+                        elements.forEach(element => {
+                            element.style.setProperty('display', 'none', 'important');
+                        });
+                    });
+                    break;
+                case 'remove':
+                    await this.page.locator(msg.selector).evaluateAll(elements => {
+                        elements.forEach(element => element.remove());
+                    });
+                    break;
+                case 'get_a11y_snapshot':
+                    this.sendRpcResult(client.ws, requestId, {
+                        success: true,
+                        snapshot: await this.getA11ySnapshot()
+                    });
+                    return;
+                default:
+                    throw new Error(`Unsupported sentinel action: ${msg.cmd}`);
+            }
+
+            this.sendRpcResult(client.ws, requestId, { success: true });
+        } catch (error) {
+            console.error(`[CBA Hub] Sentinel action failed: ${error.message}`);
+            this.sendRpcError(client?.ws, requestId, -32000, 'Sentinel action failed', error.message);
         }
     }
 
@@ -2489,7 +2826,7 @@ class CBAHub {
      * Phase 13: Get page context for NLI parsing.
      * Extracts semantic elements (buttons, inputs, products) to guide the LLM.
      */
-    async getPageContext() {
+    async getLegacyPageContext() {
         if (!this.page) return { error: 'No active page' };
 
         try {
@@ -2534,8 +2871,7 @@ class CBAHub {
 
                         data.inputs.push({
                             label: (label || 'unknown').trim().slice(0, 50),
-                            type: i.type || 'text',
-                            value: i.value
+                            type: i.type || 'text'
                         });
                     }
                 });
@@ -2921,9 +3257,10 @@ class CBAHub {
     async broadcastToClient(clientId, msg) {
         const data = JSON.stringify(msg);
         await this.recordTrace('SEND', clientId, msg);
-        this.wss.clients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) client.send(data);
-        });
+        const client = this.clients.get(clientId);
+        if (client?.ws?.readyState === WebSocket.OPEN) {
+            client.ws.send(data);
+        }
     }
 
     async generateReport() {
@@ -3267,5 +3604,13 @@ if (require.main === module) {
     const port = args.find(a => a.startsWith('--port='))?.split('=')[1] || 8080;
 
     const hub = new CBAHub(parseInt(port), headless);
-    hub.init();
+    hub.init().catch(async (error) => {
+        console.error('[CBA Hub] Startup failed:', error);
+        try {
+            await hub.shutdown(error);
+        } catch (shutdownError) {
+            console.error('[CBA Hub] Shutdown after startup failure also failed:', shutdownError);
+        }
+        process.exitCode = 1;
+    });
 }

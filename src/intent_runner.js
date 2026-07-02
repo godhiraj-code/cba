@@ -5,15 +5,22 @@
  */
 
 const ws = require('ws');
+const crypto = require('crypto');
 // Use ws if global.WebSocket doesn't look like our mock (Node 24 global WebSocket is NOT an EventEmitter)
 const WebSocket = (typeof global !== 'undefined' && global.WebSocket && (global.WebSocket.isMock || global.WebSocket.name === 'MockWebSocket')) ? global.WebSocket : ws;
 
 class IntentRunner {
-    constructor(hubUrl = 'ws://localhost:8080') {
+    constructor(hubUrl = process.env.HUB_URL || process.env.STARLIGHT_HUB_URL || 'ws://localhost:8080', options = {}) {
+        if (typeof hubUrl === 'object' && hubUrl !== null) {
+            options = hubUrl;
+            hubUrl = options.hubUrl || process.env.HUB_URL || process.env.STARLIGHT_HUB_URL || 'ws://localhost:8080';
+        }
         this.hubUrl = hubUrl;
+        this.options = options;
+        this.authToken = options.authToken || process.env.STARLIGHT_AUTH_TOKEN || null;
+        this.layer = options.layer || `IntentRunner-${crypto.randomUUID()}`;
         this.ws = null;
         this.pendingCommands = new Map();
-        this.commandIdCounter = 0;
         this.onContextUpdate = null;
     }
 
@@ -29,7 +36,38 @@ class IntentRunner {
                 // Use addEventListener for cross-environment compatibility (Node 24 built-in vs ws package)
                 this.ws.addEventListener('open', () => {
                     console.log('[IntentRunner] Connected to Starlight Hub');
-                    resolve();
+                    const registrationId = `reg-${crypto.randomUUID()}`;
+                    const timeoutId = setTimeout(() => {
+                        this.pendingCommands.delete(registrationId);
+                        reject(new Error('Hub registration timed out'));
+                    }, this.options.registrationTimeout || 5000);
+
+                    this.pendingCommands.set(registrationId, {
+                        resolve: () => {
+                            clearTimeout(timeoutId);
+                            resolve();
+                        },
+                        reject: (error) => {
+                            clearTimeout(timeoutId);
+                            reject(error);
+                        },
+                        cmdDesc: 'Hub registration'
+                    });
+
+                    this.ws.send(JSON.stringify({
+                        jsonrpc: '2.0',
+                        method: 'starlight.registration',
+                        params: {
+                            layer: this.layer,
+                            role: 'intent',
+                            priority: 10,
+                            capabilities: ['intent'],
+                            selectors: [],
+                            version: '1.0.0',
+                            ...(this.authToken ? { authToken: this.authToken } : {})
+                        },
+                        id: registrationId
+                    }));
                 });
 
                 this.ws.addEventListener('message', (event) => {
@@ -71,6 +109,21 @@ class IntentRunner {
             this.hijackDetails = msg;
         }
 
+        if (msg.id && (Object.prototype.hasOwnProperty.call(msg, 'result') || msg.error)) {
+            const pending = this.pendingCommands.get(msg.id);
+            if (!pending) return;
+            this.pendingCommands.delete(msg.id);
+
+            if (msg.error) {
+                pending.reject(new Error(msg.error.message || 'Hub request failed'));
+            } else if (msg.result?.success === false) {
+                pending.reject(new Error(msg.result.error || `Failed: ${pending.cmdDesc}`));
+            } else {
+                pending.resolve(msg.result);
+            }
+            return;
+        }
+
         if (msg.type === 'COMMAND_COMPLETE') {
             const pending = this.pendingCommands.get(msg.id);
             if (pending) {
@@ -86,6 +139,10 @@ class IntentRunner {
         } else if (msg.method === 'starlight.sovereign_update' && this.onContextUpdate) {
             this.onContextUpdate(msg.params.context);
         }
+    }
+
+    _isSocketOpen() {
+        return !!this.ws && this.ws.readyState === 1;
     }
 
     /**
@@ -222,7 +279,12 @@ class IntentRunner {
      */
     _sendCommand(params, timeout = 30000) {
         return new Promise((resolve, reject) => {
-            const id = `cmd-${++this.commandIdCounter}`;
+            if (!this._isSocketOpen()) {
+                reject(new Error('IntentRunner is not connected to the Hub'));
+                return;
+            }
+
+            const id = `cmd-${crypto.randomUUID()}`;
 
             // Build human-readable description for error messages
             const cmdDesc = this._describeCommand(params);
@@ -298,8 +360,13 @@ class IntentRunner {
      * Close WebSocket connection.
      */
     close() {
+        for (const [id, pending] of this.pendingCommands) {
+            pending.reject(new Error(`Connection closed before ${pending.cmdDesc || id} completed`));
+        }
+        this.pendingCommands.clear();
         if (this.ws) {
             this.ws.close();
+            this.ws = null;
         }
     }
 
@@ -366,43 +433,35 @@ class IntentRunner {
      */
     async requestPageContext() {
         // Check if WebSocket is connected
-        if (!this.ws || this.ws.readyState !== 1) {
+        if (!this._isSocketOpen()) {
             return { error: 'WebSocket not connected' };
         }
 
         return new Promise((resolve, reject) => {
-            const id = `context-${Date.now()}`;
+            const id = `context-${crypto.randomUUID()}`;
             const timeout = setTimeout(() => {
-                this.ws.removeListener('message', handler);
-                // Return empty context instead of rejecting - this allows tests to continue
-                resolve({ error: 'Page context request timed out', buttons: [], inputs: [], links: [], products: [], headings: [] });
-            }, 10000); // Increased timeout to 10s
+                this.pendingCommands.delete(id);
+                resolve({
+                    error: 'Page context request timed out',
+                    buttons: [],
+                    inputs: [],
+                    links: [],
+                    products: [],
+                    headings: []
+                });
+            }, 10000);
 
-            // Set up one-time message handler for this specific response
-            const handler = (data) => {
-                try {
-                    // Handle both Buffer and string data
-                    const dataStr = typeof data === 'string' ? data : data.toString('utf8');
-                    const msg = JSON.parse(dataStr);
-
-                    // Check if this response matches our request
-                    if (msg.id === id) {
-                        clearTimeout(timeout);
-                        this.ws.removeListener('message', handler);
-
-                        if (msg.error) {
-                            resolve({ error: msg.error.message || 'Unknown error', buttons: [], inputs: [], links: [], products: [], headings: [] });
-                        } else {
-                            resolve(msg.result || {});
-                        }
-                    }
-                } catch (e) {
-                    // Ignore parse errors - message may not be for us
-                }
-            };
-
-            // Add listener
-            this.ws.on('message', handler);
+            this.pendingCommands.set(id, {
+                resolve: (result) => {
+                    clearTimeout(timeout);
+                    resolve(result || {});
+                },
+                reject: (error) => {
+                    clearTimeout(timeout);
+                    reject(error);
+                },
+                cmdDesc: 'Page context request'
+            });
 
             // Send request
             this.ws.send(JSON.stringify({

@@ -1,6 +1,7 @@
 {
     "hub": {
         "port": 8080,
+        "host": "127.0.0.1",
         "browser": {
             "engine": "chromium",
             "mobile": {
@@ -24,12 +25,19 @@
         },
         "quorumThreshold": 1,
         "consensusTimeout": 5000,
+        "maxPreCheckRetries": 3,
         "ghostMode": false,
         "security": {
             "authToken": null,
             "jwtSecret": null,
+            "authRequired": false,
             "tokenExpiry": 3600,
             "piiRedaction": true,
+            "allowedOrigins": [
+                "http://127.0.0.1:3000",
+                "http://localhost:3000"
+            ],
+            "maxMessageBytes": 1048576,
             "ssl": {
                 "enabled": false,
                 "keyPath": null,

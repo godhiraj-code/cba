@@ -12,7 +12,7 @@ use crate::client::{ClientConfig, WebSocketClient};
 use crate::error::{Error, Result};
 use crate::messages::{
     methods, ActionCommand, ActionParams, ContextUpdateParams, EntropyParams, HijackParams,
-    JsonRpcNotification, JsonRpcRequest, PreCheckParams, PreCheckResponse, RawMessage,
+    JsonRpcRequest, PreCheckParams, PreCheckResponse, RawMessage,
     RegistrationParams, ResumeParams,
 };
 
@@ -288,9 +288,16 @@ impl<H: SentinelHandler + 'static> Sentinel<H> {
 
     /// Handle an incoming message from the Hub.
     async fn handle_message(&self, msg: RawMessage) -> Result<()> {
-        debug!("Handling: {}", msg.method);
+        let Some(method) = msg.method.as_deref() else {
+            if let Some(error) = msg.error {
+                error!("Hub request failed: {}", error.message);
+            }
+            return Ok(());
+        };
 
-        match msg.method.as_str() {
+        debug!("Handling: {}", method);
+
+        match method {
             methods::PRE_CHECK => {
                 let params: PreCheckParams = serde_json::from_value(msg.params)?;
                 let response = self.handler.on_pre_check(params).await;
@@ -299,7 +306,7 @@ impl<H: SentinelHandler + 'static> Sentinel<H> {
                     self.send_pre_check_response(&id, response).await?;
                 }
             }
-            methods::ENTROPY => {
+            methods::ENTROPY_STREAM => {
                 let params: EntropyParams = serde_json::from_value(msg.params)?;
                 self.handler.on_entropy(params).await;
             }
@@ -307,8 +314,17 @@ impl<H: SentinelHandler + 'static> Sentinel<H> {
                 let params: ContextUpdateParams = serde_json::from_value(msg.params)?;
                 self.handler.on_context_update(params.context).await;
             }
+            methods::PING => {
+                let client = self.client.as_ref().ok_or(Error::NotConnected)?;
+                let request = JsonRpcRequest::new(
+                    methods::PONG,
+                    serde_json::json!({ "timestamp": chrono::Utc::now().timestamp_millis() }),
+                    format!("pong-{}", Uuid::new_v4()),
+                );
+                client.send_json(&request).await?;
+            }
             _ => {
-                debug!("Unhandled method: {}", msg.method);
+                debug!("Unhandled method: {}", method);
             }
         }
 
@@ -316,17 +332,35 @@ impl<H: SentinelHandler + 'static> Sentinel<H> {
     }
 
     /// Send pre-check response to Hub.
-    async fn send_pre_check_response(&self, _id: &str, response: PreCheckResponse) -> Result<()> {
+    async fn send_pre_check_response(&self, id: &str, response: PreCheckResponse) -> Result<()> {
         let client = self.client.as_ref().ok_or(Error::NotConnected)?;
 
-        let method = match &response {
-            PreCheckResponse::Clear => methods::CLEAR,
-            PreCheckResponse::Wait { .. } => methods::WAIT,
-            PreCheckResponse::Hijack { .. } => methods::HIJACK,
+        let (method, params) = match response {
+            PreCheckResponse::Clear => (
+                methods::CLEAR,
+                serde_json::json!({ "confidence": 1.0 }),
+            ),
+            PreCheckResponse::Wait {
+                retry_after_ms,
+                reason,
+            } => {
+                let mut params = serde_json::json!({
+                    "retryAfterMs": retry_after_ms,
+                    "severity": "soft"
+                });
+                if let Some(reason) = reason {
+                    params["reason"] = serde_json::Value::String(reason);
+                }
+                (methods::WAIT, params)
+            }
+            PreCheckResponse::Hijack { reason } => (
+                methods::HIJACK,
+                serde_json::json!({ "reason": reason }),
+            ),
         };
 
-        let notification = JsonRpcNotification::new(method, response);
-        client.send_json(&notification).await
+        let request = JsonRpcRequest::new(method, params, id);
+        client.send_json(&request).await
     }
 
     /// Send a hijack request (take control of browser).
@@ -337,8 +371,12 @@ impl<H: SentinelHandler + 'static> Sentinel<H> {
             reason: reason.into(),
         };
 
-        let notification = JsonRpcNotification::new(methods::HIJACK, params);
-        client.send_json(&notification).await
+        let request = JsonRpcRequest::new(
+            methods::HIJACK,
+            params,
+            format!("hijack-{}", Uuid::new_v4()),
+        );
+        client.send_json(&request).await
     }
 
     /// Send an action during hijack.
@@ -356,8 +394,12 @@ impl<H: SentinelHandler + 'static> Sentinel<H> {
             text,
         };
 
-        let notification = JsonRpcNotification::new(methods::ACTION, params);
-        client.send_json(&notification).await
+        let request = JsonRpcRequest::new(
+            methods::ACTION,
+            params,
+            format!("action-{}", Uuid::new_v4()),
+        );
+        client.send_json(&request).await
     }
 
     /// Resume after hijack.
@@ -365,8 +407,12 @@ impl<H: SentinelHandler + 'static> Sentinel<H> {
         let client = self.client.as_ref().ok_or(Error::NotConnected)?;
 
         let params = ResumeParams { request_recheck };
-        let notification = JsonRpcNotification::new(methods::RESUME, params);
-        client.send_json(&notification).await
+        let request = JsonRpcRequest::new(
+            methods::RESUME,
+            params,
+            format!("resume-{}", Uuid::new_v4()),
+        );
+        client.send_json(&request).await
     }
 
     /// Stop the Sentinel.

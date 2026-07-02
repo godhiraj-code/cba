@@ -24,6 +24,17 @@ Starlight is an open protocol for building **self-healing browser automation** s
 
 ---
 
+## Protocol Objectives
+
+Run a mission file, URL, or natural-language intent with Sentinels in the background:
+
+```bash
+node bin/starlight.js --url https://www.dhirajdas.dev --all-sentinels --headless --json
+node bin/starlight.js --intent "Go to https://www.saucedemo.com and click Login" --all-sentinels --headless --json
+```
+
+The runner starts the Hub, waits for health, starts Sentinels, waits for registration, and routes browser actions through `starlight.pre_check` consensus.
+
 ## Hub & Constellation Features
 
 | Feature | Description |

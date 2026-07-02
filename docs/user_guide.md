@@ -50,8 +50,14 @@ graph TD
 ```bash
 # Hub + Sentinels + Intent in one command
 node bin/starlight.js test/intent_portfolio_v2.js --headless --verbose
+
+# URL objective with every production Sentinel
+node bin/starlight.js --url https://www.dhirajdas.dev --all-sentinels --headless --json
+
+# Natural-language objective
+node bin/starlight.js --intent "Go to https://www.saucedemo.com and fill Username with standard_user and fill Password with secret_sauce and click Login" --all-sentinels --headless --json
 ```
-This script handles the entire lifecycle: spawning the constellation, running the mission, and cleaning up.
+This script handles the entire lifecycle: spawning the constellation, waiting for Hub health and Sentinel registration, running the mission/objective, and cleaning up.
 
 **Option B: Manual Launch (For Development)**
 ```bash
@@ -298,10 +304,11 @@ Sentinels can now communicate directly with each other:
 - **Stability Broadcast**: Pulse tells everyone "environment is stable"
 - **Availability Handling**: If a Sentinel is offline, sender gets notified
 
-### 🗳️ Consensus Mesh (Quorum)
-The Hub no longer waits for every single Sentinel to "handshake". If a majority (Quorum) agrees the path is clear, the mission proceeds.
-- **Fail-Fast**: Respects any Veto (WAIT) immediately.
-- **Performance**: High-speed execution even with laggy Sentinels.
+### 🗳️ Consensus Mesh
+By default, the Hub waits for every connected Sentinel to answer the `PRE_CHECK` handshake. A lower quorum can be configured, but any `WAIT` or `HIJACK` still overrides quorum and pauses execution.
+- **Fail-Fast**: Respects any veto (`WAIT`) immediately.
+- **No Forced Proceed**: Repeated vetoes fail the objective instead of bypassing Sentinel judgment.
+- **Evidence**: Reports and `mission_trace.json` show which Sentinels cleared, waited, hijacked, or injected context.
 
 ### 🌀 Temporal Ghosting (Speed Limit)
 Run missions in "Ghost Mode" to find the UI's performance limits.
@@ -351,8 +358,8 @@ Mission Control now dynamically discovers ALL sentinels in the `sentinels/` dire
 **How It Works:**
 1. Sentinels connect to the Hub via WebSocket
 2. On each action, the Hub sends `PRE_CHECK` to ALL sentinels
-3. Each sentinel responds: `CLEAR` (no problem) or `HIJACK` (I'll handle this)
-4. Only relevant sentinels take action; others stay silent
+3. Each sentinel responds: `CLEAR`, `WAIT`, or `HIJACK`
+4. Only Sentinels with something to fix take control; passive Sentinels still clear or inject context
 
 ---
 

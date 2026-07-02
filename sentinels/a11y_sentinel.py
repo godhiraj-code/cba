@@ -113,7 +113,7 @@ class A11ySentinel(SentinelBase):
     async def _request_dom_snapshot(self):
         """Request DOM snapshot from Hub via action."""
         try:
-            await self.send_action("get_dom_snapshot", "body")
+            await self.send_action("get_a11y_snapshot")
             # In a real implementation, we'd wait for the response
             # For now, return mock data for testing
             return {"elements": [], "computed": []}

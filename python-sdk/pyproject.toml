@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "starlight-protocol"
-version = "1.3.4"
+version = "4.0.0a1"
 description = "Python SDK for the Starlight Protocol - Resilient browser automation through autonomous Sentinels"
 readme = "README.md"
 license = {text = "MIT"}

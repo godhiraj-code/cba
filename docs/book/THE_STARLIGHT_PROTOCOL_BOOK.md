@@ -44,6 +44,12 @@ Instead of treating the browser as a machine to be commanded, Starlight treats i
 | Single thread of control | Multi-agent mesh |
 | Tests break when UI changes | Predictive selector recovery |
 
+## Production Protocol Objectives
+
+The production runner treats a protocol objective as a first-class workflow. A user can provide a mission file, a URL to inspect, a natural-language intent, or a URL plus a natural-language intent.
+
+`bin/starlight.js` starts the Hub, waits for the runtime health endpoint to become ready, launches the selected background Sentinels, waits for their registration, executes the objective, and then shuts the constellation down cleanly. Browser readiness is not inferred from elapsed time. Page readiness belongs to Sentinels through `starlight.pre_check`, `starlight.wait`, `starlight.hijack`, and `starlight.clear`.
+
 ## The Origin Story
 
 Starlight was born from a simple observation: **the best automation engineers don't write better scripts—they build better systems**.
@@ -303,6 +309,9 @@ Translates goals like "Login Button" to actual CSS selectors by scanning the pag
 ### 6. Historical Memory
 Maintains `mission_trace.json` for time-travel debugging and self-healing selector substitution.
 
+### 7. Protocol Objective Runner
+`src/protocol_objective.js` is the production objective harness behind `bin/starlight.js`. It accepts mission files, URLs, and natural-language objectives, assembles the Sentinel fleet, waits on observable health and registration, and produces `mission_trace.json`, `report.html`, and structured JSON output for CI.
+
 ## Key Methods
 
 ```javascript
@@ -342,6 +351,21 @@ All settings are externalized to `config.json`:
     }
 }
 ```
+
+## Protocol Objective CLI
+
+```bash
+# Probe a URL with the default background Sentinel fleet
+node bin/starlight.js --url https://example.com --headless
+
+# Use every available Sentinel and emit structured evidence
+node bin/starlight.js --url https://www.dhirajdas.dev --all-sentinels --headless --json
+
+# Execute natural language through the protocol
+node bin/starlight.js --intent "Go to https://www.saucedemo.com and log in" --all-sentinels --headless
+```
+
+The runner uses bounded process and transport timeouts, but it does not use time as proof that the application is ready. If a Sentinel continues to answer `starlight.wait`, the objective fails after the configured retry budget instead of force-proceeding.
 
 ### Cross-Browser Support (Phase 14.1)
 

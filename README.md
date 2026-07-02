@@ -84,6 +84,22 @@ npx playwright install chromium
 node bin/starlight.js test/intent_portfolio_v2.js --headless
 ```
 
+### Protocol Objectives
+```bash
+# Probe a URL with the default background sentinel fleet
+node bin/starlight.js --url https://example.com --headless
+
+# Start at a URL, then let natural-language intent drive the mission
+node bin/starlight.js --url https://www.saucedemo.com --intent "log in and add the first item to the cart" --headless
+
+# Use every available sentinel, including AI vision if its local backend is running
+node bin/starlight.js --url https://example.com --all-sentinels --headless
+```
+
+The CLI now treats the protocol objective as a first-class workflow: it starts the Hub, launches Sentinels in the background, waits for registration, executes the mission/URL/intent, and cleans up the constellation when complete.
+
+Real-site protocol evidence is tracked in [`docs/PROTOCOL_OBJECTIVE_EVIDENCE.md`](docs/PROTOCOL_OBJECTIVE_EVIDENCE.md).
+
 ### Mission Control (GUI)
 ```bash
 node launcher/server.js
@@ -153,6 +169,22 @@ All communication uses JSON-RPC 2.0:
 
 ---
 
+## 💸 Commercial launch wedge
+
+Starlight should not launch as another generic browser automation tool. The sharper wedge is **Sentinel/Agent-powered AI QA reliability** for teams whose Playwright, Selenium, RPA, or AI-agent browser workflows are flaky, blocked by popups, leaking sensitive data, or hard to explain after failure.
+
+The paid offer should start as a productized service before broad SaaS: reliability audits, managed Sentinel regression runs, and custom Sentinels for one high-value customer journey. The open-source protocol creates trust and virality; the monetizable layer is outcome-based QA reliability, launch-readiness reports, and premium Sentinel/Agent implementation.
+
+Generate the current commercial snapshot with:
+
+```bash
+npm run launch:report
+```
+
+Then open Mission Control to see the Launch Readiness panel.
+
+For the first paid offer, see [docs/PILOT_OFFER.md](docs/PILOT_OFFER.md).
+
 ## ✨ Key Features
 
 | Feature | Description |
@@ -215,7 +247,7 @@ if __name__ == "__main__":
     asyncio.run(MySentinel().start())
 ```
 
-#### Go SDK (New - v4.0.0)
+#### Go SDK
 > ⚠️ **Note:** This SDK provides building blocks. Pre-built Sentinels (Janitor, Pulse, etc.) are NOT included - use Python versions or build your own.
 
 ```go
@@ -229,7 +261,7 @@ sentinel.Start(ctx, "ws://localhost:8080")
 
 📦 **Location:** [`go-sdk/`](go-sdk/) | 📄 **[Go SDK README](go-sdk/README.md)**
 
-#### Java SDK (New - v4.0.0)
+#### Java SDK
 > ⚠️ **Note:** This SDK provides building blocks. Pre-built Sentinels (Janitor, Pulse, etc.) are NOT included - use Python versions or build your own.
 
 ```java
@@ -243,7 +275,7 @@ sentinel.start("ws://localhost:8080");
 
 📦 **Location:** [`java-sdk/`](java-sdk/) | 📄 **[Java SDK README](java-sdk/README.md)**
 
-#### Rust SDK (New - v4.0.0)
+#### Rust SDK
 > ⚠️ **Note:** This SDK provides building blocks. Pre-built Sentinels (Janitor, Pulse, etc.) are NOT included - use Python versions or build your own.
 
 ```rust

@@ -69,17 +69,20 @@ class MissionDocumenter {
             case 'goto':
                 return `Given I am on "${url}"`;
 
-            case 'fill':
+            case 'fill': {
                 const field = goal || this._selectorToLabel(selector) || 'field';
                 return `When I fill "${field}" with "${text || value || ''}"`;
+            }
 
-            case 'click':
+            case 'click': {
                 const target = goal || this._selectorToLabel(selector) || 'element';
                 return `When I click "${target}"`;
+            }
 
-            case 'select':
+            case 'select': {
                 const dropdown = goal || this._selectorToLabel(selector) || 'dropdown';
                 return `When I select "${value}" from "${dropdown}"`;
+            }
 
             case 'check':
                 return `When I check "${goal || selector}"`;

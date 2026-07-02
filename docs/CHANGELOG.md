@@ -2,6 +2,18 @@
 
 All notable changes to the Starlight Protocol.
 
+## [4.0.0-alpha.1] - 2026-07-03
+
+### Protocol Objectives
+- Added first-class protocol objectives through `bin/starlight.js` for mission files, URLs, natural-language intent, and URL plus intent.
+- Added background Sentinel startup with observable Hub health and Sentinel registration checks.
+- Added real-site evidence for `www.dhirajdas.dev`, `login.salesforce.com`, and a SauceDemo natural-language login flow.
+
+### Protocol Compliance
+- Enforced Sentinel priority range `1-10` in canonical schemas and production Sentinels.
+- Removed forced proceed after repeated Sentinel `wait` responses; exhausted retries now fail the objective.
+- Removed fixed Python CLI startup sleeps in favor of health/registration polling.
+
 ## [1.4.0] - 2026-01-09
 
 ### 📱 Phase 14.2: Mobile Device Emulation

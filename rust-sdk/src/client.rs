@@ -3,9 +3,12 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use futures_util::{SinkExt, StreamExt};
+use futures_util::{
+    stream::{SplitSink, SplitStream},
+    SinkExt, StreamExt,
+};
 use tokio::net::TcpStream;
-use tokio::sync::{mpsc, Mutex, RwLock};
+use tokio::sync::{Mutex, RwLock};
 use tokio::time::sleep;
 use tokio_tungstenite::{connect_async, tungstenite::Message, MaybeTlsStream, WebSocketStream};
 use tracing::{debug, error, info, warn};
@@ -15,6 +18,8 @@ use crate::messages::RawMessage;
 
 /// Type alias for the WebSocket stream.
 pub type WsStream = WebSocketStream<MaybeTlsStream<TcpStream>>;
+type WsSink = SplitSink<WsStream, Message>;
+type WsReceiver = SplitStream<WsStream>;
 
 /// WebSocket client configuration.
 #[derive(Debug, Clone)]
@@ -60,8 +65,8 @@ impl ClientConfig {
 /// WebSocket client for Starlight Hub communication.
 pub struct WebSocketClient {
     config: ClientConfig,
-    stream: Arc<RwLock<Option<WsStream>>>,
-    sender: Arc<Mutex<Option<mpsc::Sender<Message>>>>,
+    sender: Arc<Mutex<Option<WsSink>>>,
+    receiver: Arc<Mutex<Option<WsReceiver>>>,
     connected: Arc<RwLock<bool>>,
     reconnect_count: Arc<RwLock<u32>>,
 }
@@ -71,8 +76,8 @@ impl WebSocketClient {
     pub fn new(config: ClientConfig) -> Self {
         Self {
             config,
-            stream: Arc::new(RwLock::new(None)),
             sender: Arc::new(Mutex::new(None)),
+            receiver: Arc::new(Mutex::new(None)),
             connected: Arc::new(RwLock::new(false)),
             reconnect_count: Arc::new(RwLock::new(0)),
         }
@@ -86,7 +91,9 @@ impl WebSocketClient {
 
         info!("Connected to Hub");
 
-        *self.stream.write().await = Some(ws_stream);
+        let (sender, receiver) = ws_stream.split();
+        *self.sender.lock().await = Some(sender);
+        *self.receiver.lock().await = Some(receiver);
         *self.connected.write().await = true;
         *self.reconnect_count.write().await = 0;
 
@@ -100,10 +107,10 @@ impl WebSocketClient {
 
     /// Send a message to the Hub.
     pub async fn send(&self, message: &str) -> Result<()> {
-        let mut stream_guard = self.stream.write().await;
+        let mut sender_guard = self.sender.lock().await;
 
-        if let Some(ref mut stream) = *stream_guard {
-            stream.send(Message::Text(message.to_string())).await?;
+        if let Some(ref mut sender) = *sender_guard {
+            sender.send(Message::Text(message.to_string())).await?;
             debug!("Sent: {}", message);
             Ok(())
         } else {
@@ -119,38 +126,39 @@ impl WebSocketClient {
 
     /// Receive a message from the Hub.
     pub async fn receive(&self) -> Result<Option<RawMessage>> {
-        let mut stream_guard = self.stream.write().await;
+        let message = {
+            let mut receiver_guard = self.receiver.lock().await;
+            let receiver = receiver_guard.as_mut().ok_or(Error::NotConnected)?;
+            receiver.next().await
+        };
 
-        if let Some(ref mut stream) = *stream_guard {
-            match stream.next().await {
-                Some(Ok(Message::Text(text))) => {
-                    debug!("Received: {}", text);
-                    let msg: RawMessage = serde_json::from_str(&text)?;
-                    Ok(Some(msg))
-                }
-                Some(Ok(Message::Close(_))) => {
-                    warn!("Connection closed by Hub");
-                    *self.connected.write().await = false;
-                    Err(Error::ConnectionClosed("Closed by Hub".to_string()))
-                }
-                Some(Ok(Message::Ping(data))) => {
-                    // Respond to ping with pong
-                    stream.send(Message::Pong(data)).await?;
-                    Ok(None)
-                }
-                Some(Ok(_)) => Ok(None), // Ignore other message types
-                Some(Err(e)) => {
-                    error!("WebSocket error: {}", e);
-                    *self.connected.write().await = false;
-                    Err(Error::Connection(e))
-                }
-                None => {
-                    *self.connected.write().await = false;
-                    Err(Error::ConnectionClosed("Stream ended".to_string()))
-                }
+        match message {
+            Some(Ok(Message::Text(text))) => {
+                debug!("Received: {}", text);
+                let msg: RawMessage = serde_json::from_str(&text)?;
+                Ok(Some(msg))
             }
-        } else {
-            Err(Error::NotConnected)
+            Some(Ok(Message::Close(_))) => {
+                warn!("Connection closed by Hub");
+                *self.connected.write().await = false;
+                Err(Error::ConnectionClosed("Closed by Hub".to_string()))
+            }
+            Some(Ok(Message::Ping(data))) => {
+                let mut sender_guard = self.sender.lock().await;
+                let sender = sender_guard.as_mut().ok_or(Error::NotConnected)?;
+                sender.send(Message::Pong(data)).await?;
+                Ok(None)
+            }
+            Some(Ok(_)) => Ok(None), // Ignore other message types
+            Some(Err(e)) => {
+                error!("WebSocket error: {}", e);
+                *self.connected.write().await = false;
+                Err(Error::Connection(e))
+            }
+            None => {
+                *self.connected.write().await = false;
+                Err(Error::ConnectionClosed("Stream ended".to_string()))
+            }
         }
     }
 
@@ -193,13 +201,14 @@ impl WebSocketClient {
 
     /// Close the connection.
     pub async fn close(&self) -> Result<()> {
-        let mut stream_guard = self.stream.write().await;
+        let mut sender_guard = self.sender.lock().await;
 
-        if let Some(ref mut stream) = *stream_guard {
-            stream.close(None).await?;
+        if let Some(ref mut sender) = *sender_guard {
+            sender.close().await?;
         }
 
-        *stream_guard = None;
+        *sender_guard = None;
+        *self.receiver.lock().await = None;
         *self.connected.write().await = false;
 
         info!("Connection closed");
@@ -216,8 +225,8 @@ impl Clone for WebSocketClient {
     fn clone(&self) -> Self {
         Self {
             config: self.config.clone(),
-            stream: Arc::clone(&self.stream),
             sender: Arc::clone(&self.sender),
+            receiver: Arc::clone(&self.receiver),
             connected: Arc::clone(&self.connected),
             reconnect_count: Arc::clone(&self.reconnect_count),
         }

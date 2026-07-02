@@ -7,8 +7,15 @@ import os
 import sys
 import subprocess
 import signal
-import time
 import socket
+import time
+import json
+import urllib.request
+import urllib.error
+from threading import Event
+
+
+_poll_waiter = Event()
 
 
 def is_port_in_use(port: int) -> bool:
@@ -44,6 +51,54 @@ def kill_process_on_port(port: int):
             pass
 
 
+def wait_until(label: str, predicate, timeout: float = 30.0, interval: float = 0.25):
+    """Poll an observable condition until it is true or the deadline expires."""
+    deadline = time.monotonic() + timeout
+    last_error = None
+
+    while time.monotonic() < deadline:
+        try:
+            result = predicate()
+            if result:
+                return result
+        except Exception as error:
+            last_error = error
+        _poll_waiter.wait(min(interval, max(0.0, deadline - time.monotonic())))
+
+    detail = f": {last_error}" if last_error else ""
+    raise TimeoutError(f"Timed out waiting for {label}{detail}")
+
+
+def read_hub_health(port: int = 8080):
+    """Read Hub health without relying on a fixed startup delay."""
+    with urllib.request.urlopen(f"http://localhost:{port}/health", timeout=1) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def wait_for_hub(port: int = 8080, timeout: float = 30.0):
+    return wait_until(
+        "Hub health",
+        lambda: (health if (health := read_hub_health(port)).get("status") == "healthy" else None),
+        timeout=timeout
+    )
+
+
+def wait_for_sentinel_registration(expected_count: int, port: int = 8080, timeout: float = 30.0):
+    if expected_count <= 0:
+        return None
+
+    def enough_registered():
+        health = read_hub_health(port)
+        sentinels = health.get("sentinels") or []
+        return health if len(sentinels) >= expected_count else None
+
+    return wait_until(
+        f"{expected_count} Sentinel registrations",
+        enough_registered,
+        timeout=timeout
+    )
+
+
 def discover_sentinels(sentinels_dir: str) -> list:
     """Find all Python sentinel files in the sentinels directory."""
     sentinels = []
@@ -68,7 +123,7 @@ def execute(intent: str = None, no_sentinels: bool = False):
     if is_port_in_use(8080):
         print("  [*] Port 8080 in use, cleaning up...")
         kill_process_on_port(8080)
-        time.sleep(1)
+        wait_until("port 8080 to be released", lambda: not is_port_in_use(8080), timeout=5, interval=0.1)
     
     processes = []
     
@@ -86,12 +141,15 @@ def execute(intent: str = None, no_sentinels: bool = False):
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE
             )
         processes.append(("Hub", hub_process))
-        time.sleep(2)  # Wait for Hub to initialize
+        wait_for_hub(8080, timeout=30)
+        print("  [✓] Hub is healthy.")
         
         # 2. Launch Sentinels (unless --no-sentinels)
         if not no_sentinels:
             sentinels_dir = os.path.join(os.getcwd(), "sentinels")
             sentinel_files = discover_sentinels(sentinels_dir)
+            sentinel_env = os.environ.copy()
+            sentinel_env["HUB_URL"] = "ws://localhost:8080"
             
             for sentinel_path in sentinel_files:
                 sentinel_name = os.path.basename(sentinel_path)
@@ -100,15 +158,18 @@ def execute(intent: str = None, no_sentinels: bool = False):
                 if sys.platform == "win32":
                     sentinel_process = subprocess.Popen(
                         ["python", sentinel_path],
+                        env=sentinel_env,
                         creationflags=subprocess.CREATE_NEW_CONSOLE
                     )
                 else:
                     sentinel_process = subprocess.Popen(
                         ["python", sentinel_path],
-                        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                        env=sentinel_env
                     )
                 processes.append((sentinel_name, sentinel_process))
-                time.sleep(1)  # Stagger sentinel launches
+            wait_for_sentinel_registration(len(sentinel_files), port=8080, timeout=30)
+            print(f"  [✓] Registered {len(sentinel_files)} Sentinel(s).")
         
         # 3. Run Intent (if provided)
         if intent:
@@ -117,19 +178,22 @@ def execute(intent: str = None, no_sentinels: bool = False):
                 print(f"[Starlight] ERROR: Intent script not found: {intent}")
             else:
                 print(f"  [+] Executing Intent: {intent}...")
-                time.sleep(2)  # Wait for Sentinels to register
-                subprocess.run(["node", intent_path])
+                result = subprocess.run(["node", intent_path])
+                if result.returncode != 0:
+                    print(f"[Starlight] ERROR: Intent exited with code {result.returncode}")
+                    return False
         
         # If no intent, keep constellation running
         if not intent:
             print("\n[Starlight] Constellation is running. Press Ctrl+C to stop.")
             try:
                 while True:
-                    time.sleep(1)
-                    # Check if Hub is still running
-                    if hub_process.poll() is not None:
+                    try:
+                        hub_process.wait(timeout=1)
                         print("[Starlight] Hub has stopped.")
                         break
+                    except subprocess.TimeoutExpired:
+                        pass
             except KeyboardInterrupt:
                 print("\n[Starlight] Shutting down constellation...")
         

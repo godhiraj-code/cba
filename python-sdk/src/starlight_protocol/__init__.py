@@ -6,5 +6,5 @@ A Python package for building Sentinels that connect to the Starlight Protocol H
 
 from .sentinel_base import SentinelBase
 
-__version__ = "1.3.4"
+__version__ = "4.0.0a1"
 __all__ = ["SentinelBase"]

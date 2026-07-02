@@ -53,6 +53,8 @@ type Sentinel struct {
 	// done signals shutdown.
 	done chan struct{}
 
+	stopOnce sync.Once
+
 	// isConnected tracks connection state.
 	isConnected bool
 }
@@ -88,6 +90,8 @@ func (s *Sentinel) Start(ctx context.Context, hubURL string) error {
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
+			case <-s.done:
+				return nil
 			case <-time.After(s.ReconnectDelay):
 				continue
 			}
@@ -103,6 +107,8 @@ func (s *Sentinel) Start(ctx context.Context, hubURL string) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
+		case <-s.done:
+			return nil
 		case <-time.After(s.ReconnectDelay):
 			s.Logger.Printf("[%s] Reconnecting...", s.Name)
 		}
@@ -111,15 +117,12 @@ func (s *Sentinel) Start(ctx context.Context, hubURL string) error {
 
 // Stop gracefully shuts down the sentinel.
 func (s *Sentinel) Stop() {
-	close(s.done)
+	s.stopOnce.Do(func() { close(s.done) })
 	s.disconnect()
 }
 
 // connect establishes WebSocket connection and registers with Hub.
 func (s *Sentinel) connect(ctx context.Context, hubURL string) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
 	dialer := websocket.Dialer{
 		HandshakeTimeout: 10 * time.Second,
 	}
@@ -129,21 +132,24 @@ func (s *Sentinel) connect(ctx context.Context, hubURL string) error {
 		return fmt.Errorf("dial failed: %w", err)
 	}
 
+	s.mu.Lock()
 	s.conn = conn
 	s.isConnected = true
+	s.mu.Unlock()
 
 	// Send registration
 	regParams := RegistrationParams{
 		Layer:        s.Name,
+		Role:         "sentinel",
 		Priority:     s.Priority,
 		Capabilities: s.Capabilities,
 		Selectors:    s.Selectors,
+		Version:      "1.0.0",
 		AuthToken:    s.AuthToken,
 	}
 
 	if err := s.sendMessage("starlight.registration", regParams); err != nil {
-		conn.Close()
-		s.isConnected = false
+		s.disconnect()
 		return fmt.Errorf("registration failed: %w", err)
 	}
 
@@ -251,6 +257,13 @@ func (s *Sentinel) handleMessage(msg *Message) {
 			s.OnEntropyStream(params)
 		}
 
+	case "starlight.ping":
+		if err := s.sendMessage("starlight.pong", map[string]any{
+			"timestamp": time.Now().UnixMilli(),
+		}); err != nil {
+			s.Logger.Printf("[%s] Failed to send pong: %v", s.Name, err)
+		}
+
 	default:
 		// Log unknown methods for debugging
 		if msg.Method != "" {
@@ -266,7 +279,10 @@ func (s *Sentinel) SendClear(msgID string) error {
 
 // SendWait sends a wait response to veto action execution.
 func (s *Sentinel) SendWait(msgID string, retryAfterMs int) error {
-	return s.sendResponse(msgID, "starlight.wait", WaitParams{RetryAfterMs: retryAfterMs})
+	return s.sendResponse(msgID, "starlight.wait", WaitParams{
+		RetryAfterMs: retryAfterMs,
+		Severity:     "soft",
+	})
 }
 
 // SendHijack requests exclusive browser control.

@@ -1,45 +1,50 @@
-version: '3.8'
-
 services:
-  # Central Message Bus & Browser Context
   hub:
     build: .
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     volumes:
-      - ./mission_trace.json:/app/mission_trace.json
-      - ./report.html:/app/report.html
       - ./screenshots:/app/screenshots
     environment:
-      - PWDEBUG=0
-    restart: always
+      STARLIGHT_HOST: 0.0.0.0
+      STARLIGHT_AUTH_TOKEN: ${STARLIGHT_AUTH_TOKEN:?Set STARLIGHT_AUTH_TOKEN}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:8080/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
 
-  # Environmental Stability Monitor
   pulse:
     build: .
-    command: [ "python3", "sentinels/pulse_sentinel.py" ]
+    command: ["python", "sentinels/pulse_sentinel.py"]
     depends_on:
-      - hub
+      hub:
+        condition: service_healthy
     environment:
-      - HUB_URI=ws://hub:8080
+      HUB_URL: ws://hub:8080
+      STARLIGHT_AUTH_TOKEN: ${STARLIGHT_AUTH_TOKEN:?Set STARLIGHT_AUTH_TOKEN}
+    restart: unless-stopped
 
-  # Proactive Obstacle Clearance
   janitor:
     build: .
-    command: [ "python3", "sentinels/janitor.py" ]
+    command: ["python", "sentinels/janitor.py"]
     depends_on:
-      - hub
+      hub:
+        condition: service_healthy
     environment:
-      - HUB_URI=ws://hub:8080
+      HUB_URL: ws://hub:8080
+      STARLIGHT_AUTH_TOKEN: ${STARLIGHT_AUTH_TOKEN:?Set STARLIGHT_AUTH_TOKEN}
+    restart: unless-stopped
 
-  # Passive Intelligence Extraction
   data:
     build: .
-    command: [ "python3", "sentinels/data_sentinel.py" ]
+    command: ["python", "sentinels/data_sentinel.py"]
     depends_on:
-      - hub
+      hub:
+        condition: service_healthy
     environment:
-      - HUB_URI=ws://hub:8080
-
-# Note: Vision Sentinel requires Ollama (external or separate container)
-# and is manually excluded for lite orchestration.
+      HUB_URL: ws://hub:8080
+      STARLIGHT_AUTH_TOKEN: ${STARLIGHT_AUTH_TOKEN:?Set STARLIGHT_AUTH_TOKEN}
+    restart: unless-stopped

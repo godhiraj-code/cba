@@ -14,7 +14,7 @@ class IntentScript {
                 method: 'starlight.registration',
                 params: {
                     layer: 'IntentLayer',
-                    priority: 100 // Intent is low priority, never hijacks
+                    priority: 10 // Intent is low priority, never hijacks
                 },
                 id: nanoid()
             }));

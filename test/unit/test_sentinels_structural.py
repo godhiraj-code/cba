@@ -66,7 +66,7 @@ class TestSentinelsStructural(unittest.TestCase):
         """Test JanitorSentinel blocking detection logic"""
         janitor = JanitorSentinel()
         janitor.sent_messages = []
-        async def mock_send(method, params):
+        async def mock_send(method, params, msg_id=None):
             janitor.sent_messages.append({"method": method, "params": params})
         janitor._send_msg = mock_send
 
@@ -93,7 +93,7 @@ class TestSentinelsStructural(unittest.TestCase):
         """Test PulseSentinel stability check logic"""
         pulse = PulseSentinel()
         pulse.sent_messages = []
-        async def mock_send(method, params):
+        async def mock_send(method, params, msg_id=None):
             pulse.sent_messages.append({"method": method, "params": params})
         pulse._send_msg = mock_send
 
@@ -109,6 +109,22 @@ class TestSentinelsStructural(unittest.TestCase):
         pulse.is_stable = True
         params = {"stability": {"is_stable": True}}
         asyncio.run(pulse.on_pre_check(params, "id-p2"))
+        self.assertEqual(pulse.sent_messages[0]["method"], "starlight.clear")
+
+    def test_pulse_clears_on_final_veto_budget(self):
+        """Pulse should clear on the final configured veto budget attempt."""
+        pulse = PulseSentinel()
+        pulse.sent_messages = []
+        async def mock_send(method, params, msg_id=None):
+            pulse.sent_messages.append({"method": method, "params": params})
+        pulse._send_msg = mock_send
+
+        pulse.is_stable = False
+        pulse.veto_count = pulse.max_veto_count - 1
+        pulse.current_command_id = "checkpoint"
+        pulse.last_entropy_time = time.time()
+
+        asyncio.run(pulse.on_pre_check({"command": {"cmd": "checkpoint"}}, "id-p3"))
         self.assertEqual(pulse.sent_messages[0]["method"], "starlight.clear")
 
 class TestSDKCoverageIntensive(unittest.IsolatedAsyncioTestCase):

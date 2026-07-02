@@ -102,7 +102,7 @@ class ResponsiveSentinel(SentinelBase):
         print(f"[{self.layer}] 📱 Mobile viewport detected ({viewport.get('width', '?')}x{viewport.get('height', '?')})")
         
         # Check for mobile-specific blockers in pre_check elements
-        elements = params.get("elements", [])
+        elements = params.get("blocking", [])
         
         for pattern in self.mobile_patterns:
             for element in elements:
@@ -120,7 +120,7 @@ class ResponsiveSentinel(SentinelBase):
                             print(f"[{self.layer}] ✓ Mobile blocker cleared")
                         else:
                             print(f"[{self.layer}] ⚠ Could not auto-clear blocker, hiding element")
-                            await self.send_action("evaluate", f"document.querySelector('{pattern}')?.remove()")
+                            await self.send_action("remove", pattern)
                         
                         await self.send_resume(re_check=True)
                         return

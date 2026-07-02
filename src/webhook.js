@@ -80,7 +80,7 @@ class WebhookNotifier {
             attachments: [{
                 color: color,
                 fields: fields,
-                footer: 'Starlight Protocol v3.0',
+                footer: 'Starlight Protocol v4.0.0-alpha.1',
                 footer_icon: 'https://www.dhirajdas.dev/favicon.ico',
                 ts: Math.floor(Date.now() / 1000)
             }]

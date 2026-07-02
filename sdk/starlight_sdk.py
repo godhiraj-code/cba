@@ -1,5 +1,5 @@
 """
-Starlight Sentinel SDK (v1.2.2)
+Starlight Sentinel SDK (v4.0.0-alpha.1)
 Standardizes the creation of autonomous agents for the CBA ecosystem.
 
 Phase 18: Extended action methods for universal automation commands.
@@ -14,6 +14,7 @@ import sys
 import signal
 import tempfile
 import shutil
+import contextvars
 from abc import ABC, abstractmethod
 
 class SentinelBase(ABC):
@@ -29,6 +30,12 @@ class SentinelBase(ABC):
         self._running = False
         self.memory = {}
         self.last_action = None
+        self._current_request_id = contextvars.ContextVar(
+            f"{self.layer}_current_request_id",
+            default=None
+        )
+        self._precheck_lock = asyncio.Lock()
+        self._protocol_tasks = set()
         # Stability: Use absolute path in project root, not relative CWD
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.memory_file = os.path.join(project_root, f"{self.layer}_memory.json")
@@ -102,16 +109,25 @@ class SentinelBase(ABC):
                     
                     # Start background tasks
                     heartbeat_task = asyncio.create_task(self._heartbeat_loop())
-                    
-                    async for message in websocket:
-                        if not self._running:
-                            break
-                        try:
-                            data = json.loads(message)
-                            asyncio.create_task(self._handle_protocol(data))
-                        except json.JSONDecodeError as e:
-                            print(f"[{self.layer}] Warning: Received malformed JSON, ignoring: {e}")
-                            # Continue processing - don't crash on bad input
+
+                    try:
+                        async for message in websocket:
+                            if not self._running:
+                                break
+                            try:
+                                data = json.loads(message)
+                                task = asyncio.create_task(self._handle_protocol(data))
+                                self._protocol_tasks.add(task)
+                                task.add_done_callback(self._protocol_task_done)
+                            except json.JSONDecodeError as e:
+                                print(f"[{self.layer}] Warning: Received malformed JSON, ignoring: {e}")
+                    finally:
+                        heartbeat_task.cancel()
+                        await asyncio.gather(heartbeat_task, return_exceptions=True)
+                        for task in self._protocol_tasks:
+                            task.cancel()
+                        await asyncio.gather(*self._protocol_tasks, return_exceptions=True)
+                        self._protocol_tasks.clear()
                         
             except websockets.exceptions.ConnectionClosed as e:
                 print(f"[{self.layer}] Connection closed: {e}. Retrying in {reconnect_delay}s...")
@@ -130,12 +146,14 @@ class SentinelBase(ABC):
     async def _register(self):
         # Security: Get auth token from config
         auth_token = self.config.get("hub", {}).get("security", {}).get("authToken")
+        auth_token = os.environ.get("STARLIGHT_AUTH_TOKEN", auth_token)
         
         msg = {
             "jsonrpc": "2.0",
             "method": "starlight.registration",
             "params": {
                 "layer": self.layer,
+                "role": "sentinel",
                 "priority": self.priority,
                 "selectors": self.selectors,
                 "capabilities": self.capabilities,
@@ -170,11 +188,21 @@ class SentinelBase(ABC):
         msg_id = data.get("id")
 
         if method == "starlight.pre_check":
-            await self.on_pre_check(params, msg_id)
+            async with self._precheck_lock:
+                token = self._current_request_id.set(msg_id)
+                try:
+                    await self.on_pre_check(params, msg_id)
+                finally:
+                    self._current_request_id.reset(token)
         elif method == "starlight.entropy_stream":
             await self.on_entropy(params)
         elif method == "starlight.sovereign_update":
             await self.on_context_update(params.get("context", {}))
+        elif method == "starlight.ping":
+            await self._send_msg(
+                "starlight.pong",
+                {"timestamp": int(time.time() * 1000)}
+            )
         # Phase 17: Inter-Sentinel Side-Talk
         elif method == "starlight.sidetalk":
             await self.on_sidetalk(params)
@@ -184,31 +212,56 @@ class SentinelBase(ABC):
             # Phase 7.3: For responses/broadcasts without method, pass full data
             await self.on_message(method, params if method else data, msg_id)
 
+    def _protocol_task_done(self, task):
+        self._protocol_tasks.discard(task)
+        if not task.cancelled():
+            error = task.exception()
+            if error:
+                print(f"[{self.layer}] Protocol handler failed: {error}")
+
     # --- Communication Methods ---
 
-    async def send_clear(self, confidence=1.0):
+    async def send_clear(self, confidence=1.0, msg_id=None):
         """Approve execution with an optional confidence score (0.0-1.0)."""
-        await self._send_msg("starlight.clear", {"confidence": confidence})
+        await self._send_msg(
+            "starlight.clear",
+            {"confidence": confidence},
+            msg_id or self._current_request_id.get()
+        )
 
-    async def send_wait(self, retry_after_ms=1000, confidence=1.0):
+    async def send_wait(self, retry_after_ms=1000, confidence=1.0, severity="soft", reason=None, msg_id=None):
         """Veto execution with an optional confidence score (0.0-1.0)."""
-        await self._send_msg("starlight.wait", {
+        params = {
             "retryAfterMs": retry_after_ms,
-            "confidence": confidence
-        })
+            "confidence": confidence,
+            "severity": severity
+        }
+        if reason:
+            params["reason"] = reason
+        await self._send_msg(
+            "starlight.wait",
+            params,
+            msg_id or self._current_request_id.get()
+        )
 
-    async def send_hijack(self, reason):
-        await self._send_msg("starlight.hijack", {"reason": reason})
+    async def send_hijack(self, reason, msg_id=None):
+        await self._send_msg(
+            "starlight.hijack",
+            {"reason": reason},
+            msg_id or self._current_request_id.get()
+        )
 
     async def send_resume(self, re_check=True):
         await self._send_msg("starlight.resume", {"re_check": re_check})
 
-    async def send_action(self, cmd, selector, text=None, value=None, key=None):
+    async def send_action(self, cmd, selector=None, text=None, value=None, key=None, files=None):
         """Execute a healing action via the Hub."""
-        params = {"cmd": cmd, "selector": selector}
+        params = {"cmd": cmd}
+        if selector: params["selector"] = selector
         if text: params["text"] = text
         if value: params["value"] = value
         if key: params["key"] = key
+        if files: params["files"] = files
         await self._send_msg("starlight.action", params)
 
     # === Extended Action Methods (v1.2.0) ===
@@ -239,26 +292,19 @@ class SentinelBase(ABC):
     
     async def send_scroll(self, selector=None):
         """Scroll to an element, or scroll to bottom if no selector."""
-        await self.send_action("scroll", selector or "")
+        await self.send_action("scroll", selector)
     
     async def send_press(self, key):
         """Press a keyboard key."""
-        params = {"cmd": "press", "key": key}
-        await self._send_msg("starlight.action", params)
+        await self.send_action("press", key=key)
     
     async def send_type(self, text):
         """Type text using keyboard."""
-        params = {"cmd": "type", "text": text}
-        await self._send_msg("starlight.action", params)
+        await self.send_action("type", text=text)
     
     async def send_upload(self, selector, files):
         """Upload file(s) to file input. Files can be single path or list of paths."""
-        params = {
-            "cmd": "upload",
-            "selector": selector,
-            "files": files
-        }
-        await self._send_msg("starlight.action", params)
+        await self.send_action("upload", selector, files=files)
 
     async def update_context(self, context_data):
         """Inject data into the Hub's sovereign state."""
@@ -284,7 +330,7 @@ class SentinelBase(ABC):
         if reply_to:
             params["replyTo"] = reply_to
         await self._send_msg("starlight.sidetalk", params)
-        print(f"[{self.layer}] Side-Talk → {to} (topic: {topic})")
+        print(f"[{self.layer}] Side-Talk -> {to} (topic: {topic})")
 
     async def broadcast_state(self, stable=True, mutation_rate=0):
         """Convenience method to broadcast environment state to all Sentinels."""
@@ -294,10 +340,11 @@ class SentinelBase(ABC):
             "timestamp": time.time()
         })
 
-    async def _send_msg(self, method, params):
+    async def _send_msg(self, method, params, msg_id=None):
         if self._websocket:
             try:
-                msg = self._format_message(method, params, str(int(time.time() * 1000)))
+                message_id = msg_id or str(time.time_ns())
+                msg = self._format_message(method, params, message_id)
                 await self._websocket.send(json.dumps(msg))
             except websockets.exceptions.ConnectionClosed:
                 print(f"[{self.layer}] Cannot send {method}: connection closed")

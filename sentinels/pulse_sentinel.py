@@ -114,7 +114,7 @@ class PulseSentinel(SentinelBase):
             print(f"[{self.layer}] Stability Verified for: {cmd}")
             self.veto_count = 0
             await self.send_clear()
-        elif self.veto_count >= self.max_veto_count:
+        elif self.veto_count >= max(0, self.max_veto_count - 1):
             # Animation tolerance: force clear after max retries
             print(f"[{self.layer}] ANIMATION TOLERANCE: Max vetoes ({self.max_veto_count}) reached, force clearing for: {cmd}")
             self.veto_count = 0

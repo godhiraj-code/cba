@@ -95,11 +95,12 @@ class PIISentinel(SentinelBase):
                 
                 if self.mode == "block":
                     print(f"[{self.layer}] 🚫 BLOCKING execution - PII found in page")
-                    await self.send_hijack(f"PII Compliance Block: {types_found}")
-                    # Log the event but don't proceed
                     await self._log_pii_event(findings, blocked=True)
-                    await asyncio.sleep(2)
-                    await self.send_resume(re_check=False)
+                    await self.send_wait(
+                        retry_after_ms=0,
+                        severity="hard",
+                        reason=f"PII Compliance Block: {types_found}"
+                    )
                     return
                 elif self.mode == "alert":
                     print(f"[{self.layer}] ⚠️  ALERT: Proceeding with PII warning")

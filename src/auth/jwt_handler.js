@@ -73,6 +73,11 @@ class JWTHandler {
 
         const [base64Header, base64Payload, signature] = parts;
 
+        const header = JSON.parse(this._base64UrlDecode(base64Header));
+        if (header.alg !== this.algorithm || header.typ !== 'JWT') {
+            throw new Error('Unsupported token algorithm');
+        }
+
         // Verify signature
         const expectedSignature = this._sign(`${base64Header}.${base64Payload}`);
         if (!this._timingSafeEqual(signature, expectedSignature)) {

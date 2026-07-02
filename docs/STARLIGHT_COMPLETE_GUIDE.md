@@ -71,7 +71,8 @@ The **Hub** is the central brain of the system. It:
 | **Pulse Sentinel** | Waits for page stability (no mutations, network idle) |
 | **Janitor Sentinel** | Detects and clears popups, modals, cookie banners |
 | **Vision Sentinel** | Uses AI/ML to visually detect obstacles |
-| **Data Sentinel** | Protects sensitive data (PII redaction) |
+| **Data Sentinel** | Injects page and command context into shared state |
+| **PII Sentinel** | Detects and redacts sensitive data |
 
 Sentinels can be written in **any language** - Python, JavaScript, Go, Java, Rust, etc.
 
@@ -282,10 +283,11 @@ await runner.selectGoal('Country', 'India');  // Finds country dropdown
 Sentinels have priorities (1-10, lower = higher priority):
 
 ```
-Priority 1: Security Sentinel (runs first)
+Priority 1: Pulse Sentinel (stability veto)
+Priority 2: PII Sentinel
 Priority 3: Vision Sentinel
 Priority 5: Janitor Sentinel
-Priority 7: Pulse Sentinel (runs last)
+Priority 10: Data/A11y passive Sentinels
 ```
 
 ### Consensus Mechanism
@@ -297,6 +299,8 @@ CLEAR + CLEAR + CLEAR = ✅ Execute
 CLEAR + CLEAR + WAIT  = ⏳ Retry later
 CLEAR + HIJACK + WAIT = 🚨 Sentinel takes control
 ```
+
+There is no production "force proceed" after repeated `WAIT` responses. If the environment never becomes safe enough for the Sentinels to clear, the objective fails and the report explains which Sentinel blocked progress.
 
 ---
 
@@ -373,6 +377,18 @@ node src/hub.js
 ```bash
 node bin/starlight.js test/intent_saucedemo.js
 ```
+
+For production-style protocol objectives, use the unified runner:
+
+```bash
+# URL objective
+node bin/starlight.js --url https://www.dhirajdas.dev --all-sentinels --headless --json
+
+# Natural-language objective
+node bin/starlight.js --intent "Go to https://www.saucedemo.com and fill Username with standard_user and fill Password with secret_sauce and click Login" --all-sentinels --headless --json
+```
+
+The runner starts the Hub, waits for `/health`, starts Sentinels in the background, waits for registration, and only passes browser actions through Sentinel consensus.
 
 ### 3. Build Your Own Sentinel
 

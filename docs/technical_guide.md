@@ -365,13 +365,23 @@ The **Pulse Sentinel** consumes this hint to dynamically adjust its `settleWindo
 
 ## 4.7 bin/starlight.js: The Autonomous Orchestrator
 
-The unified CLI entry point for CI/CD environments.
+The unified CLI entry point for CI/CD environments and local protocol-objective runs.
 
 ### Orchestration Lifecycle
-1. **Hub Launch**: Spawns Hub process + waits for `/health` response.
-2. **Constellation Assembly**: Launches configured Sentinels (Pulse, Janitor).
-3. **Mission Execution**: Spawns the intent script.
-4. **Graceful Cleanup**: Kills all child processes (using `taskkill /t` on Windows) to ensure telemetry and reports are saved.
+1. **Hub Launch**: Spawns the Hub process and waits for `/health` to report `healthy`.
+2. **Constellation Assembly**: Launches the configured background Sentinels and waits for registration in `/health`.
+3. **Objective Execution**: Runs a mission file, URL objective, natural-language objective, or URL plus intent.
+4. **Protocol Checkpoints**: Sends every browser action through `starlight.pre_check`; `wait` and `hijack` responses block progress until the protocol clears.
+5. **Graceful Cleanup**: Closes child processes after reports, traces, and telemetry are saved.
+
+### Objective Examples
+
+```bash
+node bin/starlight.js --url https://www.dhirajdas.dev --all-sentinels --headless --json
+node bin/starlight.js --intent "Go to https://www.saucedemo.com and click Login" --all-sentinels --headless --json
+```
+
+The runner uses timeouts as operational bounds for process startup, transport, and cleanup. It does not treat elapsed time as proof of page readiness; Sentinel consensus is the readiness gate.
 
 ---
 
@@ -533,7 +543,7 @@ ws.send(JSON.stringify({
 
 ## 5.3 Phase 17: Consensus Mesh (Quorum Protocol)
 
-The Hub supports decentralized decision-making through weight-based voting.
+The Hub supports decentralized decision-making through weight-based voting. Production defaults remain strict: every connected Sentinel must clear unless a lower quorum is explicitly configured.
 
 ### Quorum Configuration
 ```json
@@ -549,6 +559,7 @@ The Hub supports decentralized decision-making through weight-based voting.
 - **Quorum Met**: If `total_confidence >= total_sentinels * quorumThreshold`, the Hub proceeds immediately.
 - **Veto Supremacy**: Any `starlight.wait` or `starlight.hijack` signal overrides the quorum and stops execution.
 - **Confidence Scores**: Sentinels can specify `confidence` (0.0 - 1.0) in their response to weight their vote.
+- **No Forced Proceed**: Exhausted retry budgets fail the objective; they do not bypass Sentinel vetoes.
 
 ---
 

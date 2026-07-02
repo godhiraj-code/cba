@@ -78,8 +78,14 @@ pub struct RegistrationParams {
     /// Sentinel layer name (e.g., "JanitorSentinel")
     pub layer: String,
 
+    /// Client role.
+    pub role: String,
+
     /// Priority (1-10, lower = higher priority)
     pub priority: u8,
+
+    /// Protocol version.
+    pub version: String,
 
     /// Capabilities (e.g., ["detection", "healing"])
     #[serde(default)]
@@ -91,6 +97,7 @@ pub struct RegistrationParams {
 
     /// Optional JWT authentication token
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "authToken")]
     pub auth_token: Option<String>,
 }
 
@@ -99,7 +106,9 @@ impl RegistrationParams {
     pub fn new(layer: impl Into<String>, priority: u8) -> Self {
         Self {
             layer: layer.into(),
+            role: "sentinel".to_string(),
             priority,
+            version: "1.0.0".to_string(),
             capabilities: Vec::new(),
             selectors: Vec::new(),
             auth_token: None,
@@ -128,20 +137,8 @@ impl RegistrationParams {
 /// Pre-check parameters from Hub → Sentinel.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PreCheckParams {
-    /// Current page URL
-    #[serde(default)]
-    pub url: Option<String>,
-
-    /// Upcoming command type
-    pub command: String,
-
-    /// Target selector for the command
-    #[serde(default)]
-    pub selector: Option<String>,
-
-    /// Semantic goal
-    #[serde(default)]
-    pub goal: Option<String>,
+    /// Upcoming command.
+    pub command: CommandInfo,
 
     /// Detected blocking elements
     #[serde(default)]
@@ -151,9 +148,35 @@ pub struct PreCheckParams {
     #[serde(default)]
     pub screenshot: Option<String>,
 
-    /// Additional context
+    /// Target element rectangle, when available.
     #[serde(default)]
-    pub context: HashMap<String, serde_json::Value>,
+    #[serde(rename = "targetRect")]
+    pub target_rect: Option<serde_json::Value>,
+
+    /// Page text supplied to PII-aware Sentinels.
+    #[serde(default)]
+    pub page_text: Option<String>,
+
+    /// Accessibility snapshot supplied to accessibility Sentinels.
+    #[serde(default)]
+    pub a11y_snapshot: Option<serde_json::Value>,
+}
+
+/// Command information included in a pre-check.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CommandInfo {
+    #[serde(default)]
+    pub cmd: Option<String>,
+    #[serde(default)]
+    pub goal: Option<String>,
+    #[serde(default)]
+    pub selector: Option<String>,
+    #[serde(default)]
+    pub text: Option<String>,
+    #[serde(default)]
+    pub value: Option<String>,
+    #[serde(default)]
+    pub url: Option<String>,
 }
 
 /// A blocking element detected by the Hub.
@@ -218,6 +241,7 @@ pub enum ActionCommand {
 pub struct ResumeParams {
     /// Request re-check after resume
     #[serde(default = "default_true")]
+    #[serde(rename = "re_check")]
     pub request_recheck: bool,
 }
 
@@ -234,7 +258,10 @@ pub struct ContextUpdateParams {
 /// Entropy (page state) update from Hub.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EntropyParams {
-    pub url: String,
+    #[serde(default)]
+    pub entropy: bool,
+    #[serde(default)]
+    pub url: Option<String>,
     #[serde(default)]
     pub title: Option<String>,
     #[serde(default)]
@@ -259,8 +286,11 @@ pub mod methods {
     pub const ACTION: &str = "starlight.action";
     pub const RESUME: &str = "starlight.resume";
     pub const ENTROPY: &str = "starlight.entropy";
+    pub const ENTROPY_STREAM: &str = "starlight.entropy_stream";
     pub const CONTEXT_UPDATE: &str = "starlight.context_update";
     pub const INTENT: &str = "starlight.intent";
+    pub const PING: &str = "starlight.ping";
+    pub const PONG: &str = "starlight.pong";
 }
 
 // =============================================================================
@@ -271,7 +301,13 @@ pub mod methods {
 #[derive(Debug, Clone, Deserialize)]
 pub struct RawMessage {
     pub jsonrpc: String,
-    pub method: String,
+    #[serde(default)]
+    pub method: Option<String>,
+    #[serde(default)]
     pub params: serde_json::Value,
     pub id: Option<String>,
+    #[serde(default)]
+    pub result: Option<serde_json::Value>,
+    #[serde(default)]
+    pub error: Option<JsonRpcError>,
 }

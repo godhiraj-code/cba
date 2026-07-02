@@ -58,6 +58,22 @@ func ValidateToken(token, secret string) (*JWTClaims, error) {
 		return nil, fmt.Errorf("invalid token format")
 	}
 
+	headerJSON, err := base64.RawURLEncoding.DecodeString(parts[0])
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode header: %w", err)
+	}
+
+	var header struct {
+		Algorithm string `json:"alg"`
+		Type      string `json:"typ"`
+	}
+	if err := json.Unmarshal(headerJSON, &header); err != nil {
+		return nil, fmt.Errorf("failed to parse header: %w", err)
+	}
+	if header.Algorithm != "HS256" || header.Type != "JWT" {
+		return nil, fmt.Errorf("unsupported token header")
+	}
+
 	// Verify signature
 	message := parts[0] + "." + parts[1]
 	h := hmac.New(sha256.New, []byte(secret))

@@ -2,6 +2,10 @@
 
 Formal JSON Schema definitions for all Starlight Protocol v1.0.0 methods.
 
+`starlight.protocol.schema.json` is the canonical runtime contract. The
+per-method files are retained for focused documentation and code generation;
+runtime validation and conformance tests must use the canonical schema.
+
 ## Purpose
 
 These schemas enable:

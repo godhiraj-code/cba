@@ -26,9 +26,11 @@ type RPCError struct {
 // RegistrationParams contains parameters for sentinel registration.
 type RegistrationParams struct {
 	Layer        string   `json:"layer"`
+	Role         string   `json:"role"`
 	Priority     int      `json:"priority"`
 	Capabilities []string `json:"capabilities,omitempty"`
 	Selectors    []string `json:"selectors,omitempty"`
+	Version      string   `json:"version"`
 	AuthToken    string   `json:"authToken,omitempty"`
 }
 
@@ -67,8 +69,11 @@ type EntropyStreamParams struct {
 // ActionParams contains parameters for sentinel actions during hijack.
 type ActionParams struct {
 	Cmd      string `json:"cmd"`
-	Selector string `json:"selector"`
+	Selector string `json:"selector,omitempty"`
 	Text     string `json:"text,omitempty"`
+	Value    string `json:"value,omitempty"`
+	Key      string `json:"key,omitempty"`
+	Files    any    `json:"files,omitempty"`
 }
 
 // ContextUpdateParams contains sovereign context data.
@@ -79,6 +84,8 @@ type ContextUpdateParams struct {
 // WaitParams contains parameters for the wait response.
 type WaitParams struct {
 	RetryAfterMs int `json:"retryAfterMs,omitempty"`
+	Severity     string `json:"severity,omitempty"`
+	Reason       string `json:"reason,omitempty"`
 }
 
 // HijackParams contains parameters for hijack requests.

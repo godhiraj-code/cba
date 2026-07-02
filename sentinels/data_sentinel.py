@@ -16,7 +16,7 @@ from sdk.starlight_sdk import SentinelBase
 
 class DataSentinel(SentinelBase):
     def __init__(self):
-        super().__init__(layer_name="DataSentinel", priority=20)
+        super().__init__(layer_name="DataSentinel", priority=10)
         self.capabilities = ["context-injection", "data-extraction"]
         self.selectors = []  # No blocking patterns to watch
         self.last_extraction = 0

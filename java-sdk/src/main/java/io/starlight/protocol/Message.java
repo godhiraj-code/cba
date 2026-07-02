@@ -105,13 +105,18 @@ public class Message {
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class RegistrationParams {
     private String layer;
+    private String role;
     private int priority;
     private List<String> capabilities;
     private List<String> selectors;
+    private String version;
     private String authToken;
     
     public String getLayer() { return layer; }
     public void setLayer(String layer) { this.layer = layer; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
     
     public int getPriority() { return priority; }
     public void setPriority(int priority) { this.priority = priority; }
@@ -121,6 +126,9 @@ class RegistrationParams {
     
     public List<String> getSelectors() { return selectors; }
     public void setSelectors(List<String> selectors) { this.selectors = selectors; }
+
+    public String getVersion() { return version; }
+    public void setVersion(String version) { this.version = version; }
     
     public String getAuthToken() { return authToken; }
     public void setAuthToken(String authToken) { this.authToken = authToken; }

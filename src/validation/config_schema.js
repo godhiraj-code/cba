@@ -14,6 +14,7 @@ const CONFIG_SCHEMA = {
             required: ['port', 'syncBudget'],
             properties: {
                 port: { type: 'integer', minimum: 1024, maximum: 65535, default: 8080 },
+                host: { type: 'string', default: '127.0.0.1' },
                 browser: {
                     type: 'object',
                     properties: {
@@ -23,7 +24,7 @@ const CONFIG_SCHEMA = {
                             type: 'object',
                             properties: {
                                 enabled: { type: 'boolean' },
-                                device: { type: 'string' }
+                                device: { type: ['string', 'null'] }
                             }
                         }
                     }
@@ -50,12 +51,16 @@ const CONFIG_SCHEMA = {
                 },
                 quorumThreshold: { type: 'number', minimum: 0, maximum: 1, default: 1 },
                 consensusTimeout: { type: 'integer', minimum: 1000, default: 5000 },
+                maxPreCheckRetries: { type: 'integer', minimum: 1, maximum: 20, default: 3 },
                 ghostMode: { type: 'boolean', default: false },
                 security: {
                     type: 'object',
                     properties: {
                         authToken: { type: ['string', 'null'] },
                         jwtSecret: { type: ['string', 'null'] },
+                        authRequired: { type: 'boolean', default: false },
+                        allowedOrigins: { type: 'array', items: { type: 'string' } },
+                        maxMessageBytes: { type: 'integer', minimum: 1024, default: 1048576 },
                         tokenExpiry: { type: 'integer', minimum: 60 },
                         piiRedaction: { type: 'boolean', default: true },
                         inputValidation: { type: 'boolean', default: true },
