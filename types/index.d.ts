@@ -1,1 +1,1 @@
-export { CBAHub } from './hub';
+export * from './core';

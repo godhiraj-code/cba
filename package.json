@@ -1,87 +1,65 @@
 {
   "name": "@starlight-protocol/starlight",
-  "version": "4.0.0-alpha.1",
-  "description": "Starlight Protocol: An Open Standard for Autonomous Browser Automation with self-healing Sentinels",
-  "main": "src/hub.js",
+  "version": "5.0.0-alpha.1",
+  "description": "A minimal, open protocol for routing intent to autonomous Sentinels",
+  "main": "src/core/index.js",
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "require": "./src/hub.js",
-      "default": "./src/hub.js"
+      "require": "./src/core/index.js",
+      "default": "./src/core/index.js"
     },
-    "./hub": {
-      "types": "./types/hub.d.ts",
-      "require": "./src/hub.js",
-      "default": "./src/hub.js"
+    "./core": {
+      "types": "./types/core.d.ts",
+      "require": "./src/core/index.js",
+      "default": "./src/core/index.js"
     },
-    "./intent-runner": {
-      "types": "./types/intent-runner.d.ts",
-      "require": "./src/intent_runner.js",
-      "default": "./src/intent_runner.js"
-    },
-    "./observability": {
-      "types": "./types/observability.d.ts",
-      "require": "./src/observability/otel.js",
-      "default": "./src/observability/otel.js"
-    },
-    "./auth": {
-      "types": "./types/auth.d.ts",
-      "require": "./src/auth/jwt_handler.js",
-      "default": "./src/auth/jwt_handler.js"
-    },
-    "./validation": {
-      "types": "./types/validation.d.ts",
-      "require": "./src/validation/schema_validator.js",
-      "default": "./src/validation/schema_validator.js"
-    },
-    "./schemas/*": "./schemas/*"
+    "./schema": "./schemas/starlight.core.schema.json"
   },
   "types": "./types/index.d.ts",
   "files": [
-    "src/",
-    "sdk/*.py",
-    "schemas/",
-    "docs/",
-    "types/",
-    "bin/",
+    "src/core/",
+    "schemas/starlight.core.schema.json",
+    "!schemas/README.md",
+    "spec/STARLIGHT_CORE_PROTOCOL.md",
+    "spec/SECURITY_PROFILE.md",
+    "!spec/README.md",
+    "types/core.d.ts",
+    "types/index.d.ts",
+    "examples/",
     "README.md",
-    "LICENSE",
-    "CHANGELOG.md"
+    "LICENSE"
   ],
-  "bin": {
-    "starlight": "./bin/starlight.js"
-  },
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "start": "node src/hub.js",
-    "start:headless": "node src/hub.js --headless",
-    "mission": "node bin/starlight.js",
-    "launcher": "node launcher/server.js",
-    "test": "npm run test:unit && npm run test:python",
-    "test:unit": "node --test test/unit/protocol.test.js test/unit/intent_runner.test.js test/unit/protocol_objective.test.js",
+    "start": "node src/core/start.js",
+    "test": "npm run test:core",
+    "test:core": "node --test test/unit/core_protocol.test.js test/unit/core_tck.test.js",
+    "test:interop": "python -m unittest discover -s test -p test_core_python_sdk.py",
+    "test:unit": "npm run test:core",
+    "test:legacy": "node --test test/unit/protocol.test.js test/unit/intent_runner.test.js test/unit/protocol_objective.test.js && npm run test:python",
     "test:python": "python -m unittest discover -s test -p test_sdk_actions.py && python -m unittest discover -s test/unit -p test_sentinels_structural.py",
     "test:security": "node --test test/unit/protocol.test.js",
-    "test:legacy": "node test/run_all_tests.js",
-    "tck": "cd tck && npm test",
-    "lint": "eslint src/ launcher/ bin/ test/unit/*.test.js --ext .js",
+    "test:experiments": "node test/run_all_tests.js",
+    "tck": "node tck/src/core_tck.js",
+    "lint": "eslint src/core test/unit/core_protocol.test.js examples --ext .js",
+    "lint:legacy": "eslint src launcher bin test/unit/*.test.js --ext .js",
     "prepublishOnly": "npm run test"
   },
   "keywords": [
     "starlight",
     "starlight-protocol",
-    "automation",
-    "browser-automation",
-    "playwright",
-    "self-healing",
+    "intent",
+    "agent-protocol",
     "testing",
     "e2e",
     "sentinel",
     "json-rpc",
     "websocket",
     "ai",
-    "autonomous"
+    "autonomous-agents"
   ],
   "author": {
     "name": "Dhiraj Das",
@@ -99,19 +77,19 @@
   "homepage": "https://github.com/starlight-protocol/starlight#readme",
   "type": "commonjs",
   "dependencies": {
-    "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1",
-    "nanoid": "^5.1.6",
-    "playwright": "^1.57.0",
     "ws": "^8.20.1"
   },
   "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "@opentelemetry/api": "^1.7.0",
     "@opentelemetry/exporter-metrics-otlp-http": "^0.46.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.46.0",
     "@opentelemetry/sdk-metrics": "^1.19.0",
     "@opentelemetry/sdk-trace-base": "^1.19.0",
     "@opentelemetry/sdk-trace-node": "^1.19.0",
+    "nanoid": "^5.1.6",
+    "playwright": "^1.57.0",
     "eslint": "^8.57.1"
   },
   "engines": {

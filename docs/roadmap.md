@@ -1,160 +1,65 @@
-# 🛰️ CBA World-Class Roadmap: The "Universal Starlight" Strategy
+# Starlight 5.x Roadmap
 
-To transform Constellation-Based Automation from a smart framework into a global automation paradigm, we must move from **Reactive Healing** to **Sovereign Intelligence**.
+Starlight 5.x is intentionally smaller than the browser-specific 4.x system. Features belong in Sentinels unless they are necessary for safe coordination between every kind of Sentinel.
 
----
+## Phase 1 — Minimal core protocol: complete
 
-## 🟢 PHASE 1: The Core Protocol (COMPLETED)
-*Establish the foundational Sidecar Architecture.*
-- **Starlight v2.0**: JSON-RPC 2.0 message bus implementation. [DONE]
-- **Priority Handshaking**: Multi-sentinel coordination (Janitor vs Pulse). [DONE]
-- **Business ROI Reporting**: Autonomous "Hero Story" report generation. [DONE]
+- Intent-only client contract
+- Offer, Claim, Execute, Outcome lifecycle
+- Deterministic claim arbitration
+- `completed`, `failed`, `unhandled`, and `retry` outcomes
+- JSON-RPC 2.0 WebSocket reference transport
+- Canonical schema and normative specification
 
-## 🟢 PHASE 2: AI Visionary Layer (COMPLETED)
-*Integrate Local SLMs for visual, selector-free resilience.*
-- **Local Vision Pulse**: `moondream` integration for visual obstacle detection. [DONE]
-- **Hybrid Healing**: 25s AI budget with seamless heuristic fallback. [DONE]
-- **Sovereign Hijack**: Priority-based browser control for AI intervention. [DONE]
+## Phase 2 — Execution correctness: complete
 
-## 🟢 PHASE 3: Temporal Stability & Network Pulse (COMPLETED)
-*Eliminating "Flakiness" at the source: Network & DOM Jitter.*
-- **The Pulse Sentinel**: Specialized agent for Network/DOM mutation monitoring. [DONE]
-- **Auto-Wait Handshake**: Hub-level execution delay based on environment stability. [DONE]
-- **Wait-Less Execution**: Removal of manual `setTimeout` from intent scripts. [DONE]
+- Offer and execution deadlines
+- Caller and remote cancellation propagation
+- Failure isolation and bounded retry
+- Per-Sentinel capacity and execution serialization
+- Intent-ID idempotency and conflict detection
+- Bounded replay history
 
-## 🟢 PHASE 4: Decentralized Sentinel Mesh (COMPLETED)
-*Scaling CBA across distributed environments.*
-- **Sovereign Context Injection**: Shared intelligence across the constellation. [DONE]
-- **The Starlight SDK**: Standardized base class for rapid Sentinel development. [DONE]
-- **Data Sentinel**: Example agent performing passive intelligence extraction. [DONE]
+## Phase 3 — Open interoperability: complete
 
-## 🟢 PHASE 5: Semantic Intent & Mission Planning (COMPLETED)
-*Moving from "Clicking" to "Goal Achievement."*
-- **Semantic Resolver**: Hub-level translation of goals (e.g., "INITIATE MISSION") to selectors. [DONE]
-- **Dynamic ID Resilience**: Handling randomly generated attributes via semantic scanning. [DONE]
-- **The Cosmic Challenge**: A world-class stress test of the full autonomous fleet. [DONE]
+- JavaScript in-process and remote SDKs
+- Python asynchronous Sentinel and intent client
+- Black-box Hub Technology Compatibility Kit
+- Cross-language Python → Node → Python verification
 
----
+## Phase 4 — Connection resilience: complete
 
-## 🟢 PHASE 6: The "Omega" Standard & Ecosystem (COMPLETED)
-*Achieving World-Class Paradigm Status.*
-- **Starlight Certification**: A formal ISO-like standard for "Resilient Test Infrastructure." [DONE]
-- **CBA Cloud Orchestrator**: A global, managed Hub that spins up ephemeral browsers and Sentinels on demand. [DONE]
-- **Time-Travel Triage**: The ability to "Rewind" a failed mission and inspect the exact handshake logs. [DONE]
+- Transport heartbeat and stale-peer eviction
+- Configurable Sentinel reconnect with jittered backoff
+- Idempotent JavaScript and Python client replay after reconnect
+- Sentinel re-registration without duplicate execution
+- Graceful Hub draining during shutdown
+- Explicit failure/fallback semantics for interrupted attempts
 
-## 🛰️ NEXT: PHASE 7: The "Galaxy" Mesh (Predictive Intelligence)
-*Moving from Reactive Healing to Predictive Avoidance.*
-- **Self-Healing Selectors**: Use `mission_trace.json` history to automatically suggest substitutes for failed selectors. [DONE]
-- **Aura-Based Throttling**: Dynamic Hub frequency adjustment based on historical environmental entropy. [DONE]
-- **Sentinel Learning**: Persistent memory for Sentinels to optimize corrective actions over time. [DONE]
+## Phase 5 — Security profile: foundation complete
 
-## 🟢 PHASE 8: The Starlight Ecosystem (DevX) (COMPLETED)
-*Transforming CBA into a formal Developer Toolset.*
-- **Centralized Configuration**: All settings externalized to `config.json`. [DONE]
-- **Graceful Shutdown**: Signal handlers for clean sentinel termination. [DONE]
-- **SDK Hardening**: Atomic writes, proper exceptions, auto-reconnect. [DONE]
-- **Screenshot Cleanup**: Auto-removes files older than 24h. [DONE]
-- **Trace Rotation**: Limits mission trace to 500 events. [DONE]
-- **Starlight CLI**: Advanced project scaffolding and constellation management. [DONE]
-  - `starlight init <name>` - Scaffold new CBA projects
-  - `starlight create <sentinel>` - Generate Sentinel boilerplate
-  - `starlight run` - Launch Hub + Sentinels constellation
-  - `starlight doctor` - Environment diagnostics
-  - `starlight triage` - Time-travel debugging UI
+- Normative TLS deployment profile
+- Pluggable registration authentication
+- Per-Intent authorization policy hook
+- Per-client rate and payload limits
+- Secret-handling and evidence-redaction guidance
 
-## � PHASE 9: Sovereign Security & Compliance (COMPLETED)
-*Turning CBA into a Shield for Enterprise Environments.*
-- **PII Sentinel**: Passive sentinel for detecting and alerting on sensitive data in the UI. [DONE]
-- **Traffic Sovereign**: Network-level request blocking and chaos engineering via the Hub. [DONE]
-- **Shadow DOM Penetration**: Advanced deep-piercing selectors for encapsulated web components. [DONE]
+Security remains deployment policy rather than domain logic in the core lifecycle.
 
----
+## Phase 6 — Protocol observability
 
-## 🔭 PHASE 10: Enterprise Observability & Telemetry
-*Full visibility into automation health at scale.*
-- **OpenTelemetry Integration**: Export traces, metrics, and logs to Datadog/Grafana/Splunk. [PLANNED]
-- **Real-Time Dashboard**: Live constellation health (Sentinel status, mission success rates). [DONE]
-- **Alerting Webhooks**: Slack/Teams/Discord notifications on mission completion. [DONE]
-- **SLA Tracking**: Automated compliance reporting (uptime, MTTR metrics). [PLANNED]
+- Stable lifecycle event vocabulary
+- OpenTelemetry adapter outside the core runtime
+- Intent latency, queue time, retries, and Sentinel health metrics
+- Evidence/artifact reference conventions
 
-## ☁️ PHASE 11: Multi-Tenant Cloud Platform
-*CBA as a managed service.*
-- **Hub-as-a-Service**: REST API to spawn ephemeral browser sessions on demand. [PLANNED]
-- **Remote Sentinel Registry**: Hot-deploy Sentinels without restarting the Hub. [PLANNED]
-- **Session Isolation**: Multi-user browser context management for parallel testing. [PLANNED]
-- **Kubernetes Operator**: Native K8s deployment with auto-scaling Sentinels. [PLANNED]
+## Phase 7 — Ecosystem
 
-## ♿ PHASE 12: Accessibility & Compliance Testing
-*Shift-left on accessibility.*
-- **A11y Sentinel**: WCAG 2.1 automated audits during every mission. [DONE]
-- **Color Contrast Analyzer**: Real-time detection of contrast failures. [DONE]
-- **Screen Reader Simulation**: Validate ARIA labels and keyboard navigation. [PLANNED]
-- **Compliance Reports**: PDF generation for audit trails (GDPR, HIPAA readiness). [PLANNED]
+- Go, Java, and Rust 5.x SDKs generated from the core contract
+- Sentinel TCK in addition to the Hub TCK
+- Certified browser, computer-use, mobile, LLM, API, and human-approval Sentinels
+- Migration wrapper for selected 4.x browser fleets
 
-## 🗣️ PHASE 13: Natural Language Intent (NLI)
-*Talk to your tests in plain English.*
-- **LLM-Powered Intent Parsing**: "Login and add the first product to cart" → automated steps. [PLANNED]
-- **Voice-to-Intent**: Speech recognition for exploratory testing. [PLANNED]
-- **Gherkin Bridge**: Parse `.feature` files directly into Starlight intents. [PLANNED]
-- **Self-Documenting Missions**: Auto-generate BDD scenarios from successful traces. [PLANNED]
+## Non-goals
 
-## 📱 PHASE 14: Cross-Browser & Mobile Constellation
-*Beyond Chromium.*
-
-### Phase 14.1: Multi-Browser Foundation (COMPLETED)
-- **Browser Adapter Pattern**: Chromium, Firefox, WebKit support via unified interface. [DONE]
-- **Mission Control Integration**: Browser selector dropdown in Hub card. [DONE]
-- **Zero Protocol Changes**: Sentinels remain 100% browser-agnostic. [DONE]
-- **Performance Benchmarks**: Chromium ~715ms, Firefox ~1099ms, WebKit ~545ms. [DONE]
-
-### Phase 14.2: Mobile Constellation (COMPLETED)
-- **Device Emulation**: iPhone, Pixel, Galaxy, iPad profiles via Mission Control. [DONE]
-- **Network Throttling**: 4G, 3G, Slow 3G, Offline conditions (Chromium CDP). [DONE]
-- **ResponsiveSentinel**: Viewport-aware mobile obstacle detection. [DONE]
-- **Mission Control Integration**: Device & network dropdowns in Hub card. [DONE]
-
-## 🏪 PHASE 15: Plugin Marketplace
-*Community-driven extensibility.*
-
-### Phase 15.1: Plugin Lite (COMPLETED)
-- **Plugin Registry**: Curated `plugins.json` with community sentinels. [DONE]
-- **Plugin SDK Documentation**: `PLUGIN_SDK.md` for developers. [DONE]
-- **CLI Install Command**: `starlight install <name|github-url>`. [DONE]
-- **CLI List Command**: `starlight list --available`. [DONE]
-- **CLI Remove Command**: `starlight remove <name>`. [DONE]
-
-### Phase 15.2: Full Marketplace (PLANNED)
-- **Sentinel Store**: Hosted registry with search and versioning. [PLANNED]
-- **Visual Editor**: No-code Sentinel builder for non-developers. [PLANNED]
-- **Certification Program**: "Starlight Certified" badges for verified plugins. [PLANNED]
-
-## 🟢 PHASE 16: The Autonomous Era (COMPLETED)
-*Zero-Touch Orchestration & Environmental Stability Sensing.*
-- **Mutation Fingerprinting**: World-Class Recorder captures stability signatures for context-aware waiting. [DONE]
-- **Autonomous CLI Orchestrator**: `starlight.js` for one-command constellation lifecycle management. [DONE]
-- **Failure-Safe Reporting**: Immediate evidence generation on mission error. [DONE]
-- **Hub Health Polling**: HTTP/Websocket unified health endpoint for CI/CD readiness. [DONE]
-
-## 🌀 PHASE 17: Deep Mesh Intelligence & Temporal Warping
-*Towards a self-aware, collaborative constellation.*
-
-- **Starlight "Warp"**: Serialize full browser context (Storage, Cookies, DOM) into `.warp` files for instant failure triage. PII sanitization and optional AES-256 encryption. [DONE]
-- **Inter-Sentinel "Side-Talk"**: Protocol support for agents to negotiate environment state without Hub intervention. Handles Sentinel availability. [DONE]
-- **Consensus Mesh**: Voting-based action validation (Quorum) for mission-critical "Zero-Flake" guarantees. [DONE]
-- **Temporal Ghosting**: Automated "Ghost" runs to identify the performance speed limits of the UI. [DONE]
-- **Sovereign Chaos**: Integrated "Red Team" Sentinels to validate constellation resilience through active sabotage. [PLANNED]
-- **Entropy Sentinel**: Monitoring background network intent to predictively adjust settlement windows. [PLANNED]
-
----
-
-### 🛡️ MISSION STATUS: STARLIGHT PROTOCOL STANDARD v1.0.0
-
-The Starlight Protocol is now a **formal open standard** for autonomous browser automation.
-
-**Specification:** `spec/STARLIGHT_PROTOCOL_SPEC_v1.0.0.md`  
-**Compliance Tests:** `spec/COMPLIANCE_TESTS.md`  
-**Reference Implementation:** `src/hub.js`, `sdk/starlight_sdk.py`
-
-CBA has made the **Environment** irrelevant to the **Goal**. Whether the UI changes, popups appear, or the network lags—the Starlight Protocol ensures the journey reaches its destination.
-
-*Built with ❤️ by [Dhiraj Das](https://www.dhirajdas.dev)*
+The core protocol will not acquire selectors, browser actions, device APIs, model-provider APIs, test syntax, dashboards, marketplaces, or application-specific planning. Those are Sentinel or product concerns.

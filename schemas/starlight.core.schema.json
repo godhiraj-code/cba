@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://starlight.dev/schemas/starlight.core.schema.json",
+  "title": "Starlight Core Protocol 1.0",
+  "oneOf": [
+    { "$ref": "#/$defs/register" },
+    { "$ref": "#/$defs/intentRequest" },
+    { "$ref": "#/$defs/offer" },
+    { "$ref": "#/$defs/execute" },
+    { "$ref": "#/$defs/cancel" },
+    { "$ref": "#/$defs/successResponse" },
+    { "$ref": "#/$defs/errorResponse" }
+  ],
+  "$defs": {
+    "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "request": {
+      "type": "object",
+      "required": ["jsonrpc", "method", "params"],
+      "properties": {
+        "jsonrpc": { "const": "2.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "method": { "type": "string" },
+        "params": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "intent": {
+      "type": "object",
+      "required": ["goal"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "goal": { "type": "string", "minLength": 1, "maxLength": 10000 },
+        "context": { "type": "object" },
+        "constraints": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "register": {
+      "allOf": [
+        { "$ref": "#/$defs/request" },
+        {
+          "required": ["id"],
+          "properties": {
+            "method": { "const": "starlight.register" },
+            "params": {
+              "type": "object",
+              "required": ["role", "name", "protocolVersion"],
+              "properties": {
+                "role": { "enum": ["client", "sentinel"] },
+                "id": { "$ref": "#/$defs/id" },
+                "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+                "version": { "type": "string", "maxLength": 50 },
+                "protocolVersion": { "type": "string", "maxLength": 20 },
+                "priority": { "type": "integer", "minimum": 0 },
+                "capacity": { "type": "integer", "minimum": 1 },
+                "capabilities": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1, "maxLength": 100 },
+                  "uniqueItems": true
+                },
+                "token": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      ]
+    },
+    "intentRequest": {
+      "allOf": [
+        { "$ref": "#/$defs/request" },
+        {
+          "required": ["id"],
+          "properties": {
+            "method": { "const": "starlight.intent" },
+            "params": { "$ref": "#/$defs/intent" }
+          }
+        }
+      ]
+    },
+    "offer": {
+      "allOf": [
+        { "$ref": "#/$defs/request" },
+        {
+          "required": ["id"],
+          "properties": {
+            "method": { "const": "starlight.offer" },
+            "params": {
+              "type": "object",
+              "required": ["intent"],
+              "properties": { "intent": { "$ref": "#/$defs/intent" } },
+              "additionalProperties": false
+            }
+          }
+        }
+      ]
+    },
+    "execute": {
+      "allOf": [
+        { "$ref": "#/$defs/request" },
+        {
+          "required": ["id"],
+          "properties": {
+            "method": { "const": "starlight.execute" },
+            "params": {
+              "type": "object",
+              "required": ["intent", "attempt", "claim", "history"],
+              "properties": {
+                "intent": { "$ref": "#/$defs/intent" },
+                "attempt": { "type": "integer", "minimum": 1 },
+                "claim": { "type": "object" },
+                "history": { "type": "array" }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      ]
+    },
+    "cancel": {
+      "allOf": [
+        { "$ref": "#/$defs/request" },
+        {
+          "properties": {
+            "method": { "const": "starlight.cancel" },
+            "params": {
+              "type": "object",
+              "required": ["intentId"],
+              "properties": { "intentId": { "$ref": "#/$defs/id" } },
+              "additionalProperties": false
+            }
+          }
+        }
+      ]
+    },
+    "successResponse": {
+      "type": "object",
+      "required": ["jsonrpc", "id", "result"],
+      "properties": {
+        "jsonrpc": { "const": "2.0" },
+        "id": { "$ref": "#/$defs/id" },
+        "result": {}
+      },
+      "additionalProperties": false
+    },
+    "errorResponse": {
+      "type": "object",
+      "required": ["jsonrpc", "id", "error"],
+      "properties": {
+        "jsonrpc": { "const": "2.0" },
+        "id": { "type": ["string", "null"] },
+        "error": {
+          "type": "object",
+          "required": ["code", "message"],
+          "properties": {
+            "code": { "type": "integer" },
+            "message": { "type": "string" },
+            "data": {
+              "type": "object",
+              "required": ["protocolCode"],
+              "properties": {
+                "protocolCode": { "type": "string" },
+                "details": {}
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "starlight-protocol"
-version = "4.0.0a1"
-description = "Python SDK for the Starlight Protocol - Resilient browser automation through autonomous Sentinels"
+version = "5.0.0a1"
+description = "Minimal Python SDK for routing intent to autonomous Starlight Sentinels"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
@@ -14,9 +14,8 @@ authors = [
 keywords = [
     "automation",
     "testing",
-    "browser",
-    "selenium",
-    "playwright",
+    "intent",
+    "agents",
     "sentinel",
     "protocol",
     "websocket",

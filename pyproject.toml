@@ -4,23 +4,22 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "starlight-protocol"
-version = "4.0.0a1"
-description = "Sovereign SDK for the Starlight Protocol"
-readme = "README.md"
-requires-python = ">=3.9"
+version = "5.0.0a1"
+description = "Minimal Python SDK for routing intent to autonomous Starlight Sentinels"
+readme = "python-sdk/README.md"
+requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
     { name = "Dhiraj Das", email = "dhirajdas.666@gmail.com" }
 ]
 dependencies = [
     "websockets>=10.0",
-    "httpx>=0.24.0",
 ]
 
 [project.urls]
 Homepage = "https://www.dhirajdas.dev"
-Documentation = "https://starlight-protocol.github.io/starlight/"
+Documentation = "https://github.com/starlight-protocol/starlight/blob/main/spec/STARLIGHT_CORE_PROTOCOL.md"
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["sdk*"]
+where = ["python-sdk/src"]
+include = ["starlight_protocol*"]

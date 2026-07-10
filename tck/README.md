@@ -1,79 +1,27 @@
-# Starlight Protocol Technology Compatibility Kit (TCK)
+# Starlight Core TCK
 
-The TCK provides a standardized test suite for validating compliance with the Starlight Protocol specification.
+The Technology Compatibility Kit verifies a Hub only through its public WebSocket interface.
 
-## Purpose
+Against the reference implementation:
 
-The TCK ensures that all implementations of the Starlight Protocol behave consistently according to the specification. It tests:
-
-1. **Protocol Compliance** - JSON-RPC 2.0 message format
-2. **Lifecycle Events** - Registration, heartbeat, shutdown
-3. **Handshake Behavior** - Pre-check, clear, wait, hijack, resume
-4. **Security** - JWT authentication, token validation
-5. **Performance** - Latency requirements, throughput
-
-## Test Categories
-
-### Level 1: Core Compliance (Required)
-- Message format validation
-- Registration handshake
-- Pre-check/clear flow
-- Heartbeat mechanism
-
-### Level 2: Extended Compliance
-- Hijack/resume flow
-- Context updates
-- Entropy stream handling
-- Semantic goal resolution
-
-### Level 3: Full Compliance
-- Self-healing selectors
-- Multi-sentinel coordination
-- Security features
-- Performance benchmarks
-
-## Running the TCK
-
-### Against JavaScript SDK
 ```bash
-cd tck
-npm install
-npm run test:js -- --hub-url ws://localhost:8080
+npm run tck
 ```
 
-### Against Python SDK
+Against another implementation:
+
 ```bash
-cd tck
-pip install -r requirements.txt
-python run_tck.py --sdk python --hub-url ws://localhost:8080
+node tck/src/core_tck.js --url=ws://host:8080
 ```
 
-### Against Go SDK
-```bash
-cd tck
-go run ./cmd/tck --sdk go --hub-url ws://localhost:8080
-```
+The TCK checks:
 
-### Against Java SDK
-```bash
-cd tck
-mvn test -Dsdk=java -Dhub.url=ws://localhost:8080
-```
+- protocol-version negotiation;
+- registration and role enforcement;
+- Offer, Claim, Execute, and completed Outcome flow;
+- Sentinel identity and evidence in results;
+- idempotent Intent replay;
+- conflicting replay rejection;
+- declared Sentinel capacity.
 
-## Test Results
-
-The TCK generates a compliance report in JSON and HTML format:
-
-```
-tck/
-├── results/
-│   ├── compliance-report.json
-│   ├── compliance-report.html
-│   └── performance-metrics.json
-```
-
-## Certification
-
-Implementations that pass all Level 1 tests are considered "Starlight Protocol Compliant".
-
-Implementations that pass all Level 3 tests are eligible for "Starlight Certified" status.
+A successful run emits a machine-readable JSON report and exits with code zero.

@@ -1,140 +1,84 @@
 # Starlight Protocol Python SDK
 
-[![PyPI version](https://img.shields.io/pypi/v/starlight-protocol.svg?color=green)](https://pypi.org/project/starlight-protocol/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-
-Python SDK for building **Sentinels** that connect to the Starlight Protocol Hub.
-
-## Installation
+Minimal asyncio SDK for Starlight Core Protocol 1.0.
 
 ```bash
 pip install starlight-protocol
 ```
 
-## Quick Start
-
-### 🚀 New in v1.3 Series: Protocol Resilience & Extended Actions
-- **Protocol Resilience**: Support for Phase 14 Hub features (Generic Perception, Self-Healing).
-- **Extended Commands**: Native support for scroll, hover, check/uncheck, select, press, type.
-- **Enterprise Security**: JWT-ready Sentinel base class.
-
-Create a custom Sentinel in just a few lines:
+## Build a Sentinel
 
 ```python
-from starlight_protocol import SentinelBase
+import asyncio
+from starlight_protocol import Sentinel
 
-class MySentinel(SentinelBase):
-    def __init__(self):
-        super().__init__(
-            layer_name="MySentinel",
-            priority=5,
-            capabilities=["custom-detection"]
-        )
-    
-    async def on_pre_check(self, params, msg_id):
-        # Called before each Hub action
-        blocking = params.get("blocking", [])
-        
-        if self.should_intervene(blocking):
-            await self.send_hijack("Custom obstacle detected")
-            await self.send_action("click", "#close-button")
-            await self.send_resume()
-        else:
-            await self.send_clear()
-    
-    def should_intervene(self, blocking):
-        # Your custom detection logic
-        return any(b.get("className", "").find("custom-modal") >= 0 for b in blocking)
 
-# Run the Sentinel
-if __name__ == "__main__":
-    sentinel = MySentinel()
-    sentinel.run()
-```
+async def execute(intent, execution):
+    # Use heuristics, an LLM, Playwright, Appium, computer-use, or any API here.
+    return {
+        "status": "completed",
+        "value": {"handled": intent["goal"]},
+        "evidence": ["python-agent-ran"],
+    }
 
-## Core Classes
 
-### `SentinelBase`
-
-Abstract base class for all Sentinels.
-
-```python
-class SentinelBase:
-    def __init__(
-        self,
-        layer_name: str,      # Unique identifier (e.g., "JanitorSentinel")
-        priority: int,        # 1-10, lower = higher priority
-        uri: str = "ws://localhost:8080",  # Hub WebSocket URL
-        capabilities: list = None,  # ["stability", "obstacle-removal", "vision"]
-        selectors: list = None,     # CSS selectors to monitor
+async def main():
+    sentinel = Sentinel(
+        name="python-agent",
+        capabilities=["python"],
+        capacity=1,
+        can_handle=lambda intent: {"score": 0.9},
+        handle=execute,
     )
+    await sentinel.connect()
+    await sentinel.serve_forever()
+
+
+asyncio.run(main())
 ```
 
-### Methods to Override
+`can_handle` runs during the non-mutating Offer phase. `handle` runs only after the Coordinator grants an execution attempt.
 
-| Method | When Called | Purpose |
-|--------|-------------|---------|
-| `on_pre_check(params, msg_id)` | Before each Hub action | Decide to clear, wait, or hijack |
-| `on_message(msg)` | Any message received | Custom message handling |
-
-### Methods to Call
-
-| Method | Purpose |
-|--------|---------|
-| `send_clear()` | Signal all-clear to Hub |
-| `send_wait(delay_ms, reason)` | Request Hub to wait |
-| `send_hijack(reason)` | Take exclusive control |
-| `send_action(action, selector, **kwargs)` | Execute browser action during hijack |
-| `send_resume(re_check=False)` | Return control to Hub |
-
-## Built-in Sentinels
-
-The package includes reference Sentinel implementations:
+## Submit intent
 
 ```python
-from starlight_protocol.sentinels import PulseSentinel, JanitorSentinel
+from starlight_protocol import Starlight
 
-# Stability monitoring
-pulse = PulseSentinel()
-pulse.run()
+mission = await Starlight().connect()
 
-# Obstacle removal
-janitor = JanitorSentinel()
-janitor.run()
+await mission.intent("Sign in as the test customer")
+await mission.intent(
+    "Complete checkout",
+    context={"channel": "mobile"},
+    constraints={"maxTotal": 100},
+)
 ```
 
-## Protocol Compliance
+The mission contains no implementation commands. Sentinels own planning, execution, recovery, verification, and evidence.
 
-This SDK implements [Starlight Protocol v1.0.0](https://github.com/starlight-protocol/starlight/blob/main/spec/STARLIGHT_PROTOCOL_SPEC_v1.0.0.md).
+## Outcomes
 
-### Certification
+A Sentinel returns one status:
 
-Test your Sentinel with the TCK Validator:
+- `completed`: the goal is satisfied.
+- `failed`: terminal domain failure.
+- `unhandled`: try the next claimant.
+- `retry`: transient condition; retry within the Coordinator's attempt budget.
 
-```bash
-# Start validator
-node validator/starlight_validator.js
+## Subclassing
 
-# Run your Sentinel
-python -m starlight_protocol.my_sentinel
+Callbacks are optional. A Sentinel can be implemented as a class:
+
+```python
+from starlight_protocol import Sentinel
+
+
+class MobileSentinel(Sentinel):
+    async def can_handle(self, intent):
+        return {"score": 1.0} if intent["context"].get("channel") == "mobile" else False
+
+    async def handle(self, intent, execution):
+        return {"status": "completed"}
 ```
 
-## Configuration
-
-Sentinels automatically load `config.json` from the project root:
-
-```json
-{
-  "sentinel": {
-    "reconnectDelay": 3,
-    "heartbeatInterval": 2
-  },
-  "security": {
-    "authToken": "your-secret-token"
-  }
-}
-```
-
-## License
-
-MIT - See [LICENSE](LICENSE)
+The old `SentinelBase` remains exported only to help migrate 4.x implementations. New Sentinels should use `Sentinel`.

@@ -1,10 +1,11 @@
 {
     "name": "@starlight-protocol/tck",
-    "version": "1.0.0",
-    "description": "Technology Compatibility Kit for Starlight Protocol",
-    "main": "src/index.js",
+    "version": "5.0.0-alpha.1",
+    "description": "Black-box compatibility kit for Starlight Core Protocol 1.0",
+    "main": "src/core_tck.js",
     "scripts": {
-        "test": "node src/run_tck.js",
+        "test": "node src/core_tck.js",
+        "test:legacy": "node src/run_tck.js",
         "test:js": "node src/run_tck.js --sdk javascript",
         "test:hub": "node src/hub_compliance.js",
         "test:sentinel": "node src/sentinel_compliance.js",
