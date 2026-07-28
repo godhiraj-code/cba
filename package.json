@@ -17,8 +17,12 @@
     "./schema": "./schemas/starlight.core.schema.json"
   },
   "types": "./types/index.d.ts",
+  "bin": {
+    "starlight-core": "bin/starlight-core.js"
+  },
   "files": [
     "src/core/",
+    "bin/starlight-core.js",
     "schemas/starlight.core.schema.json",
     "!schemas/README.md",
     "spec/STARLIGHT_CORE_PROTOCOL.md",
@@ -26,8 +30,10 @@
     "!spec/README.md",
     "types/core.d.ts",
     "types/index.d.ts",
+    "scripts/proof-e2e.js",
     "examples/",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "directories": {
@@ -35,18 +41,16 @@
   },
   "scripts": {
     "start": "node src/core/start.js",
-    "test": "npm run test:core",
+    "test": "npm run test:core && npm run lint && npm run typecheck && npm run schema:check && npm run tck",
     "test:core": "node --test test/unit/core_protocol.test.js test/unit/core_tck.test.js",
-    "test:interop": "python -m unittest discover -s test -p test_core_python_sdk.py",
     "test:unit": "npm run test:core",
-    "test:legacy": "node --test test/unit/protocol.test.js test/unit/intent_runner.test.js test/unit/protocol_objective.test.js && npm run test:python",
-    "test:python": "python -m unittest discover -s test -p test_sdk_actions.py && python -m unittest discover -s test/unit -p test_sentinels_structural.py",
-    "test:security": "node --test test/unit/protocol.test.js",
-    "test:experiments": "node test/run_all_tests.js",
     "tck": "node tck/src/core_tck.js",
-    "lint": "eslint src/core test/unit/core_protocol.test.js examples --ext .js",
-    "lint:legacy": "eslint src launcher bin test/unit/*.test.js --ext .js",
-    "prepublishOnly": "npm run test"
+    "proof:e2e": "node scripts/proof-e2e.js",
+    "lint": "eslint src/core test/unit/core_protocol.test.js examples scripts bin/starlight-core.js --ext .js",
+    "typecheck": "tsc -p tsconfig.contract.json",
+    "schema:check": "node scripts/check-contract.js",
+    "release:gate": "node scripts/release-gate.js",
+    "prepublishOnly": "npm run release:gate"
   },
   "keywords": [
     "starlight",
@@ -90,9 +94,10 @@
     "@opentelemetry/sdk-trace-node": "^1.19.0",
     "nanoid": "^5.1.6",
     "playwright": "^1.57.0",
-    "eslint": "^8.57.1"
+    "eslint": "^8.57.1",
+    "typescript": "^5.9.3"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   }
 }

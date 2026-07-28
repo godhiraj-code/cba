@@ -1,4 +1,4 @@
-name: Starlight CI
+name: Starlight 5.x Launch Gate
 
 on:
   push:
@@ -7,109 +7,33 @@ on:
     branches: [main]
 
 jobs:
-  quality:
+  conformance:
+    name: Node ${{ matrix.node }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22", "24"]
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ matrix.node }}
           cache: npm
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: pip
-
-      - name: Install dependencies
-        run: |
-          npm ci
-          python -m pip install -r requirements.txt
-
-      - name: Run tests
-        run: npm test
-
-      - name: Run lint
-        run: npm run lint
-
-      - name: Verify package contents
-        run: npm pack --dry-run
-
-  mission-smoke:
-    needs: quality
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    env:
-      STARLIGHT_AUTH_TOKEN: ci-starlight-token
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
       - run: npm ci
-      - run: python -m pip install -r requirements.txt
-      - run: npx playwright install --with-deps chromium
+      - run: npm run release:gate
 
-      - name: Run headless mission
-        run: timeout 300s node bin/starlight.js test/intent_portfolio_v2.js --headless --verbose
-
-      - name: Upload mission artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: starlight-report
-          if-no-files-found: ignore
-          path: |
-            report.html
-            screenshots/
-            mission_trace.json
-
-  go-sdk:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: go-sdk
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go-sdk/go.mod
-          cache-dependency-path: go-sdk/go.sum
-      - run: gofmt -w starlight/*.go
-      - run: git diff --exit-code
-        working-directory: .
-      - run: go test ./...
-
-  java-sdk:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: java-sdk
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-          cache: maven
-      - run: mvn --batch-mode test
-
-  docker:
-    needs: quality
+  artifacts:
+    name: Installed npm artifact smoke
+    needs: conformance
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/build-push-action@v6
+      - uses: actions/setup-node@v4
         with:
-          context: .
-          push: false
-          tags: starlight:test
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run release:gate
+      - name: Reject repository pollution
+        run: git diff --exit-code && test -z "$(git status --short)"

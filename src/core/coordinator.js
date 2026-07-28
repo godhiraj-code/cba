@@ -10,6 +10,16 @@ const {
 const { ProtocolError, ERROR_CODES } = require('./errors');
 const { ExecutionGate } = require('./gate');
 
+function boundedInteger(value, label, minimum, maximum) {
+    if (!Number.isInteger(value) || value < minimum || value > maximum) {
+        throw new ProtocolError(
+            ERROR_CODES.INVALID_REQUEST,
+            `${label} must be an integer between ${minimum} and ${maximum}`
+        );
+    }
+    return value;
+}
+
 function canonicalize(value) {
     if (Array.isArray(value)) return value.map(canonicalize);
     if (value && typeof value === 'object') {
@@ -48,7 +58,7 @@ function delay(ms, signal) {
     });
 }
 
-function withTimeout(operation, timeoutMs, message, parentSignal) {
+function withTimeout(operation, timeoutMs, message, parentSignal, observeOperation) {
     const controller = new AbortController();
     if (parentSignal?.aborted) {
         controller.abort(parentSignal.reason);
@@ -73,8 +83,10 @@ function withTimeout(operation, timeoutMs, message, parentSignal) {
         }, timeoutMs);
     });
 
+    const operationPromise = Promise.resolve().then(() => operation(controller.signal));
+    observeOperation?.(operationPromise);
     return Promise.race([
-        Promise.resolve().then(() => operation(controller.signal)),
+        operationPromise,
         timeout,
         cancelled
     ]).finally(() => {
@@ -92,9 +104,16 @@ class Coordinator extends EventEmitter {
         this.schedulingTimeoutMs = options.schedulingTimeoutMs ?? this.executionTimeoutMs;
         this.intentHistoryTtlMs = options.intentHistoryTtlMs ?? 300_000;
         this.maxIntentHistory = options.maxIntentHistory ?? 1_000;
+        boundedInteger(this.offerTimeoutMs, 'offerTimeoutMs', 1, 300_000);
+        boundedInteger(this.executionTimeoutMs, 'executionTimeoutMs', 1, 3_600_000);
+        boundedInteger(this.schedulingTimeoutMs, 'schedulingTimeoutMs', 1, 3_600_000);
+        boundedInteger(this.maxAttempts, 'maxAttempts', 1, 10);
+        boundedInteger(this.intentHistoryTtlMs, 'intentHistoryTtlMs', 1, 86_400_000);
+        boundedInteger(this.maxIntentHistory, 'maxIntentHistory', 1, 1_000_000);
         this.sentinels = new Map();
         this.intentHistory = new Map();
         this.activeIntents = new Set();
+        this.activeControllers = new Map();
         this.draining = false;
         this.sequence = 0;
     }
@@ -157,6 +176,12 @@ class Coordinator extends EventEmitter {
         this.pruneIntentHistory();
         const existing = this.intentHistory.get(intent.id);
         if (existing) {
+            if (existing.owner !== options.owner) {
+                return Promise.reject(new ProtocolError(
+                    ERROR_CODES.FORBIDDEN,
+                    `intent id '${intent.id}' belongs to a different principal`
+                ));
+            }
             if (existing.fingerprint !== intentFingerprint) {
                 return Promise.reject(new ProtocolError(
                     ERROR_CODES.INTENT_CONFLICT,
@@ -166,14 +191,27 @@ class Coordinator extends EventEmitter {
             this.emit('intent.replayed', { intent, state: existing.state });
             return existing.promise;
         }
+        if (this.intentHistory.size >= this.maxIntentHistory) {
+            return Promise.reject(new ProtocolError(
+                ERROR_CODES.RESOURCE_EXHAUSTED,
+                'intent history capacity is exhausted by active work',
+                { maxIntentHistory: this.maxIntentHistory }
+            ));
+        }
 
         const record = {
             fingerprint: intentFingerprint,
+            owner: options.owner,
             createdAt: Date.now(),
             state: 'running',
             promise: null
         };
-        record.promise = this.executeIntent(intent, options);
+        const controller = new AbortController();
+        const abortFromCaller = () => controller.abort(options.signal.reason);
+        if (options.signal?.aborted) controller.abort(options.signal.reason);
+        else options.signal?.addEventListener('abort', abortFromCaller, { once: true });
+        this.activeControllers.set(intent.id, controller);
+        record.promise = this.executeIntent(intent, { ...options, signal: controller.signal });
         this.intentHistory.set(intent.id, record);
         this.activeIntents.add(record.promise);
         record.promise.then(
@@ -181,14 +219,31 @@ class Coordinator extends EventEmitter {
                 record.state = 'completed';
                 record.settledAt = Date.now();
                 this.activeIntents.delete(record.promise);
+                this.activeControllers.delete(intent.id);
+                options.signal?.removeEventListener('abort', abortFromCaller);
             },
             () => {
                 record.state = 'failed';
                 record.settledAt = Date.now();
                 this.activeIntents.delete(record.promise);
+                this.activeControllers.delete(intent.id);
+                options.signal?.removeEventListener('abort', abortFromCaller);
             }
         );
         return record.promise;
+    }
+
+    cancel(intentId, owner) {
+        const record = this.intentHistory.get(intentId);
+        if (!record || record.owner !== owner) return false;
+        const controller = this.activeControllers.get(intentId);
+        if (!controller || controller.signal.aborted) return false;
+        controller.abort(new ProtocolError(
+            ERROR_CODES.CANCELLED,
+            `intent '${intentId}' was cancelled`
+        ));
+        this.emit('intent.cancelled', { intentId });
+        return true;
     }
 
     async drain(timeoutMs = 30_000) {
@@ -277,6 +332,7 @@ class Coordinator extends EventEmitter {
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                 const selected = this.describe(candidate.sentinel);
                 let release;
+                let executionOperation;
                 try {
                     release = await withTimeout(
                         childSignal => candidate.sentinel.gate.acquire(childSignal),
@@ -286,15 +342,25 @@ class Coordinator extends EventEmitter {
                     );
                     this.emit('sentinel.selected', { intent, sentinel: selected, claim: candidate.claim, attempt });
                     const rawOutcome = await withTimeout(
-                        childSignal => candidate.sentinel.execute(intent, {
-                            signal: childSignal,
-                            attempt,
-                            claim: candidate.claim,
-                            history: [...history]
-                        }),
+                        childSignal => {
+                            const notifyCancellation = () => {
+                                if (!candidate.sentinel.cancel) return;
+                                Promise.resolve(candidate.sentinel.cancel(intent)).catch(error => {
+                                    this.emit('sentinel.cancel_error', { intent, sentinel: selected, error });
+                                });
+                            };
+                            childSignal.addEventListener('abort', notifyCancellation, { once: true });
+                            return Promise.resolve(candidate.sentinel.execute(intent, {
+                                signal: childSignal,
+                                attempt,
+                                claim: candidate.claim,
+                                history: [...history]
+                            })).finally(() => childSignal.removeEventListener('abort', notifyCancellation));
+                        },
                         executionTimeoutMs,
                         `sentinel '${candidate.sentinel.name}' timed out executing '${intent.goal}'`,
-                        signal
+                        signal,
+                        operation => { executionOperation = operation; }
                     );
                     const outcome = normalizeOutcome(rawOutcome);
                     history.push({ sentinel: selected, attempt, status: outcome.status });
@@ -339,7 +405,11 @@ class Coordinator extends EventEmitter {
                     this.emit('sentinel.execution_error', { intent, sentinel: selected, attempt, error });
                     break;
                 } finally {
-                    release?.();
+                    if (release) {
+                        const releaseWhenStopped = release;
+                        if (executionOperation) executionOperation.then(releaseWhenStopped, releaseWhenStopped);
+                        else releaseWhenStopped();
+                    }
                 }
             }
         }

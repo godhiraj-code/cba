@@ -11,7 +11,7 @@ npm run tck
 Against another implementation:
 
 ```bash
-node tck/src/core_tck.js --url=ws://host:8080
+node tck/src/core_tck.js --url=ws://host:8080 --token=your-token
 ```
 
 The TCK checks:
@@ -23,5 +23,9 @@ The TCK checks:
 - idempotent Intent replay;
 - conflicting replay rejection;
 - declared Sentinel capacity.
+- invalid credentials and anonymous/wrong-role rejection;
+- malformed JSON-RPC policy closure;
+- all four Outcome states and bounded retry;
+- cancellation propagation and execution timeout cleanup.
 
 A successful run emits a machine-readable JSON report and exits with code zero.

@@ -6,11 +6,109 @@ const Ajv2020 = require('ajv/dist/2020');
 const WebSocket = require('ws');
 const {
     Coordinator,
+    digestToken,
     ERROR_CODES,
     ProtocolHub,
     Sentinel,
     Starlight
 } = require('../../src/core');
+const { normalizeOutcome } = require('../../src/core/contract');
+
+test('Hub is authenticated by default and anonymous mode is loopback-only', async t => {
+    const hub = new ProtocolHub({ port: 0 });
+    const address = await hub.start();
+    const denied = new Starlight({ url: address.url, token: 'invalid-token-000000000' });
+    t.after(async () => {
+        denied.close();
+        await hub.close();
+    });
+    await assert.rejects(() => denied.connect(), error => error.code === ERROR_CODES.UNAUTHORIZED);
+    assert.throws(
+        () => new ProtocolHub({ host: '0.0.0.0', allowAnonymousLoopback: true }),
+        error => error.code === ERROR_CODES.INVALID_REQUEST
+    );
+});
+
+test('digest authentication accepts the right secret without retaining plaintext', async t => {
+    const token = 'correct-token-0000000000000000';
+    const hub = new ProtocolHub({ port: 0, tokenDigests: [digestToken(token)] });
+    const address = await hub.start();
+    const client = new Starlight({ url: address.url, token });
+    t.after(async () => {
+        client.close();
+        await hub.close();
+    });
+    await client.connect();
+    const registration = [...hub.connections][0].registration;
+    assert.equal(Object.hasOwn(registration, 'token'), true);
+    assert.equal(registration.token, undefined);
+    assert.equal(JSON.stringify(registration).includes(token), false);
+});
+
+test('malformed JSON-RPC is rejected and the violating connection is closed', async t => {
+    const hub = new ProtocolHub({ port: 0, allowAnonymousLoopback: true });
+    const address = await hub.start();
+    const socket = new WebSocket(address.url);
+    t.after(async () => {
+        socket.terminate();
+        await hub.close();
+    });
+    await new Promise((resolve, reject) => {
+        socket.once('open', resolve);
+        socket.once('error', reject);
+    });
+    const response = new Promise(resolve => socket.once('message', raw => resolve(JSON.parse(raw))));
+    const closed = new Promise(resolve => socket.once('close', (code) => resolve(code)));
+    socket.send('not-json');
+    assert.equal((await response).error.data.protocolCode, ERROR_CODES.INVALID_REQUEST);
+    assert.equal(await closed, 1008);
+});
+
+test('strict outcomes reject every schema-forbidden status field and error shape', () => {
+    const invalid = [
+        { status: 'completed', retryAfterMs: 1 },
+        { status: 'completed', error: 'ambiguous' },
+        { status: 'unhandled', value: 42 },
+        { status: 'failed', error: '' },
+        { status: 'failed', error: { arbitrary: true } }
+    ];
+    for (const outcome of invalid) {
+        assert.throws(
+            () => normalizeOutcome(outcome),
+            error => error.code === ERROR_CODES.INVALID_REQUEST
+        );
+    }
+    assert.deepEqual(
+        normalizeOutcome({ status: 'failed', error: { message: 'blocked', code: 'POLICY' } }),
+        { status: 'failed', error: { message: 'blocked', code: 'POLICY' } }
+    );
+});
+
+test('resource limits reject unsafe numeric ranges', () => {
+    assert.throws(
+        () => new Coordinator({ maxAttempts: 0 }),
+        error => error.code === ERROR_CODES.INVALID_REQUEST
+    );
+    assert.throws(
+        () => new ProtocolHub({ rateLimit: { max: -1, windowMs: 0 } }),
+        error => error.code === ERROR_CODES.INVALID_REQUEST
+    );
+});
+
+test('settled replay records expire and permit a fresh execution', async () => {
+    const coordinator = new Coordinator({ intentHistoryTtlMs: 1 });
+    let executions = 0;
+    coordinator.register({
+        name: 'expiry-agent',
+        offer: () => true,
+        execute: () => ({ status: 'completed', value: ++executions })
+    });
+    const intent = { id: 'expiring-intent', goal: 'Execute after expiry' };
+    await coordinator.dispatch(intent);
+    await new Promise(resolve => setTimeout(resolve, 5));
+    const result = await coordinator.dispatch(intent);
+    assert.equal(result.value, 2);
+});
 
 test('the package default export is the lean protocol', () => {
     const packageApi = require('../..');
@@ -181,6 +279,126 @@ test('a sentinel is execution-isolated unless it declares more capacity', async 
     assert.equal(maximumActive, 1);
 });
 
+test('a timed-out handler that ignores cancellation keeps its capacity slot quarantined', async () => {
+    const coordinator = new Coordinator({
+        executionTimeoutMs: 5,
+        schedulingTimeoutMs: 10,
+        maxAttempts: 1
+    });
+    let active = 0;
+    let maximumActive = 0;
+    coordinator.register({
+        name: 'non-cooperative-device',
+        capacity: 1,
+        offer: () => true,
+        execute: async () => {
+            active++;
+            maximumActive = Math.max(maximumActive, active);
+            await new Promise(resolve => setTimeout(resolve, 50));
+            active--;
+            return { status: 'completed' };
+        }
+    });
+
+    await assert.rejects(
+        () => coordinator.dispatch({ id: 'timeout-1', goal: 'First timed operation' }),
+        error => error.code === ERROR_CODES.NO_SENTINEL
+    );
+    await assert.rejects(
+        () => coordinator.dispatch({ id: 'timeout-2', goal: 'Second timed operation' }),
+        error => error.code === ERROR_CODES.NO_SENTINEL
+    );
+    assert.equal(maximumActive, 1);
+});
+
+test('maxIntentHistory rejects new work when every bounded slot is active', async () => {
+    const coordinator = new Coordinator({ maxIntentHistory: 1, executionTimeoutMs: 1_000 });
+    const controller = new AbortController();
+    let started;
+    const executing = new Promise(resolve => { started = resolve; });
+    coordinator.register({
+        name: 'history-holder',
+        offer: () => true,
+        execute: async (_intent, { signal }) => {
+            started();
+            await new Promise((_resolve, reject) => {
+                signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+            });
+        }
+    });
+    const first = coordinator.dispatch(
+        { id: 'bounded-1', goal: 'Hold history' },
+        { signal: controller.signal }
+    ).catch(() => undefined);
+    await executing;
+    await assert.rejects(
+        () => coordinator.dispatch({ id: 'bounded-2', goal: 'Exceed history' }),
+        error => error.code === ERROR_CODES.RESOURCE_EXHAUSTED
+    );
+    assert.equal(coordinator.intentHistory.size, 1);
+    controller.abort(new Error('test cleanup'));
+    await first;
+});
+
+test('only the connection that submitted an active Intent can cancel it', async t => {
+    const hub = new ProtocolHub({ port: 0, allowAnonymousLoopback: true });
+    let started;
+    const executing = new Promise(resolve => { started = resolve; });
+    hub.coordinator.register({
+        name: 'cancel-owner-target',
+        offer: () => true,
+        execute: async (_intent, { signal }) => {
+            started();
+            await new Promise((_resolve, reject) => {
+                signal.addEventListener('abort', () => reject(signal.reason), { once: true });
+            });
+        }
+    });
+    const address = await hub.start();
+    const owner = await new Starlight({ url: address.url, name: 'owner' }).connect();
+    const other = await new Starlight({ url: address.url, name: 'other' }).connect();
+    t.after(async () => {
+        owner.close();
+        other.close();
+        await hub.close();
+    });
+
+    const intent = owner.intent({ id: 'owned-active-intent', goal: 'Long operation' });
+    await executing;
+    assert.deepEqual(await other.cancel('owned-active-intent'), { cancelled: false });
+    assert.deepEqual(await owner.cancel('owned-active-intent'), { cancelled: true });
+    await assert.rejects(() => intent, error => error.code === ERROR_CODES.CANCELLED);
+});
+
+test('replay results are scoped to the authenticated principal', async t => {
+    const tokenA = 'principal-a-token-000000000000';
+    const tokenB = 'principal-b-token-000000000000';
+    const hub = new ProtocolHub({
+        port: 0,
+        tokenDigests: [digestToken(tokenA), digestToken(tokenB)]
+    });
+    hub.coordinator.register({
+        name: 'principal-result-agent',
+        offer: () => true,
+        execute: () => ({ status: 'completed', value: { secret: 'owner-result' } })
+    });
+    const address = await hub.start();
+    const owner = await new Starlight({ url: address.url, name: 'owner', token: tokenA }).connect();
+    const other = await new Starlight({ url: address.url, name: 'other', token: tokenB }).connect();
+    t.after(async () => {
+        owner.close();
+        other.close();
+        await hub.close();
+    });
+    const intent = { id: 'principal-owned-id', goal: 'Produce private result' };
+    const result = await owner.intent(intent);
+    assert.equal(result.value.secret, 'owner-result');
+    await assert.rejects(
+        () => other.intent(intent),
+        error => error.code === ERROR_CODES.FORBIDDEN
+    );
+});
+
 test('unhandled and retry outcomes provide controlled fallback', async () => {
     const coordinator = new Coordinator({ maxAttempts: 2 });
     let retryCount = 0;
@@ -226,7 +444,9 @@ test('a failed outcome is terminal and preserves evidence', async () => {
 });
 
 test('the WebSocket reference transport works across process boundaries', async t => {
-    const hub = new ProtocolHub({ port: 0, offerTimeoutMs: 500, executionTimeoutMs: 1_000 });
+    const hub = new ProtocolHub({
+        port: 0, allowAnonymousLoopback: true, offerTimeoutMs: 500, executionTimeoutMs: 1_000
+    });
     const address = await hub.start();
     const sentinel = new Sentinel({
         url: address.url,
@@ -258,7 +478,7 @@ test('the WebSocket reference transport works across process boundaries', async 
 });
 
 test('a client reconnect replays safely after its response connection drops', async t => {
-    const hub = new ProtocolHub({ port: 0 });
+    const hub = new ProtocolHub({ port: 0, allowAnonymousLoopback: true });
     const address = await hub.start();
     let executions = 0;
     const sentinel = new Sentinel({
@@ -297,7 +517,7 @@ test('a client reconnect replays safely after its response connection drops', as
 });
 
 test('Hub shutdown drains an active intent before closing peers', async () => {
-    const hub = new ProtocolHub({ port: 0, shutdownTimeoutMs: 1_000 });
+    const hub = new ProtocolHub({ port: 0, allowAnonymousLoopback: true, shutdownTimeoutMs: 1_000 });
     const address = await hub.start();
     let started;
     const executionStarted = new Promise(resolve => { started = resolve; });
@@ -327,7 +547,7 @@ test('Hub shutdown drains an active intent before closing peers', async () => {
 });
 
 test('Hub heartbeat evicts a stale Sentinel connection', async t => {
-    const hub = new ProtocolHub({ port: 0, heartbeatIntervalMs: 10 });
+    const hub = new ProtocolHub({ port: 0, allowAnonymousLoopback: true, heartbeatIntervalMs: 10 });
     const address = await hub.start();
     const socket = new WebSocket(address.url, { autoPong: false });
     t.after(async () => {

@@ -1,6 +1,6 @@
-# Starlight Core Protocol 1.0
+# Starlight 5.x Wire Contract 1.0
 
-Status: reference specification for Starlight 5.x.
+Status: normative launch contract for Starlight 5.x.
 
 ## 1. Purpose
 
@@ -30,9 +30,16 @@ An Intent is the only executable object authored by a mission:
 
 `goal` is required. `context` supplies facts. `constraints` defines boundaries that must remain true. The protocol treats their contents as opaque data.
 
-The Coordinator assigns an `id` when the Client does not provide one. An Intent is immutable after submission.
+The Coordinator assigns an `id` when the Client does not provide one. Wire IDs are non-empty
+strings of at most 128 characters and cannot contain control characters. `goal` is at most
+10,000 characters. Intent objects reject unknown top-level fields. An Intent is immutable after
+submission.
 
-An Intent ID is an idempotency key. A Coordinator MUST execute the first submission at most once within its documented history window. A concurrent or later submission with the same ID and identical content MUST observe the same result. Reusing the ID with different `goal`, `context`, or `constraints` MUST fail with `INTENT_CONFLICT`.
+An Intent ID is an idempotency key scoped to the authenticated principal. A Coordinator MUST execute
+the first submission at most once within its documented history window. A concurrent or later
+submission by the same principal with the same ID and identical content MUST observe the same
+result. Another principal using that ID MUST receive `FORBIDDEN`. Reusing the ID with different
+`goal`, `context`, or `constraints` MUST fail with `INTENT_CONFLICT`.
 
 ## 4. Lifecycle
 
@@ -69,21 +76,34 @@ false
 Execution MUST return exactly one status:
 
 - `completed`: the goal and constraints are satisfied. It MAY include `value` and `evidence`.
-- `failed`: the Sentinel handled the Intent and proved it cannot or must not complete. It SHOULD include `error` and MAY include `evidence`. Failure is terminal.
+- `failed`: the Sentinel handled the Intent and proved it cannot or must not complete. It MUST include `error` and MAY include `evidence`. Failure is terminal.
 - `unhandled`: the Claim was optimistic, but the Sentinel made no terminal decision. The Coordinator tries the next claimant.
-- `retry`: the Sentinel encountered a transient condition. It MAY include `retryAfterMs`. The Coordinator retries within its configured attempt budget, then tries the next claimant.
+- `retry`: the Sentinel encountered a transient condition. It MAY include integer `retryAfterMs`
+  from 0 through 60,000. The Coordinator retries within its configured attempt budget (maximum
+  10 in the reference implementation), then tries the next claimant.
+
+Outcome objects reject unknown fields. `retryAfterMs` is invalid on any other status. A final
+successful IntentResult contains `intentId`, `goal`, `status: "completed"`, the selected Sentinel
+description, ordered `attempts`, and non-negative `durationMs`; `value` and `evidence` are optional.
 
 Evidence is opaque, structured data. It can contain assertions, logs, artifact references, screenshots, receipts, model traces, or domain-specific proof. Large artifacts SHOULD be referenced rather than embedded.
 
 ## 7. Cancellation and deadlines
 
-The Coordinator MUST apply finite Offer and Execute deadlines. When a deadline or caller cancellation occurs, it SHOULD send `starlight.cancel` to the active remote Sentinel. A Sentinel SHOULD stop related work promptly. A Coordinator MUST ignore a late Outcome.
+The Coordinator MUST apply finite Offer, scheduling, and Execute deadlines. A registered Client
+may request cancellation with `{ "intentId": "..." }`. When a deadline or caller cancellation
+occurs, the Coordinator SHOULD send `starlight.cancel` to the active remote Sentinel. A Sentinel
+SHOULD stop related work promptly. A Coordinator MUST ignore a late Outcome and clear its pending
+RPC and timers. It MUST NOT reuse the Sentinel capacity slot until the timed-out handler actually
+settles; an implementation that cannot force-stop work must quarantine that slot rather than exceed
+declared capacity.
 
 The reference WebSocket transport MUST use ping/pong or an equivalent heartbeat to evict stale peers. A reconnecting Client MAY safely resubmit an interrupted request only with the same Intent ID and identical content. A Hub shutting down SHOULD stop accepting new Intents, allow active Intents a bounded drain period, and only then close peer connections.
 
 ## 8. Reference wire protocol
 
-The reference transport is JSON-RPC 2.0 over WebSocket. Implementations MAY use another request/response transport when they preserve the lifecycle and semantics above.
+The normative Starlight 5.x transport is JSON-RPC 2.0 over WebSocket. Alternate transports are
+extensions and cannot claim wire conformance.
 
 There are only five methods:
 
@@ -93,11 +113,37 @@ There are only five methods:
 | `starlight.intent` | Client → Coordinator | Submit one Intent and wait for its Outcome |
 | `starlight.offer` | Coordinator → Sentinel | Ask whether the Sentinel should handle an Intent |
 | `starlight.execute` | Coordinator → Sentinel | Give one claimant an execution attempt |
-| `starlight.cancel` | Coordinator → Sentinel | Stop work for an Intent |
+| `starlight.cancel` | Client → Coordinator; Coordinator → Sentinel | Cancel active work |
 
 The canonical wire schema is [`schemas/starlight.core.schema.json`](../schemas/starlight.core.schema.json).
 
-Transport connections MUST enforce a maximum message size. Production deployments MUST use authenticated encrypted transport and authorize roles at registration. Authentication mechanisms are deployment policy, not protocol semantics.
+Every connection MUST successfully authenticate before receiving a role. The reference Hub is
+authenticated by default. Anonymous development requires `allowAnonymousLoopback: true` and an
+explicit loopback bind; it cannot be enabled on a non-loopback bind. Unknown methods, malformed
+envelopes, unsolicited/ambiguous responses, and malformed JSON receive a JSON-RPC error when
+possible and close with WebSocket policy code 1008.
+
+Requests contain only `jsonrpc`, optional string `id`, `method`, and object `params`. Responses
+contain exactly one of `result` or `error`. Unknown or ambiguous fields are rejected where defined
+by the canonical schema.
+
+### Error codes
+
+- `INVALID_REQUEST`: malformed envelope, parameters, role, IDs, ranges, or payload.
+- `INTENT_CONFLICT`: an idempotency key was reused with different content.
+- `DUPLICATE_SENTINEL`: a live Sentinel ID is already registered.
+- `NO_SENTINEL`: no claimant completed the Intent.
+- `INTENT_FAILED`: a Sentinel returned a terminal failed Outcome.
+- `TIMEOUT`: a finite protocol deadline expired.
+- `DISCONNECTED`: the peer disappeared while work was pending.
+- `DRAINING`: the Hub no longer accepts new work.
+- `RATE_LIMITED`: the connection exceeded its configured request budget.
+- `RESOURCE_EXHAUSTED`: bounded coordinator capacity is occupied by active work.
+- `UNAUTHORIZED`: authentication or policy authorization failed.
+- `FORBIDDEN`: the authenticated role cannot invoke that method.
+- `CANCELLED`: the Client cancelled active work.
+- `UNSUPPORTED_VERSION`: the registered major wire version is incompatible.
+- `INTERNAL`: an unexpected implementation failure occurred.
 
 ## 9. Conformance
 
@@ -112,6 +158,7 @@ A conforming Coordinator MUST:
 - preserve attempt history and Sentinel identity in the final result.
 - enforce Sentinel capacity across concurrent Intents;
 - provide bounded idempotency history and reject conflicting replays.
+- authenticate before assigning a role and enforce the method/role matrix.
 
 A conforming Sentinel MUST:
 
@@ -136,3 +183,10 @@ The Starlight 4.x pre-check/clear/wait/hijack/action state machine encoded brows
 | `clear`, `wait`, `hijack`, `resume` | `completed`, `retry`, internal Sentinel logic |
 
 This is the compatibility boundary: old components can be wrapped as one Sentinel, but they do not expand the core protocol.
+
+## 11. Idempotency boundary
+
+The reference history is bounded, in-memory, process-local, and removed after its configured TTL
+or capacity pruning. It prevents duplicate execution only while that record remains in the same
+Hub process. It is not durable exactly-once delivery. Deployments needing crash-safe deduplication
+must provide a durable idempotency store outside this reference implementation.

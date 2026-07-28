@@ -1,6 +1,7 @@
-# Starlight Protocol
+# Starlight Protocol 5.x
 
-Starlight is a small, open protocol for intent-driven automation.
+Starlight is a small, open protocol for routing Intent to autonomous Sentinels. This alpha release
+ships one reference implementation and support surface: JavaScript on Node.js.
 
 Your mission contains only intent. Sentinels own everything else: planning, browser control, computer use, mobile control, heuristics, LLM calls, verification, recovery, and evidence.
 
@@ -58,21 +59,26 @@ Four outcomes cover the complete execution lifecycle:
 - `unhandled` — try the next claiming Sentinel
 - `retry` — retry a transient failure within the attempt budget
 
-## Run the reference implementation
+## Five-minute authenticated quickstart
 
-Requires Node.js 18 or newer.
+Requires Node.js 22 or newer.
 
 ```bash
-npm install
-npm test
+npm install @starlight-protocol/starlight
+set STARLIGHT_AUTH_TOKEN=a-long-random-development-token
+npx starlight-core
 ```
 
-Start a coordinator:
+On macOS/Linux use `export` instead of `set`. The CLI refuses to start without a token unless
+`--allow-anonymous-loopback` is explicitly supplied.
+
+Programmatic Hub:
 
 ```js
-const { ProtocolHub } = require('@starlight-protocol/starlight');
+const { ProtocolHub, digestToken } = require('@starlight-protocol/starlight');
 
-const hub = new ProtocolHub({ port: 8080 });
+const token = process.env.STARLIGHT_AUTH_TOKEN;
+const hub = new ProtocolHub({ port: 8080, tokenDigests: [digestToken(token)] });
 await hub.start();
 ```
 
@@ -83,6 +89,7 @@ const { Sentinel } = require('@starlight-protocol/starlight');
 
 const sentinel = new Sentinel({
   name: 'computer-agent',
+  token: process.env.STARLIGHT_AUTH_TOKEN,
   capabilities: ['computer-use'],
   capacity: 1, // one real desktop; executions are automatically serialized
   canHandle: intent => ({ score: 0.8 }),
@@ -95,25 +102,15 @@ const sentinel = new Sentinel({
 await sentinel.connect();
 ```
 
-The reference transport is JSON-RPC 2.0 over WebSocket, so a Sentinel can be written in any language without using this JavaScript SDK.
+The normative JSON-RPC 2.0 over WebSocket protocol and JSON Schema are language-neutral. The
+repository, package, tests, TCK, CI, and supported SDK are JavaScript-only for this release.
 
-Python uses the same contract:
+Lifecycle:
 
-```python
-from starlight_protocol import Sentinel
-
-sentinel = Sentinel(
-    name="mobile-agent",
-    capabilities=["mobile"],
-    can_handle=lambda intent: {"score": 0.9},
-    handle=lambda intent, execution: {
-        "status": "completed",
-        "evidence": ["mobile-driver-ran"],
-    },
-)
-
-await sentinel.connect()
-await sentinel.serve_forever()
+```text
+authenticated Client ──Intent──> Hub ──Offer──> Sentinels
+                              deterministic rank
+authenticated Client <─Result── Hub ──Execute──> selected Sentinel
 ```
 
 ## Design guarantees
@@ -122,7 +119,7 @@ await sentinel.serve_forever()
 - Offers run concurrently and cannot mutate the environment.
 - Exactly one Sentinel owns each execution attempt.
 - Sentinel capacity prevents simultaneous use of a shared browser, device, or account.
-- Replayed intent IDs reuse the original result instead of repeating side effects.
+- Replayed intent IDs reuse the original result while the bounded in-memory record exists.
 - Claim ranking is deterministic: score, operator priority, registration order.
 - Broken or slow Sentinels are isolated by deadlines.
 - Retry and fallback behavior is explicit and bounded.
@@ -145,10 +142,45 @@ npm run tck
 Or test another Hub implementation:
 
 ```bash
-node tck/src/core_tck.js --url=ws://host:8080
+node tck/src/core_tck.js --url=ws://host:8080 --token=your-token
 ```
 
-The previous browser-specific implementation remains in this repository only as migration source. It is excluded from the 5.x package and is not part of the core protocol.
+Run the real authenticated process/WebSocket proof:
+
+```bash
+npm run proof:e2e
+```
+
+It starts a Hub, remote Sentinel, and Client in separate processes, submits an Intent, verifies
+the value, Sentinel identity, attempt history, and evidence, then replays the Intent and proves
+the Sentinel side effect occurred only once.
+
+Run every launch check, including the production dependency audit, packing and installing the npm
+artifact in a neutral temporary project, exercising the installed proof and CLI, and rejecting
+forbidden tarball contents:
+
+```bash
+npm run release:gate
+```
+
+The npm package contains only the JavaScript core, CLI, declarations, canonical schema, current
+specification, security profile, examples, and the installed-package E2E proof. No other runtime
+implementation is shipped or supported.
+
+## Security and limits
+
+Authentication is mandatory by default. Anonymous mode is an explicit loopback-only development
+option. Use WSS/TLS for untrusted networks; the operator owns TLS termination, proxy identity
+headers, authorization policy, secret rotation, Sentinel isolation, and evidence retention.
+
+Replay/idempotency storage is bounded, process-local memory. It is not durable exactly-once
+delivery and does not survive Hub restart. The fixed-window rate limiter is per connection.
+Starlight does not sandbox Sentinels or make compliance/certification claims.
+
+This is alpha software, not a production-readiness or compliance claim. Passing
+`npm run release:gate` is necessary evidence, not sufficient deployment assurance. Operators must
+configure WSS, authentication, authorization, secret rotation, persistence, observability,
+Sentinel isolation, and resource limits for their environment.
 
 ## License
 

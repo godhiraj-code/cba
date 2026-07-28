@@ -3,6 +3,7 @@
 const { Sentinel } = require('../src/core');
 
 const sentinel = new Sentinel({
+    token: process.env.STARLIGHT_AUTH_TOKEN,
     name: 'my-computer-agent',
     capabilities: ['computer-use'],
     canHandle: intent => ({ score: intent.context.device === 'desktop' ? 0.9 : 0.3 }),

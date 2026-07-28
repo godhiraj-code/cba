@@ -106,9 +106,16 @@ async function expectProtocolError(operation, code) {
 async function runCoreTck(options = {}) {
     let hub;
     let url = options.url;
+    const token = options.token || 'starlight-tck-token-000000000000';
     if (!url) {
-        const { ProtocolHub } = require('../../src/core');
-        hub = new ProtocolHub({ port: 0 });
+        const { ProtocolHub, digestToken } = require('../../src/core');
+        hub = new ProtocolHub({
+            port: 0,
+            tokenDigests: [digestToken(token)],
+            offerTimeoutMs: 100,
+            executionTimeoutMs: 100,
+            maxAttempts: 2
+        });
         url = (await hub.start()).url;
     }
 
@@ -123,7 +130,7 @@ async function runCoreTck(options = {}) {
             'rejects incompatible protocol versions',
             await expectProtocolError(
                 () => incompatible.call('starlight.register', {
-                    role: 'client', name: 'incompatible', protocolVersion: '99.0'
+                    role: 'client', name: 'incompatible', protocolVersion: '99.0', token
                 }),
                 'UNSUPPORTED_VERSION'
             )
@@ -137,25 +144,74 @@ async function runCoreTck(options = {}) {
             'rejects intents from unregistered connections',
             await expectProtocolError(
                 () => anonymous.call('starlight.intent', { goal: 'not authorized' }),
-                'INVALID_REQUEST'
+                'FORBIDDEN'
             )
         );
+
+        const unauthorized = new WirePeer(url);
+        peers.push(unauthorized);
+        await unauthorized.connect();
+        check(
+            results,
+            'rejects invalid credentials',
+            await expectProtocolError(
+                () => unauthorized.call('starlight.register', {
+                    role: 'client',
+                    name: 'unauthorized',
+                    protocolVersion: '1.0',
+                    token: 'wrong-token-000000000000000000'
+                }),
+                'UNAUTHORIZED'
+            )
+        );
+
+        const malformed = new WirePeer(url);
+        peers.push(malformed);
+        await malformed.connect();
+        const malformedClosed = new Promise(resolve => malformed.socket.once('close', resolve));
+        malformed.socket.send('not-json');
+        await malformedClosed;
+        check(results, 'closes malformed JSON peers with a policy violation', malformed.socket.readyState === WebSocket.CLOSED);
 
         let executions = 0;
         let active = 0;
         let maximumActive = 0;
+        let retryExecutions = 0;
+        const cancelledExecutions = new Map();
         const sentinel = new WirePeer(url);
         peers.push(sentinel);
         sentinel
             .handle('starlight.offer', () => ({ score: 0.9, reason: 'TCK sentinel' }))
-            .handle('starlight.execute', async () => {
+            .handle('starlight.execute', async ({ intent }) => {
                 executions++;
                 active++;
                 maximumActive = Math.max(maximumActive, active);
+                if (intent.goal === 'Terminal failure') {
+                    active--;
+                    return { status: 'failed', error: { message: 'expected failure' }, evidence: ['failure'] };
+                }
+                if (intent.goal === 'Unhandled') {
+                    active--;
+                    return { status: 'unhandled' };
+                }
+                if (intent.goal === 'Retry once') {
+                    retryExecutions++;
+                    active--;
+                    return retryExecutions === 1
+                        ? { status: 'retry', retryAfterMs: 1 }
+                        : { status: 'completed', evidence: ['retried'] };
+                }
+                if (intent.goal === 'Cancel active' || intent.goal === 'Timeout') {
+                    return new Promise(resolve => cancelledExecutions.set(intent.id, () => {
+                        active--;
+                        resolve({ status: 'completed' });
+                    }));
+                }
                 await new Promise(resolve => setTimeout(resolve, 20));
                 active--;
                 return { status: 'completed', value: { executions }, evidence: ['tck'] };
-            });
+            })
+            .handle('starlight.cancel', ({ intentId }) => cancelledExecutions.get(intentId)?.());
         await sentinel.connect();
         const registration = await sentinel.call('starlight.register', {
             role: 'sentinel',
@@ -164,7 +220,8 @@ async function runCoreTck(options = {}) {
             protocolVersion: '1.0',
             priority: 10,
             capacity: 1,
-            capabilities: ['tck']
+            capabilities: ['tck'],
+            token
         });
         check(results, 'registers a Sentinel', registration.registered === true);
 
@@ -172,7 +229,7 @@ async function runCoreTck(options = {}) {
         peers.push(client);
         await client.connect();
         await client.call('starlight.register', {
-            role: 'client', name: 'tck-client', protocolVersion: '1.0'
+            role: 'client', name: 'tck-client', protocolVersion: '1.0', token
         });
 
         const stableIntent = { id: `tck-intent-${crypto.randomUUID()}`, goal: 'Complete TCK intent' };
@@ -198,6 +255,56 @@ async function runCoreTck(options = {}) {
         ]);
         check(results, 'honors Sentinel capacity', maximumActive === 1, `maximum active executions: ${maximumActive}`);
 
+        check(
+            results,
+            'failed outcomes are terminal',
+            await expectProtocolError(
+                () => client.call('starlight.intent', { id: crypto.randomUUID(), goal: 'Terminal failure' }),
+                'INTENT_FAILED'
+            )
+        );
+        check(
+            results,
+            'unhandled outcomes exhaust fallback deterministically',
+            await expectProtocolError(
+                () => client.call('starlight.intent', { id: crypto.randomUUID(), goal: 'Unhandled' }),
+                'NO_SENTINEL'
+            )
+        );
+        const retried = await client.call(
+            'starlight.intent',
+            { id: crypto.randomUUID(), goal: 'Retry once' }
+        );
+        check(
+            results,
+            'retry outcomes obey the attempt budget',
+            retried.status === 'completed' && retryExecutions === 2
+        );
+
+        const cancellationId = crypto.randomUUID();
+        const activeIntent = client.call(
+            'starlight.intent',
+            { id: cancellationId, goal: 'Cancel active' }
+        );
+        await new Promise(resolve => setTimeout(resolve, 20));
+        const cancellation = await client.call('starlight.cancel', { intentId: cancellationId });
+        check(results, 'cancellation is acknowledged', cancellation.cancelled === true);
+        check(
+            results,
+            'cancellation is terminal and propagates to the Sentinel',
+            await expectProtocolError(() => activeIntent, 'CANCELLED')
+        );
+
+        const timeoutStartedAt = Date.now();
+        check(
+            results,
+            'execution timeout is bounded and cleans up the remote attempt',
+            await expectProtocolError(
+                () => client.call('starlight.intent', { id: crypto.randomUUID(), goal: 'Timeout' }),
+                'NO_SENTINEL'
+            ) && Date.now() - timeoutStartedAt < 1_000
+        );
+
         return {
             protocolVersion: registration.protocolVersion,
             passed: results.length,
@@ -212,7 +319,11 @@ async function runCoreTck(options = {}) {
 
 if (require.main === module) {
     const urlArg = process.argv.find(argument => argument.startsWith('--url='));
-    runCoreTck({ url: urlArg?.slice('--url='.length) }).then(report => {
+    const tokenArg = process.argv.find(argument => argument.startsWith('--token='));
+    runCoreTck({
+        url: urlArg?.slice('--url='.length),
+        token: tokenArg?.slice('--token='.length)
+    }).then(report => {
         console.log(JSON.stringify(report, null, 2));
     }).catch(error => {
         console.error(error);

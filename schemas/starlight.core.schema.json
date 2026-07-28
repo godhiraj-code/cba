@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://starlight.dev/schemas/starlight.core.schema.json",
-  "title": "Starlight Core Protocol 1.0",
+  "title": "Starlight Protocol 5.x Wire Contract 1.0",
   "oneOf": [
     { "$ref": "#/$defs/register" },
     { "$ref": "#/$defs/intentRequest" },
@@ -12,7 +12,12 @@
     { "$ref": "#/$defs/errorResponse" }
   ],
   "$defs": {
-    "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
     "request": {
       "type": "object",
       "required": ["jsonrpc", "method", "params"],
@@ -35,6 +40,148 @@
       },
       "additionalProperties": false
     },
+    "routedIntent": {
+      "allOf": [
+        { "$ref": "#/$defs/intent" },
+        { "required": ["id"] }
+      ]
+    },
+    "claim": {
+      "type": "object",
+      "properties": {
+        "accept": { "type": "boolean" },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "reason": { "type": "string" },
+        "metadata": {}
+      },
+      "additionalProperties": false
+    },
+    "claimValue": {
+      "oneOf": [
+        { "type": "boolean" },
+        { "type": "number", "minimum": 0, "maximum": 1 },
+        { "$ref": "#/$defs/claim" }
+      ]
+    },
+    "outcome": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": { "const": "completed" },
+            "value": {},
+            "evidence": {}
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["status", "error"],
+          "properties": {
+            "status": { "const": "failed" },
+            "error": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                {
+                  "type": "object",
+                  "required": ["message"],
+                  "properties": {
+                    "message": { "type": "string", "minLength": 1 },
+                    "code": { "type": "string" }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "evidence": {}
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": { "const": "unhandled" },
+            "evidence": {}
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": { "const": "retry" },
+            "error": {
+              "oneOf": [
+                { "type": "string", "minLength": 1 },
+                {
+                  "type": "object",
+                  "required": ["message"],
+                  "properties": {
+                    "message": { "type": "string", "minLength": 1 },
+                    "code": { "type": "string" }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "evidence": {},
+            "retryAfterMs": { "type": "integer", "minimum": 0, "maximum": 60000 }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "sentinelDescription": {
+      "type": "object",
+      "required": ["id", "name", "version", "priority", "capacity", "active", "capabilities"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "version": { "type": "string", "maxLength": 50 },
+        "priority": { "type": "integer", "minimum": 0, "maximum": 1000000 },
+        "capacity": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "active": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "capabilities": {
+          "type": "array",
+          "maxItems": 100,
+          "items": { "type": "string", "minLength": 1, "maxLength": 100 },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "attempt": {
+      "type": "object",
+      "required": ["sentinel", "attempt", "status"],
+      "properties": {
+        "sentinel": { "$ref": "#/$defs/sentinelDescription" },
+        "attempt": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "status": { "enum": ["completed", "failed", "unhandled", "retry", "error"] },
+        "error": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "intentResult": {
+      "type": "object",
+      "required": ["intentId", "goal", "status", "sentinel", "attempts", "durationMs"],
+      "properties": {
+        "intentId": { "$ref": "#/$defs/id" },
+        "goal": { "type": "string", "minLength": 1, "maxLength": 10000 },
+        "status": { "const": "completed" },
+        "sentinel": { "$ref": "#/$defs/sentinelDescription" },
+        "value": {},
+        "evidence": {},
+        "attempts": {
+          "type": "array",
+          "maxItems": 10,
+          "items": { "$ref": "#/$defs/attempt" }
+        },
+        "durationMs": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
     "register": {
       "allOf": [
         { "$ref": "#/$defs/request" },
@@ -51,15 +198,35 @@
                 "name": { "type": "string", "minLength": 1, "maxLength": 200 },
                 "version": { "type": "string", "maxLength": 50 },
                 "protocolVersion": { "type": "string", "maxLength": 20 },
-                "priority": { "type": "integer", "minimum": 0 },
-                "capacity": { "type": "integer", "minimum": 1 },
+                "priority": { "type": "integer", "minimum": 0, "maximum": 1000000 },
+                "capacity": { "type": "integer", "minimum": 1, "maximum": 1000 },
                 "capabilities": {
                   "type": "array",
+                  "maxItems": 100,
                   "items": { "type": "string", "minLength": 1, "maxLength": 100 },
                   "uniqueItems": true
                 },
-                "token": { "type": "string" }
+                "token": { "type": "string", "minLength": 16 }
               },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": { "role": { "const": "client" } },
+                    "required": ["role"]
+                  },
+                  "then": {
+                    "not": {
+                      "anyOf": [
+                        { "required": ["id"] },
+                        { "required": ["version"] },
+                        { "required": ["priority"] },
+                        { "required": ["capacity"] },
+                        { "required": ["capabilities"] }
+                      ]
+                    }
+                  }
+                }
+              ],
               "additionalProperties": false
             }
           }
@@ -88,7 +255,7 @@
             "params": {
               "type": "object",
               "required": ["intent"],
-              "properties": { "intent": { "$ref": "#/$defs/intent" } },
+              "properties": { "intent": { "$ref": "#/$defs/routedIntent" } },
               "additionalProperties": false
             }
           }
@@ -106,10 +273,14 @@
               "type": "object",
               "required": ["intent", "attempt", "claim", "history"],
               "properties": {
-                "intent": { "$ref": "#/$defs/intent" },
-                "attempt": { "type": "integer", "minimum": 1 },
-                "claim": { "type": "object" },
-                "history": { "type": "array" }
+                "intent": { "$ref": "#/$defs/routedIntent" },
+                "attempt": { "type": "integer", "minimum": 1, "maximum": 10 },
+                "claim": { "$ref": "#/$defs/claim" },
+                "history": {
+                  "type": "array",
+                  "maxItems": 10,
+                  "items": { "$ref": "#/$defs/attempt" }
+                }
               },
               "additionalProperties": false
             }
@@ -139,7 +310,29 @@
       "properties": {
         "jsonrpc": { "const": "2.0" },
         "id": { "$ref": "#/$defs/id" },
-        "result": {}
+        "result": {
+          "oneOf": [
+            { "$ref": "#/$defs/claimValue" },
+            { "$ref": "#/$defs/outcome" },
+            { "$ref": "#/$defs/intentResult" },
+            {
+              "type": "object",
+              "required": ["registered", "role", "protocolVersion"],
+              "properties": {
+                "registered": { "const": true },
+                "role": { "enum": ["client", "sentinel"] },
+                "protocolVersion": { "const": "1.0" }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["cancelled"],
+              "properties": { "cancelled": { "type": "boolean" } },
+              "additionalProperties": false
+            }
+          ]
+        }
       },
       "additionalProperties": false
     },

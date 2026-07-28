@@ -5,7 +5,16 @@ const { Coordinator } = require('../src/core');
 const protocol = new Coordinator();
 
 protocol.register({
+    name: 'lower-confidence-fallback',
+    priority: 1,
+    capabilities: ['demo'],
+    offer: () => ({ score: 0.5, reason: 'generic fallback' }),
+    execute: () => ({ status: 'completed', evidence: ['fallback'] })
+});
+
+protocol.register({
     name: 'example-heuristic',
+    priority: 100,
     capabilities: ['demo'],
     offer: intent => intent.goal.startsWith('Say ') ? 1 : false,
     execute: intent => ({
@@ -17,8 +26,8 @@ protocol.register({
 
 async function mission() {
     // The mission contains intent only. It knows nothing about the implementation.
-    await protocol.dispatch('Say hello');
-    await protocol.dispatch('Say goodbye');
+    const result = await protocol.dispatch('Say hello');
+    console.log(JSON.stringify(result, null, 2));
 }
 
 mission().catch(error => {

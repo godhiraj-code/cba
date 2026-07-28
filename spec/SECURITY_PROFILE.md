@@ -11,9 +11,26 @@ This profile defines production deployment requirements without choosing an iden
 
 ## Authentication
 
-Every production Client and Sentinel MUST authenticate during `starlight.register`. A deployment may use bearer tokens, signed JWTs, mutual TLS identity, workload identity, or another mechanism.
+Every Client and Sentinel MUST authenticate during `starlight.register`. The only exception is
+explicit anonymous loopback development mode, which cannot bind to a non-loopback host.
 
-The reference Hub's `authenticate(registration, context)` hook returns a boolean and receives the HTTP upgrade request through `context.request`. Authentication secrets are removed from the registration metadata retained for later authorization.
+The reference Hub accepts SHA-256 token digests through `tokenDigests`; it hashes presented
+secrets and compares fixed-size digests with a timing-safe comparison. Plaintext bearer tokens
+are not retained. Tokens must be at least 16 characters.
+
+```js
+const { ProtocolHub, digestToken } = require('@starlight-protocol/starlight');
+
+const hub = new ProtocolHub({
+  tokenDigests: [digestToken(process.env.STARLIGHT_AUTH_TOKEN)]
+});
+```
+
+The `authenticate(registration, context)` hook supports external JWT, mTLS, or workload identity
+verification and receives the HTTP upgrade request through `context.request`. It SHOULD return a
+stable principal string or `{ principalId }`. Returning boolean `true` remains supported; the
+reference Hub derives a stable principal from the presented token when available and otherwise
+falls back to the verified registration name.
 
 ```js
 const hub = new ProtocolHub({
@@ -22,7 +39,9 @@ const hub = new ProtocolHub({
 });
 ```
 
-An implementation MUST NOT log registration tokens.
+An implementation MUST NOT log registration tokens, authorization headers, cookie material, or
+credential-derived values. Rotate keys by accepting old and new verifiers during a bounded overlap,
+then removing the old verifier. Keep secrets outside source control and command history.
 
 ## Authorization
 
@@ -36,6 +55,9 @@ const hub = new ProtocolHub({
 ```
 
 Deployments SHOULD authorize declared constraints and target scope before an Intent is offered to Sentinels.
+Reverse proxies MUST overwrite, not append, trusted identity headers and the Hub MUST trust them
+only from an authenticated proxy hop. TLS/WSS termination and certificate validation are deployment
+responsibilities. Starlight does not provide a certificate authority.
 
 ## Rate and resource limits
 
@@ -58,3 +80,11 @@ Sentinels are responsible for avoiding secrets and unnecessary personal data in 
 ## Error behavior
 
 Authentication and authorization failures use `UNAUTHORIZED`. Rate-limit failures use `RATE_LIMITED` and include `retryAfterMs` in error details. Error responses MUST NOT reveal token contents or internal policy rules.
+
+## Threat-model limits
+
+Authentication does not sandbox a Sentinel or prove that its evidence is truthful. A compromised
+authenticated Sentinel can misuse every capability granted to its process. Operators must isolate
+Sentinels, scope credentials, validate target authorization, and apply evidence retention policy.
+The reference rate limiter is per connection, replay history is process-local, and no compliance or
+enterprise certification is claimed.

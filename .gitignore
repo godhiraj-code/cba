@@ -1,6 +1,7 @@
 # Dependencies and build outputs
 node_modules/
 .npm-cache/
+.codebase-memory/
 dist/
 build/
 coverage/

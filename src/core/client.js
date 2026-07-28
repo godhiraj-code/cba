@@ -63,6 +63,11 @@ class Starlight {
         }
     }
 
+    async cancel(intentId) {
+        if (!this.peer) throw new Error('client is not connected');
+        return this.peer.call(METHODS.CANCEL, { intentId });
+    }
+
     close() {
         this.socket?.close(1000, 'client shutdown');
     }

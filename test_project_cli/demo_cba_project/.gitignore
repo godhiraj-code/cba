@@ -1,8 +1,0 @@
-node_modules/
-__pycache__/
-*.pyc
-screenshots/
-mission_trace.json
-report.html
-*.log
-.env
