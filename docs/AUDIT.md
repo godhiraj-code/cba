@@ -67,16 +67,19 @@ Local verification on Windows with Node.js 24.18.1 passed after a clean `npm ci`
 - 53 unit/integration tests, including the documented external Hub CLI profile.
 - 19 black-box protocol checks, with noncooperative remote capacity quarantine/recovery.
 - ESLint, TypeScript consumer fixtures, and 7 valid / 11 invalid schema fixtures.
-- 12 active documents and 37 local link targets checked.
+- 12 active documents and 38 local link targets checked.
 - Authenticated multi-process proof with one side effect across replay.
 - Installed alpha.2 package: 40 files, root/core/platform exports, both CLI shims, demo,
   saved inspection, and the installed multi-process proof, all in a path containing spaces.
 - Full dependency audit: zero vulnerabilities, including development dependencies.
 - Complete 63-second video decode and visual inspection of source/success/failure frames.
 
-Linux Node.js 22/24 verification is enforced by the
-[GitHub workflow](../.github/workflows/starlight_ci.yml). Its results are checked after the push
-and recorded separately below; a local pass is not evidence of a remote CI pass.
+The implementation commit `9b34f2306a2056f4db0ff18a5dcf87cb6ace4099` passed the
+[GitHub Linux Node.js 22/24 release gate](https://github.com/starlight-protocol/starlight/actions/runs/33943471637).
+Both jobs completed clean installation, the full gate, and the repository-pollution check.
+The automatically triggered [Pages workflow](https://github.com/starlight-protocol/starlight/actions/runs/33943471321)
+also succeeded. The [workflow definition](../.github/workflows/starlight_ci.yml) remains the
+enforced verification path for subsequent commits. This evidence update changes documentation only.
 
 ## Remaining limits and risks
 
