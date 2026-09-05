@@ -1,9 +1,0 @@
-[
-  {
-    "timestamp": "2026-01-06T12:02:13.993Z",
-    "command": "click",
-    "selector": "#slow-button",
-    "latency_ms": 2500,
-    "type": "settlement_observation"
-  }
-]

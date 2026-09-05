@@ -16,7 +16,9 @@ __pycache__/
 venv/
 
 # Runtime output
+.starlight/
 screenshots/
+assets/demo-frame-*.png
 *.log
 *_memory.json
 mission_trace.json
@@ -44,3 +46,9 @@ BLOG.md
 POM_IS_DEAD.md
 blog_dhiraj_idea_summarization.md
 latest_blog*.md
+
+# Local historical checkout and generated diagnostics
+github-org-repo/
+.coverage
+*_output.txt
+debug_log.txt

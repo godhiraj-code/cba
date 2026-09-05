@@ -1,0 +1,12 @@
+{
+  "goal": "Produce a verified summary of the order data",
+  "context": {
+    "inputPath": "examples/data-report/orders.json",
+    "outputPath": ".starlight/order-summary.md"
+  },
+  "constraints": { "maxRows": 1000 },
+  "steps": [
+    "Summarize the order data",
+    "Write the verified order summary"
+  ]
+}

@@ -34,7 +34,7 @@ class RpcPeer {
                 this.markAbandoned(id);
                 reject(signal.reason);
             };
-            const timer = setTimeout(() => {
+            const timer = timeoutMs === null ? null : setTimeout(() => {
                 this.pending.delete(id);
                 signal?.removeEventListener('abort', onAbort);
                 this.markAbandoned(id);

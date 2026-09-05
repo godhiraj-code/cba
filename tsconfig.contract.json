@@ -8,5 +8,5 @@
     "lib": ["ES2022", "DOM"],
     "skipLibCheck": false
   },
-  "include": ["test/types/core-contract.ts"]
+  "include": ["test/types/*.ts"]
 }

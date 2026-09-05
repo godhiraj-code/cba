@@ -1,54 +1,70 @@
 {
   "name": "@starlight-protocol/starlight",
-  "version": "5.0.0-alpha.1",
-  "description": "A minimal, open protocol for routing intent to autonomous Sentinels",
-  "main": "src/core/index.js",
+  "version": "5.0.0-alpha.2",
+  "description": "A general-purpose agent runtime for intent-driven missions, verified outcomes, and interoperable agents",
+  "main": "src/index.js",
   "exports": {
     ".": {
       "types": "./types/index.d.ts",
-      "require": "./src/core/index.js",
-      "default": "./src/core/index.js"
+      "require": "./src/index.js",
+      "default": "./src/index.js"
     },
     "./core": {
       "types": "./types/core.d.ts",
       "require": "./src/core/index.js",
       "default": "./src/core/index.js"
     },
+    "./platform": {
+      "types": "./types/platform.d.ts",
+      "require": "./src/platform/index.js",
+      "default": "./src/platform/index.js"
+    },
     "./schema": "./schemas/starlight.core.schema.json"
   },
   "types": "./types/index.d.ts",
   "bin": {
+    "starlight": "bin/starlight-platform.js",
     "starlight-core": "bin/starlight-core.js"
   },
   "files": [
+    "src/index.js",
     "src/core/",
+    "src/platform/",
+    "bin/starlight-platform.js",
     "bin/starlight-core.js",
     "schemas/starlight.core.schema.json",
-    "!schemas/README.md",
     "spec/STARLIGHT_CORE_PROTOCOL.md",
     "spec/SECURITY_PROFILE.md",
-    "!spec/README.md",
     "types/core.d.ts",
     "types/index.d.ts",
+    "types/platform.d.ts",
+    "docs/",
     "scripts/proof-e2e.js",
+    "scripts/demo-walkthrough.js",
     "examples/",
     "README.md",
     "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "GOVERNANCE.md",
     "LICENSE"
   ],
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "start": "node src/core/start.js",
-    "test": "npm run test:core && npm run lint && npm run typecheck && npm run schema:check && npm run tck",
-    "test:core": "node --test test/unit/core_protocol.test.js test/unit/core_tck.test.js",
-    "test:unit": "npm run test:core",
+    "start": "node bin/starlight-core.js",
+    "demo:walkthrough": "node scripts/demo-walkthrough.js",
+    "demo": "node bin/starlight-platform.js demo",
+    "test": "npm run test:unit && npm run lint && npm run typecheck && npm run schema:check && npm run docs:check && npm run tck",
+    "test:core": "node --test test/unit/core_*.test.js",
+    "test:platform": "node --test test/unit/platform*.test.js",
+    "test:unit": "node --test test/unit/*.test.js",
     "tck": "node tck/src/core_tck.js",
     "proof:e2e": "node scripts/proof-e2e.js",
-    "lint": "eslint src/core test/unit/core_protocol.test.js examples scripts bin/starlight-core.js --ext .js",
+    "lint": "eslint src test/unit examples scripts bin --ext .js,.cjs",
     "typecheck": "tsc -p tsconfig.contract.json",
     "schema:check": "node scripts/check-contract.js",
+    "docs:check": "node scripts/check-docs.js",
     "release:gate": "node scripts/release-gate.js",
     "prepublishOnly": "npm run release:gate"
   },
@@ -85,15 +101,6 @@
   },
   "devDependencies": {
     "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1",
-    "@opentelemetry/api": "^1.7.0",
-    "@opentelemetry/exporter-metrics-otlp-http": "^0.46.0",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.46.0",
-    "@opentelemetry/sdk-metrics": "^1.19.0",
-    "@opentelemetry/sdk-trace-base": "^1.19.0",
-    "@opentelemetry/sdk-trace-node": "^1.19.0",
-    "nanoid": "^5.1.6",
-    "playwright": "^1.57.0",
     "eslint": "^8.57.1",
     "typescript": "^5.9.3"
   },

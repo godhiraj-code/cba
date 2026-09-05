@@ -54,6 +54,17 @@ class ProtocolHub {
         }
         this.heartbeatIntervalMs = options.heartbeatIntervalMs ?? 15_000;
         this.shutdownTimeoutMs = options.shutdownTimeoutMs ?? 30_000;
+        for (const [name, value, minimum, maximum] of [
+            ['port', this.port, 0, 65535],
+            ['maxPayload', this.maxPayload, 1, 1_073_741_824],
+            ['heartbeatIntervalMs', this.heartbeatIntervalMs, 0, 3_600_000],
+            ['shutdownTimeoutMs', this.shutdownTimeoutMs, 1, 3_600_000]
+        ]) {
+            if (!Number.isInteger(value) || value < minimum || value > maximum) {
+                throw new ProtocolError(ERROR_CODES.INVALID_REQUEST,
+                    `${name} must be an integer between ${minimum} and ${maximum}`);
+            }
+        }
         this.coordinator = options.coordinator || new Coordinator(options);
         this.server = null;
         this.connections = new Set();
@@ -97,10 +108,12 @@ class ProtocolHub {
             socket,
             request,
             role: null,
+            registering: false,
+            closed: false,
             registration: null,
             principalId: null,
             unregister: null,
-            activeIntentIds: new Set(),
+            activeIntentIds: new Map(),
             alive: true,
             rateWindowStartedAt: Date.now(),
             rateCount: 0
@@ -116,9 +129,10 @@ class ProtocolHub {
         );
 
         peer.handle(METHODS.REGISTER, async params => {
-            if (connection.role) {
+            if (connection.role || connection.registering) {
                 throw new ProtocolError(ERROR_CODES.INVALID_REQUEST, 'connection is already registered');
             }
+            connection.registering = true;
             if (!params || !['client', 'sentinel'].includes(params.role)) {
                 throw new ProtocolError(ERROR_CODES.INVALID_REQUEST, "role must be 'client' or 'sentinel'");
             }
@@ -155,7 +169,11 @@ class ProtocolHub {
             if (!this.allowAnonymousLoopback) {
                 const authentication = this.authenticate &&
                     await this.authenticate(params, { request });
-                if (!authentication) {
+                const validIdentity = authentication === true ||
+                    (typeof authentication === 'string' && authentication.length > 0) ||
+                    (authentication && typeof authentication === 'object' &&
+                        typeof authentication.principalId === 'string' && authentication.principalId.length > 0);
+                if (!validIdentity) {
                     throw new ProtocolError(ERROR_CODES.UNAUTHORIZED, 'registration was rejected');
                 }
                 if (typeof authentication === 'string' && authentication.length) {
@@ -171,6 +189,10 @@ class ProtocolHub {
                 }
             }
 
+            if (connection.closed || socket.readyState !== 1 || this.draining) {
+                throw new ProtocolError(ERROR_CODES.DISCONNECTED, 'connection closed during registration');
+            }
+
             let unregister;
             if (params.role === 'sentinel') {
                 unregister = this.coordinator.register({
@@ -181,12 +203,14 @@ class ProtocolHub {
                     capacity: params.capacity,
                     capabilities: params.capabilities,
                     offer: (intent, execution) => remoteCall(METHODS.OFFER, { intent }, execution.signal),
-                    execute: (intent, execution) => remoteCall(METHODS.EXECUTE, {
+                    // Keep the capacity slot until the remote operation actually replies or disconnects.
+                    // The Coordinator still enforces the caller's execution deadline and sends cancel.
+                    execute: (intent, execution) => peer.call(METHODS.EXECUTE, {
                         intent,
                         attempt: execution.attempt,
                         claim: execution.claim,
                         history: execution.history
-                    }, execution.signal),
+                    }, null),
                     cancel: intent => peer.notify(METHODS.CANCEL, { intentId: intent.id })
                 });
             }
@@ -214,12 +238,14 @@ class ProtocolHub {
                 throw new ProtocolError(ERROR_CODES.UNAUTHORIZED, 'intent was not authorized');
             }
             this.consumeRateLimit(connection);
-            const intent = params.id ? params : { ...params, id: crypto.randomUUID() };
-            connection.activeIntentIds.add(intent.id);
+            const intent = params.id !== undefined ? params : { ...params, id: crypto.randomUUID() };
+            connection.activeIntentIds.set(intent.id, (connection.activeIntentIds.get(intent.id) || 0) + 1);
             try {
                 return await this.coordinator.dispatch(intent, { owner: connection.principalId });
             } finally {
-                connection.activeIntentIds.delete(intent.id);
+                const remaining = connection.activeIntentIds.get(intent.id) - 1;
+                if (remaining) connection.activeIntentIds.set(intent.id, remaining);
+                else connection.activeIntentIds.delete(intent.id);
             }
         });
 
@@ -247,6 +273,7 @@ class ProtocolHub {
         });
 
         socket.once('close', () => {
+            connection.closed = true;
             connection.unregister?.();
             this.connections.delete(connection);
         });
@@ -297,9 +324,15 @@ class ProtocolHub {
         } catch (error) {
             drainError = error;
         }
-        for (const connection of this.connections) connection.socket.close(1001, 'hub shutdown');
-        this.connections.clear();
-        await serverClosed;
+        const connections = [...this.connections];
+        for (const connection of connections) connection.socket.close(1001, 'hub shutdown');
+        const terminateTimer = setTimeout(() => {
+            for (const connection of connections) connection.socket.terminate();
+        }, Math.min(this.shutdownTimeoutMs, 1_000));
+        try { await serverClosed; } finally {
+            clearTimeout(terminateTimer);
+            this.connections.clear();
+        }
         if (drainError) throw drainError;
     }
 }

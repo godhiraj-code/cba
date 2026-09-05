@@ -102,10 +102,11 @@ export class Coordinator {
         maxAttempts?: number;
         intentHistoryTtlMs?: number;
         maxIntentHistory?: number;
+        fallbackOnError?: boolean;
     });
     register(sentinel: SentinelDefinition): () => boolean;
     unregister(id: string): boolean;
-    list(): Array<{ id: string; name: string; version: string; priority: number; capabilities: string[] }>;
+    list(): SentinelDescription[];
     dispatch(intent: string | Intent, options?: {
         offerTimeoutMs?: number;
         executionTimeoutMs?: number;
@@ -148,6 +149,10 @@ export class ProtocolHub {
         offerTimeoutMs?: number;
         executionTimeoutMs?: number;
         maxAttempts?: number;
+        schedulingTimeoutMs?: number;
+        fallbackOnError?: boolean;
+        intentHistoryTtlMs?: number;
+        maxIntentHistory?: number;
     });
     coordinator: Coordinator;
     start(): Promise<{ host: string; port: number; url: string }>;
@@ -169,7 +174,7 @@ export class Sentinel {
         minReconnectDelayMs?: number;
         maxReconnectDelayMs?: number;
         canHandle?: (intent: Intent) => Claim | Promise<Claim>;
-        handle: (intent: Intent, execution: { attempt: number; claim: Claim; history: unknown[] }) => Outcome | Promise<Outcome>;
+        handle: (intent: Intent, execution: { signal: AbortSignal; attempt: number; claim: Claim; history: unknown[] }) => Outcome | Promise<Outcome>;
         onCancel?: (intentId: string) => void | Promise<void>;
     });
     connect(): Promise<this>;
@@ -184,6 +189,7 @@ export class Starlight {
         token?: string;
         reconnectAttempts?: number;
         reconnectDelayMs?: number;
+        requestTimeoutMs?: number;
     });
     connect(): Promise<this>;
     intent(goal: string | Intent, context?: Record<string, unknown>, constraints?: Record<string, unknown>): Promise<IntentResult>;

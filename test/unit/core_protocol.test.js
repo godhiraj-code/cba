@@ -110,9 +110,10 @@ test('settled replay records expire and permit a fresh execution', async () => {
     assert.equal(result.value, 2);
 });
 
-test('the package default export is the lean protocol', () => {
+test('the package adds the platform while preserving protocol exports', () => {
     const packageApi = require('../..');
     assert.equal(packageApi.Coordinator, Coordinator);
+    assert.equal(typeof packageApi.AgentPlatform, 'function');
     assert.equal(typeof packageApi.CBAHub, 'undefined');
 });
 

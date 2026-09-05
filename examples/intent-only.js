@@ -5,14 +5,6 @@ const { Coordinator } = require('../src/core');
 const protocol = new Coordinator();
 
 protocol.register({
-    name: 'lower-confidence-fallback',
-    priority: 1,
-    capabilities: ['demo'],
-    offer: () => ({ score: 0.5, reason: 'generic fallback' }),
-    execute: () => ({ status: 'completed', evidence: ['fallback'] })
-});
-
-protocol.register({
     name: 'example-heuristic',
     priority: 100,
     capabilities: ['demo'],

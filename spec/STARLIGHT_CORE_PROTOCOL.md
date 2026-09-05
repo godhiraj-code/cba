@@ -35,6 +35,10 @@ strings of at most 128 characters and cannot contain control characters. `goal` 
 10,000 characters. Intent objects reject unknown top-level fields. An Intent is immutable after
 submission.
 
+The local JavaScript implementation copies and recursively freezes Intent data and completed
+results. Local inputs must contain JSON-compatible values; cycles, functions, non-finite numbers,
+and class instances are rejected so local agents observe the same data model as remote agents.
+
 An Intent ID is an idempotency key scoped to the authenticated principal. A Coordinator MUST execute
 the first submission at most once within its documented history window. A concurrent or later
 submission by the same principal with the same ID and identical content MUST observe the same
@@ -93,12 +97,17 @@ Evidence is opaque, structured data. It can contain assertions, logs, artifact r
 The Coordinator MUST apply finite Offer, scheduling, and Execute deadlines. A registered Client
 may request cancellation with `{ "intentId": "..." }`. When a deadline or caller cancellation
 occurs, the Coordinator SHOULD send `starlight.cancel` to the active remote Sentinel. A Sentinel
-SHOULD stop related work promptly. A Coordinator MUST ignore a late Outcome and clear its pending
-RPC and timers. It MUST NOT reuse the Sentinel capacity slot until the timed-out handler actually
+SHOULD stop related work promptly. A Coordinator MUST ignore a late Outcome for the caller and
+clear caller-facing deadlines. It retains only execution correlation needed to observe settlement
+and release quarantined capacity, bounded by registered execution capacity. It MUST NOT reuse
+the Sentinel capacity slot until the timed-out handler actually
 settles; an implementation that cannot force-stop work must quarantine that slot rather than exceed
 declared capacity.
 
-The reference WebSocket transport MUST use ping/pong or an equivalent heartbeat to evict stale peers. A reconnecting Client MAY safely resubmit an interrupted request only with the same Intent ID and identical content. A Hub shutting down SHOULD stop accepting new Intents, allow active Intents a bounded drain period, and only then close peer connections.
+The reference WebSocket transport MUST use ping/pong or an equivalent heartbeat to evict stale
+peers. A reconnecting Client MAY safely resubmit an interrupted request only with the same Intent
+ID and identical content. A Hub shutting down SHOULD stop accepting new Intents, allow a bounded
+drain period, cancel remaining work, and close peer connections within a bounded interval.
 
 ## 8. Reference wire protocol
 
@@ -183,6 +192,12 @@ The Starlight 4.x pre-check/clear/wait/hijack/action state machine encoded brows
 | `clear`, `wait`, `hijack`, `resume` | `completed`, `retry`, internal Sentinel logic |
 
 This is the compatibility boundary: old components can be wrapped as one Sentinel, but they do not expand the core protocol.
+
+The optional `AgentPlatform` SDK sits above this contract. Missions, run reports, and agent
+verification are application features; they add no wire methods. Its default Coordinator sets
+`fallbackOnError: false` to stop on execution exceptions and timeouts with attempt history.
+The standalone Coordinator retains error fallback by default. Explicit `failed`, `retry`, and
+`unhandled` outcomes retain their wire semantics under either policy.
 
 ## 11. Idempotency boundary
 

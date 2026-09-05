@@ -4,14 +4,9 @@ const WebSocket = require('ws');
 const { METHODS, PROTOCOL_VERSION } = require('./contract');
 const { ProtocolError, ERROR_CODES } = require('./errors');
 const { RpcPeer } = require('./rpc');
-
-function openSocket(url, options) {
-    return new Promise((resolve, reject) => {
-        const socket = new WebSocket(url, options);
-        socket.once('open', () => resolve(socket));
-        socket.once('error', reject);
-    });
-}
+const { openConnection } = require('./connection');
+const { ExecutionGate } = require('./gate');
+const { normalizeIntent, normalizeSentinel } = require('./contract');
 
 function wait(ms, signal) {
     if (signal?.aborted) return Promise.resolve();
@@ -53,19 +48,47 @@ class Sentinel {
         this.socket = null;
         this.peer = null;
         this.stopping = false;
+        normalizeSentinel({ name: this.name, capacity: this.capacity, priority: this.priority,
+            capabilities: this.capabilities, offer: this.canHandle, execute: this.handle });
+        this.gate = new ExecutionGate(this.capacity);
+        this.executions = new Map();
+        this.connecting = null;
+        this.registered = false;
     }
 
     async connect() {
-        if (this.socket?.readyState === WebSocket.OPEN) return this;
-        this.socket = await openSocket(this.url);
+        if (this.connecting) return this.connecting;
+        if (this.registered && this.socket?.readyState === WebSocket.OPEN) return this;
+        this.connecting = this.connectAndRegister();
+        try { return await this.connecting; } catch (error) {
+            this.socket?.terminate();
+            this.registered = false;
+            throw error;
+        } finally { this.connecting = null; }
+    }
+
+    async connectAndRegister() {
+        const { socket, ready } = openConnection(this.url);
+        this.socket = socket;
+        socket.once('close', () => {
+            if (this.socket === socket) this.registered = false;
+            for (const record of this.executions.values()) {
+                if (record.socket === socket) record.controller.abort(new ProtocolError(
+                    ERROR_CODES.DISCONNECTED, 'sentinel connection closed'));
+            }
+        });
+        await ready;
         this.peer = new RpcPeer(this.socket);
-        this.peer.handle(METHODS.OFFER, ({ intent }) => this.canHandle(intent));
-        this.peer.handle(METHODS.EXECUTE, params => this.handle(params.intent, {
-            attempt: params.attempt,
-            claim: params.claim,
-            history: params.history
-        }));
-        this.peer.handle(METHODS.CANCEL, params => this.onCancel(params.intentId));
+        this.peer.handle(METHODS.OFFER, ({ intent }) => this.canHandle(normalizeIntent(intent)));
+        this.peer.handle(METHODS.EXECUTE, params => this.execute(params, socket));
+        this.peer.handle(METHODS.CANCEL, params => {
+            for (const record of this.executions.values()) {
+                if (record.intentId === params.intentId && record.socket === socket) {
+                    record.controller.abort(new ProtocolError(ERROR_CODES.CANCELLED, 'remote execution cancelled'));
+                }
+            }
+            return this.onCancel(params.intentId);
+        });
         await this.peer.call(METHODS.REGISTER, {
             role: 'sentinel',
             id: this.id,
@@ -77,11 +100,33 @@ class Sentinel {
             capabilities: this.capabilities,
             token: this.token
         });
+        this.registered = true;
         return this;
+    }
+
+    async execute(params, socket) {
+        const intent = normalizeIntent(params.intent);
+        const key = `${intent.id}:${params.attempt}`;
+        if (this.executions.has(key)) throw new ProtocolError(ERROR_CODES.INTENT_CONFLICT, 'attempt is already running');
+        const controller = new AbortController();
+        this.executions.set(key, { controller, socket, intentId: intent.id });
+        let release;
+        try {
+            release = await this.gate.acquire(controller.signal);
+            controller.signal.throwIfAborted();
+            return await this.handle(intent, { signal: controller.signal,
+                attempt: params.attempt, claim: params.claim, history: params.history });
+        } finally {
+            this.executions.delete(key);
+            release?.();
+        }
     }
 
     close() {
         this.stopping = true;
+        this.registered = false;
+        for (const record of this.executions.values()) record.controller.abort(new ProtocolError(
+            ERROR_CODES.CANCELLED, 'sentinel shutdown'));
         this.socket?.close(1000, 'sentinel shutdown');
     }
 

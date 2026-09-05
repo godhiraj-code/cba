@@ -2,6 +2,7 @@
 
 const crypto = require('node:crypto');
 const { ProtocolError, ERROR_CODES } = require('./errors');
+const { snapshot } = require('./json');
 
 const PROTOCOL_VERSION = '1.0';
 const METHODS = Object.freeze({
@@ -67,8 +68,8 @@ function normalizeIntent(input) {
     return Object.freeze({
         id: typeof source.id === 'string' && source.id ? source.id : crypto.randomUUID(),
         goal: source.goal.trim(),
-        context: Object.freeze({ ...(source.context || {}) }),
-        constraints: Object.freeze({ ...(source.constraints || {}) })
+        context: snapshot(source.context || {}),
+        constraints: snapshot(source.constraints || {})
     });
 }
 
@@ -127,11 +128,14 @@ function normalizeSentinel(input) {
 
 function normalizeClaim(value) {
     if (value === false || value === null || value === undefined) return null;
-    if (value === true) return { score: 0.5 };
+    if (value === true) value = 0.5;
     if (typeof value === 'number') value = { score: value };
     assertPlainObject(value, 'offer response');
     assertAllowedKeys(value, ['accept', 'score', 'reason', 'metadata'], 'claim');
     if (value.accept === false) return null;
+    if (value.accept !== undefined && typeof value.accept !== 'boolean') {
+        throw new ProtocolError(ERROR_CODES.INVALID_REQUEST, 'claim.accept must be a boolean');
+    }
 
     const score = value.score === undefined ? 0.5 : value.score;
     if (typeof score !== 'number' || !Number.isFinite(score) || score < 0 || score > 1) {
@@ -140,11 +144,11 @@ function normalizeClaim(value) {
     if (value.reason !== undefined && typeof value.reason !== 'string') {
         throw new ProtocolError(ERROR_CODES.INVALID_REQUEST, 'claim.reason must be a string');
     }
-    return {
+    return snapshot({
         score,
-        reason: value.reason,
-        metadata: value.metadata === undefined ? undefined : value.metadata
-    };
+        ...(value.reason === undefined ? {} : { reason: value.reason }),
+        ...(value.metadata === undefined ? {} : { metadata: value.metadata })
+    });
 }
 
 function normalizeOutcome(value) {

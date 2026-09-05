@@ -1,15 +1,10 @@
 {
     "name": "@starlight-protocol/tck",
-    "version": "5.0.0-alpha.1",
+    "version": "5.0.0-alpha.2",
     "description": "Black-box compatibility kit for Starlight Core Protocol 1.0",
     "main": "src/core_tck.js",
     "scripts": {
-        "test": "node src/core_tck.js",
-        "test:legacy": "node src/run_tck.js",
-        "test:js": "node src/run_tck.js --sdk javascript",
-        "test:hub": "node src/hub_compliance.js",
-        "test:sentinel": "node src/sentinel_compliance.js",
-        "report": "node src/generate_report.js"
+        "test": "node src/core_tck.js"
     },
     "keywords": [
         "starlight",
@@ -20,11 +15,6 @@
     "author": "Starlight Protocol",
     "license": "MIT",
     "dependencies": {
-        "ws": "^8.14.0",
-        "chalk": "^4.1.2",
-        "commander": "^11.1.0"
-    },
-    "devDependencies": {
-        "jest": "^29.7.0"
+        "ws": "^8.20.1"
     }
 }

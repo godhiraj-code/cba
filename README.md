@@ -1,187 +1,162 @@
-# Starlight Protocol 5.x
+# Starlight
 
-Starlight is a small, open protocol for routing Intent to autonomous Sentinels. This alpha release
-ships one reference implementation and support surface: JavaScript on Node.js.
+**A general-purpose agent platform for turning goals into inspectable outcomes.**
 
-Your mission contains only intent. Sentinels own everything else: planning, browser control, computer use, mobile control, heuristics, LLM calls, verification, recovery, and evidence.
+Starlight runs agents that work with code, data, APIs, browsers, devices, or language models.
+You supply a goal and its boundaries. Agents decide whether they can handle it and own the
+implementation. The platform routes work, bounds execution, coordinates mission steps, and
+returns a report with agent identity, attempts, results, and evidence.
 
-```js
-const { Starlight } = require('@starlight-protocol/starlight');
+This JavaScript/Node.js alpha includes an embeddable runtime, a local CLI, and an authenticated
+protocol for remote agents. You supply domain agents; arbitrary natural-language planning
+requires an agent that implements it. No model provider or browser is required.
 
-const mission = await new Starlight().connect();
+[![Watch the 63-second verified CLI demo](assets/demo-poster.png)](assets/starlight-demo.mp4)
 
-await mission.intent('Open the store and sign in as the test customer');
-await mission.intent('Buy the least expensive blue shirt', { channel: 'mobile' });
-await mission.intent('Verify the receipt total is below $100');
+[Video and reproduction instructions](docs/DEMO.md) · [Technical audit](docs/AUDIT.md)
+
+## Run something real
+
+Requires Node.js 22 or newer. From this checkout:
+
+```bash
+npm ci
+npm run demo
 ```
 
-No selectors. No waits. No browser commands. No model choice. The test states what must become true.
+Two agents read the included order data, independently verify its total, write a Markdown
+summary, and read the file back to verify it. The expected result is **3 orders, 5500 cents**.
+Each run creates a fresh artifact and JSON report under `.starlight/runs/`.
+The CLI prints the run ID, results, evidence, and report path.
 
-## The complete protocol
-
-```text
-intent → offer to Sentinels → best claim → execute → outcome
+```bash
+node bin/starlight-platform.js inspect <run-id>
+node bin/starlight-platform.js agents --agents examples/data-report/agents.cjs
+node bin/starlight-platform.js run examples/data-report/mission.json --agents examples/data-report/agents.cjs
 ```
 
-A Sentinel can be anything that implements two operations:
+The last command writes `.starlight/order-summary.md` and fails if it already exists. Change
+the mission's output path for another run, or use `npm run demo` for a fresh path each time.
+After installing a package built from this checkout, the equivalent commands are `starlight demo`,
+`starlight run`, `starlight agents`, and `starlight inspect`.
+
+## Write an agent
 
 ```js
-const { Coordinator } = require('@starlight-protocol/starlight');
+const { AgentPlatform } = require('@starlight-protocol/starlight');
+const platform = new AgentPlatform();
 
-const protocol = new Coordinator();
-
-protocol.register({
-  name: 'checkout-heuristic',
-  priority: 10,
-
-  offer: intent =>
-    intent.goal.toLowerCase().includes('checkout')
-      ? { score: 0.95, reason: 'checkout is my domain' }
-      : false,
-
-  execute: async intent => {
-    // Use Playwright, Appium, an LLM, computer-use, an API, or plain code.
-    return {
-      status: 'completed',
-      value: { orderId: 'ORDER-42' },
-      evidence: [{ kind: 'receipt', ref: 'artifact://receipt-42' }]
-    };
+platform.register({
+  name: 'word-counter',
+  capabilities: ['text'],
+  canHandle: intent => intent.goal === 'Count the words',
+  run: async intent => {
+    if (typeof intent.context.text !== 'string') {
+      return { status: 'failed', error: 'context.text must be a string' };
+    }
+    const words = intent.context.text.match(/\S+/g) || [];
+    return { status: 'completed', value: { words: words.length } };
   }
 });
 
-await protocol.dispatch('Complete checkout');
+async function main() {
+  const report = await platform.run({
+    goal: 'Count the words',
+    context: { text: 'Goals become observable results' }
+  });
+  console.log(report.status, report.steps[0].result?.value);
+}
+main().catch(console.error);
 ```
 
-Four outcomes cover the complete execution lifecycle:
+`canHandle` offers a claim without changing anything; `run` does the work. Optional `verify`
+checks a completed outcome before the mission continues. Agents may use deterministic code,
+tools, models, or their own planning. The platform does not interpret goals on their behalf.
 
-- `completed` — goal achieved, optionally with value and evidence
-- `failed` — terminal, meaningful failure
-- `unhandled` — try the next claiming Sentinel
-- `retry` — retry a transient failure within the attempt budget
+## Compose a mission
 
-## Five-minute authenticated quickstart
-
-Requires Node.js 22 or newer.
-
-```bash
-npm install @starlight-protocol/starlight
-set STARLIGHT_AUTH_TOKEN=a-long-random-development-token
-npx starlight-core
-```
-
-On macOS/Linux use `export` instead of `set`. The CLI refuses to start without a token unless
-`--allow-anonymous-loopback` is explicitly supplied.
-
-Programmatic Hub:
+Register the agents exported by [the data-report example](examples/data-report/agents.cjs), then:
 
 ```js
-const { ProtocolHub, digestToken } = require('@starlight-protocol/starlight');
-
-const token = process.env.STARLIGHT_AUTH_TOKEN;
-const hub = new ProtocolHub({ port: 8080, tokenDigests: [digestToken(token)] });
-await hub.start();
-```
-
-Connect an independently implemented Sentinel:
-
-```js
-const { Sentinel } = require('@starlight-protocol/starlight');
-
-const sentinel = new Sentinel({
-  name: 'computer-agent',
-  token: process.env.STARLIGHT_AUTH_TOKEN,
-  capabilities: ['computer-use'],
-  capacity: 1, // one real desktop; executions are automatically serialized
-  canHandle: intent => ({ score: 0.8 }),
-  handle: async intent => ({
-    status: 'completed',
-    evidence: []
-  })
+const handle = platform.submit({
+  goal: 'Produce a verified summary of the order data',
+  context: { inputPath: './orders.json', outputPath: './summary.md' },
+  constraints: { maxRows: 1000 },
+  steps: ['Summarize the order data', 'Write the verified order summary']
 });
 
-await sentinel.connect();
+// platform.getRun(handle.id) returns a snapshot of progress.
+// handle.cancel() cooperatively cancels work and stops later steps.
+const report = await handle.done;
 ```
 
-The normative JSON-RPC 2.0 over WebSocket protocol and JSON Schema are language-neutral. The
-repository, package, tests, TCK, CI, and supported SDK are JavaScript-only for this release.
+Steps run in order and are routed independently. Agents receive preceding results in
+`intent.context.mission.results`. Mission constraints apply to every step and cannot be
+redefined by a step. Failure, verification failure, cancellation, or a deadline stops the mission.
 
-Lifecycle:
+**Inspect the report status:** completed, failed, and cancelled missions return a report with
+their history. Invalid mission definitions throw before execution. Calling `run` again creates
+a new execution with a new ID.
+
+## The protocol underneath
 
 ```text
-authenticated Client ──Intent──> Hub ──Offer──> Sentinels
-                              deterministic rank
-authenticated Client <─Result── Hub ──Execute──> selected Sentinel
+Mission → AgentPlatform → Coordinator → selected agent → outcome → run report
+                             │
+                             └── ProtocolHub ↔ remote Sentinels
 ```
 
-## Design guarantees
+“Sentinel” is the protocol name for an agent. Existing `Coordinator`, `ProtocolHub`, `Sentinel`,
+and `Starlight` exports remain available, including through `/core`. The language-neutral
+JSON-RPC/WebSocket wire contract remains **1.0**.
 
-- The core has no dependency on browsers, devices, or AI providers.
-- Offers run concurrently and cannot mutate the environment.
-- Exactly one Sentinel owns each execution attempt.
-- Sentinel capacity prevents simultaneous use of a shared browser, device, or account.
-- Replayed intent IDs reuse the original result while the bounded in-memory record exists.
-- Claim ranking is deterministic: score, operator priority, registration order.
-- Broken or slow Sentinels are isolated by deadlines.
-- Retry and fallback behavior is explicit and bounded.
-- Results carry Sentinel identity, attempt history, values, and evidence.
+Local agents need no server. Remote agents connect through a `ProtocolHub` sharing
+`platform.coordinator`; see the [agent guide](docs/AGENTS.md). Network authentication is mandatory
+by default. The protocol CLI remains `starlight-core`, requiring `STARLIGHT_AUTH_TOKEN` unless
+anonymous loopback development is explicitly enabled.
 
-## Specification and examples
+## Boundaries that matter
 
-- [Core protocol specification](spec/STARLIGHT_CORE_PROTOCOL.md)
-- [Canonical wire schema](schemas/starlight.core.schema.json)
-- [Production security profile](spec/SECURITY_PROFILE.md)
-- [Intent-only in-process example](examples/intent-only.js)
-- [Remote Sentinel example](examples/remote-sentinel.js)
+- Agents are trusted code with the host's permissions. Starlight is not a sandbox.
+- Constraints are passed intact; agents and verifiers enforce their meaning.
+- Capacity applies per registration. Different agents sharing a resource need a common owner or external lock.
+- Agents must honor `execution.signal`. Cancellation cannot forcibly stop or undo external work.
+- The platform stops on ambiguous errors and timeouts. Explicit `retry` or `unhandled` outcomes authorize another attempt or agent.
+- The SDK retains 100 runs by default in memory. CLI reports are final records, not durable workflow checkpoints; there is no automatic crash recovery.
+- Core intent replay is bounded and process-local, not durable exactly-once delivery.
+- Remote handlers receive an AbortSignal. Timed-out work retains capacity until settlement or disconnection; the Sentinel SDK preserves local capacity across reconnects.
+- Reports include context and evidence. Keep secrets in agent configuration rather than mission data.
 
-Run the black-box compatibility kit against the reference Hub:
+## Project map
+
+| Area | Purpose |
+| --- | --- |
+| [`src/platform/`](src/platform/) | Mission runtime and agent registration |
+| [`src/core/`](src/core/) | Routing, capacity, deadlines, authentication, remote transport |
+| [`examples/data-report/`](examples/data-report/) | Working agents and verified file output |
+| [`docs/OBJECTIVE.md`](docs/OBJECTIVE.md) | Product objective, design decisions, next steps |
+| [`docs/AGENTS.md`](docs/AGENTS.md) | Agent, mission, CLI, and remote integration guide |
+| [`spec/STARLIGHT_CORE_PROTOCOL.md`](spec/STARLIGHT_CORE_PROTOCOL.md) | Normative wire contract |
+| [`schemas/starlight.core.schema.json`](schemas/starlight.core.schema.json) | Canonical wire schema |
+| [`spec/SECURITY_PROFILE.md`](spec/SECURITY_PROFILE.md) | Network deployment responsibilities |
+| [`tck/`](tck/) | Black-box protocol compatibility kit |
+| [`docs/MIGRATION.md`](docs/MIGRATION.md) | Moving from the browser-era implementation |
+| [`docs/AUDIT.md`](docs/AUDIT.md) | Findings, fixes, coverage, and limits |
+
+## Validate changes
 
 ```bash
-npm run tck
-```
-
-Or test another Hub implementation:
-
-```bash
-node tck/src/core_tck.js --url=ws://host:8080 --token=your-token
-```
-
-Run the real authenticated process/WebSocket proof:
-
-```bash
+npm test
 npm run proof:e2e
-```
-
-It starts a Hub, remote Sentinel, and Client in separate processes, submits an Intent, verifies
-the value, Sentinel identity, attempt history, and evidence, then replays the Intent and proves
-the Sentinel side effect occurred only once.
-
-Run every launch check, including the production dependency audit, packing and installing the npm
-artifact in a neutral temporary project, exercising the installed proof and CLI, and rejecting
-forbidden tarball contents:
-
-```bash
 npm run release:gate
 ```
 
-The npm package contains only the JavaScript core, CLI, declarations, canonical schema, current
-specification, security profile, examples, and the installed-package E2E proof. No other runtime
-implementation is shipped or supported.
+The release gate runs runtime/CLI tests, lint, declarations, schema checks, the TCK, an
+authenticated multi-process proof, installed-package CLI/demo verification, and a production
+and development dependency audit. It does not publish anything.
 
-## Security and limits
+The old browser implementation, recordings, obsolete declarations, and generated artifacts have
+been removed from the versioned project. Git history preserves the previous implementation.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development and release checks.
 
-Authentication is mandatory by default. Anonymous mode is an explicit loopback-only development
-option. Use WSS/TLS for untrusted networks; the operator owns TLS termination, proxy identity
-headers, authorization policy, secret rotation, Sentinel isolation, and evidence retention.
-
-Replay/idempotency storage is bounded, process-local memory. It is not durable exactly-once
-delivery and does not survive Hub restart. The fixed-window rate limiter is per connection.
-Starlight does not sandbox Sentinels or make compliance/certification claims.
-
-This is alpha software, not a production-readiness or compliance claim. Passing
-`npm run release:gate` is necessary evidence, not sufficient deployment assurance. Operators must
-configure WSS, authentication, authorization, secret rotation, persistence, observability,
-Sentinel isolation, and resource limits for their environment.
-
-## License
-
-MIT
+MIT licensed. This is alpha software; passing checks is not a production-readiness or certification claim.

@@ -23,17 +23,5 @@ jobs:
       - run: npm ci
       - run: npm run release:gate
 
-  artifacts:
-    name: Installed npm artifact smoke
-    needs: conformance
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: "24"
-          cache: npm
-      - run: npm ci
-      - run: npm run release:gate
       - name: Reject repository pollution
         run: git diff --exit-code && test -z "$(git status --short)"

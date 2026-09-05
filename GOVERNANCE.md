@@ -4,7 +4,7 @@ Starlight 5.x is currently a maintainer-led alpha project.
 
 ## Scope
 
-The normative JSON-RPC/WebSocket specification is language-neutral. This repository ships and supports one reference implementation: JavaScript on maintained Node.js releases.
+Starlight is a general-purpose agent platform. Its mission runtime, local CLI, and interoperable protocol are one supported JavaScript/Node.js implementation. The normative JSON-RPC/WebSocket specification is language-neutral. Product direction is defined in [docs/OBJECTIVE.md](docs/OBJECTIVE.md).
 
 Adding another implementation language is not part of the 5.x alpha roadmap. A proposal must first demonstrate external demand, an independent maintainer and conformance against the public TCK.
 
@@ -23,7 +23,7 @@ Breaking changes require a new wire-protocol major version. Implementation-packa
 
 ## Decision making
 
-The lead maintainer makes final decisions during alpha after public issue or pull-request review. Decisions should optimize for a small, verifiable protocol rather than feature count or implementation-language breadth.
+The lead maintainer makes final decisions during alpha after public issue or pull-request review. Decisions should unlock useful agent workflows with verifiable outcomes while keeping the protocol small. Platform additions require a runnable example and tests of their success and failure behavior; wire changes follow the protocol process above.
 
 ## Security
 
@@ -38,5 +38,6 @@ A release requires:
 - Neutral installation and installed-package E2E proof.
 - Zero known production dependency vulnerabilities.
 - Honest alpha/stability and deployment-responsibility documentation.
+- An updated audit and reproducible demo whenever supported product behavior changes.
 
 Publishing packages, tags or releases requires explicit maintainer approval.

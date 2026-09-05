@@ -177,6 +177,7 @@ async function runCoreTck(options = {}) {
         let active = 0;
         let maximumActive = 0;
         let retryExecutions = 0;
+        let finishNoncooperative;
         const cancelledExecutions = new Map();
         const sentinel = new WirePeer(url);
         peers.push(sentinel);
@@ -186,6 +187,12 @@ async function runCoreTck(options = {}) {
                 executions++;
                 active++;
                 maximumActive = Math.max(maximumActive, active);
+                if (intent.goal === 'Noncooperative timeout') {
+                    return new Promise(resolve => { finishNoncooperative = () => {
+                        active--;
+                        resolve({ status: 'completed' });
+                    }; });
+                }
                 if (intent.goal === 'Terminal failure') {
                     active--;
                     return { status: 'failed', error: { message: 'expected failure' }, evidence: ['failure'] };
@@ -304,6 +311,19 @@ async function runCoreTck(options = {}) {
                 'NO_SENTINEL'
             ) && Date.now() - timeoutStartedAt < 1_000
         );
+
+        await expectProtocolError(() => client.call('starlight.intent', {
+            id: crypto.randomUUID(), goal: 'Noncooperative timeout'
+        }), 'NO_SENTINEL');
+        const callsBeforeBusy = executions;
+        const busy = await expectProtocolError(() => client.call('starlight.intent', {
+            id: crypto.randomUUID(), goal: 'Must wait for old tool'
+        }), 'NO_SENTINEL');
+        check(results, 'timed-out remote work retains its capacity until it settles',
+            busy && executions === callsBeforeBusy && active === 1);
+        finishNoncooperative();
+        const recovered = await client.call('starlight.intent', { id: crypto.randomUUID(), goal: 'After settlement' });
+        check(results, 'remote capacity recovers after the late outcome', recovered.status === 'completed');
 
         return {
             protocolVersion: registration.protocolVersion,

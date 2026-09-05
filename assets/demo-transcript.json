@@ -1,0 +1,120 @@
+{
+  "product": "Starlight",
+  "version": "5.0.0-alpha.2",
+  "capturedAt": "2026-09-05T03:46:54.733Z",
+  "format": "walkthrough rendered from real CLI results",
+  "assertions": {
+    "success": true,
+    "savedReport": true,
+    "artifactReadBack": true,
+    "constraintFailure": true
+  },
+  "scenes": [
+    {
+      "title": "01 / Start with real data",
+      "caption": "Three orders. No browser, API key, or model required.",
+      "command": "node -p \"JSON.stringify(require('./examples/data-report/orders.json'), null, 2)\"",
+      "lines": [
+        "[",
+        "  {",
+        "    \"id\": \"ORDER-1\",",
+        "    \"amountCents\": 1200",
+        "  },",
+        "  {",
+        "    \"id\": \"ORDER-2\",",
+        "    \"amountCents\": 3500",
+        "  },",
+        "  {",
+        "    \"id\": \"ORDER-3\",",
+        "    \"amountCents\": 800",
+        "  }",
+        "]"
+      ],
+      "seconds": 10
+    },
+    {
+      "title": "02 / Discover the agents",
+      "caption": "Each agent declares a capability and an execution capacity.",
+      "command": "starlight agents --agents examples/data-report/agents.cjs",
+      "lines": [
+        "order-analyst",
+        "  capabilities: structured-data",
+        "  capacity: 1",
+        "",
+        "report-writer",
+        "  capabilities: documents",
+        "  capacity: 1",
+        ""
+      ],
+      "seconds": 9
+    },
+    {
+      "title": "03 / Express the mission",
+      "caption": "Intent describes the outcome. Agent code owns the implementation.",
+      "command": "Read examples/data-report/mission.json",
+      "lines": [
+        "Goal: Produce a verified summary of the order data",
+        "",
+        "Constraint: maxRows = 1000",
+        "",
+        "1. Summarize the order data",
+        "2. Write the verified order summary"
+      ],
+      "seconds": 10
+    },
+    {
+      "title": "04 / Execute and verify",
+      "caption": "The analyst verifies the total; the writer reads back its file.",
+      "command": "starlight demo",
+      "lines": [
+        "Run: fde52c0d-248d-46e9-bec0-241566f592f2",
+        "Status: completed",
+        "",
+        "Step 1: completed",
+        "  agent: order-analyst",
+        "  attempts: 1",
+        "  evidence records: 1",
+        "Step 2: completed",
+        "  agent: report-writer",
+        "  attempts: 1",
+        "  evidence records: 1",
+        "",
+        "Verified result: 3 orders / 5500 cents"
+      ],
+      "seconds": 12
+    },
+    {
+      "title": "05 / Inspect the saved result",
+      "caption": "A saved JSON report retains identity, attempts, values, and evidence.",
+      "command": "starlight inspect fde52c0d-248d-46e9-bec0-241566f592f2",
+      "lines": [
+        "Saved report status: completed",
+        "Artifact exists: true",
+        "",
+        "Actual Markdown file contents:",
+        "# Order summary",
+        "",
+        "Orders: 3",
+        "Total (cents): 5500"
+      ],
+      "seconds": 10
+    },
+    {
+      "title": "06 / Prove the failure boundary",
+      "caption": "A failed constraint stops later steps and preserves the reason.",
+      "command": "starlight run constraint-failure.json --agents examples/data-report/agents.cjs",
+      "lines": [
+        "Same 3 source rows; changed constraint: maxRows = 1",
+        "",
+        "Status: failed",
+        "Exit code: 1",
+        "Steps started: 1",
+        "Report writer executed: false",
+        "Output file exists: false",
+        "",
+        "Error: orders must have nonnegative integer amountCents and respect maxRows"
+      ],
+      "seconds": 12
+    }
+  ]
+}

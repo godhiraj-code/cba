@@ -14,6 +14,10 @@ This profile defines production deployment requirements without choosing an iden
 Every Client and Sentinel MUST authenticate during `starlight.register`. The only exception is
 explicit anonymous loopback development mode, which cannot bind to a non-loopback host.
 
+Registration is serialized per connection. A peer that disconnects while an asynchronous
+authentication hook runs cannot become registered afterward. Hooks must return `true`, a nonempty
+principal string, or an object with a nonempty `principalId`; other values are rejected.
+
 The reference Hub accepts SHA-256 token digests through `tokenDigests`; it hashes presented
 secrets and compares fixed-size digests with a timing-safe comparison. Plaintext bearer tokens
 are not retained. Tokens must be at least 16 characters.
@@ -65,6 +69,8 @@ responsibilities. Starlight does not provide a certificate authority.
 - Offer, scheduling, and execution deadlines MUST remain finite.
 - Sentinel capacity MUST reflect genuinely isolated execution slots.
 - Idempotency history MUST be bounded by count and time.
+- Timed-out remote work retains capacity until it replies or its connection closes. The Sentinel
+  SDK preserves local capacity across reconnects; process restarts require external resource fencing.
 - Large evidence objects SHOULD be stored externally and returned as access-controlled references.
 
 The reference fixed-window limiter is configured with:
@@ -82,6 +88,15 @@ Sentinels are responsible for avoiding secrets and unnecessary personal data in 
 Authentication and authorization failures use `UNAUTHORIZED`. Rate-limit failures use `RATE_LIMITED` and include `retryAfterMs` in error details. Error responses MUST NOT reveal token contents or internal policy rules.
 
 ## Threat-model limits
+
+The local AgentPlatform and CLI execute trusted JavaScript modules. They do not authenticate
+local calls or sandbox imports, models, filesystem access, or tools. Constraints are immutable
+data whose meaning agents and verifiers must enforce. Saved reports include context and evidence
+and require appropriate filesystem access controls.
+
+Cancellation is cooperative. CPU-bound code can block Node's event loop, and external effects
+can continue after cancellation. Hard isolation requires separate processes/containers and an
+external resource owner. Final reports are not crash-safe checkpoints or resumable agent state.
 
 Authentication does not sandbox a Sentinel or prove that its evidence is truthful. A compromised
 authenticated Sentinel can misuse every capability granted to its process. Operators must isolate
