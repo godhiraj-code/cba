@@ -106,6 +106,14 @@ lint/types/schema, the authenticated multi-process proof, all walkthrough assert
 checks cover all six recorded scenarios, report expansion, native playback, chapter seeking,
 caption loading, and a 390-pixel mobile viewport without horizontal page overflow.
 
+Live verification on 2026-09-05 at 04:35 UTC confirmed the root URL returns HTTP 200 for
+implementation commit `9ad371fb819966d28203cb82916e432bbb41e19f`. All eight public file hashes,
+lengths, and MIME types matched the local build; an actual video range GET returned HTTP 206.
+The live browser loaded captions and sought directly to the 02:26 chapter. All eight external
+source/documentation links returned HTTP 200. Both [Linux Node 22/24 jobs](https://github.com/starlight-protocol/starlight/actions/runs/33944886829)
+and the [Pages build, deploy, and live-check jobs](https://github.com/starlight-protocol/starlight/actions/runs/33944886834)
+passed for that exact commit.
+
 The current [runtime workflow](../.github/workflows/starlight_ci.yml) and Pages workflow enforce
 these checks for subsequent commits. See [website operations](WEBSITE.md) for reproduction and
 the deployment record served by the public site for its exact source commit.
