@@ -54,6 +54,9 @@
   "scripts": {
     "start": "node bin/starlight-core.js",
     "demo:walkthrough": "node scripts/demo-walkthrough.js",
+    "site:build": "node scripts/build-site.js",
+    "site:preview": "node scripts/serve-site.js",
+    "site:check": "node scripts/check-site.js",
     "demo": "node bin/starlight-platform.js demo",
     "test": "npm run test:unit && npm run lint && npm run typecheck && npm run schema:check && npm run docs:check && npm run tck",
     "test:core": "node --test test/unit/core_*.test.js",
@@ -61,7 +64,7 @@
     "test:unit": "node --test test/unit/*.test.js",
     "tck": "node tck/src/core_tck.js",
     "proof:e2e": "node scripts/proof-e2e.js",
-    "lint": "eslint src test/unit examples scripts bin --ext .js,.cjs",
+    "lint": "eslint src test/unit examples scripts bin website --ext .js,.cjs",
     "typecheck": "tsc -p tsconfig.contract.json",
     "schema:check": "node scripts/check-contract.js",
     "docs:check": "node scripts/check-docs.js",
@@ -94,7 +97,7 @@
   "bugs": {
     "url": "https://github.com/starlight-protocol/starlight/issues"
   },
-  "homepage": "https://github.com/starlight-protocol/starlight#readme",
+  "homepage": "https://starlight-protocol.github.io/starlight/",
   "type": "commonjs",
   "dependencies": {
     "ws": "^8.20.1"

@@ -1,0 +1,155 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:02.927
+Starlight is a general purpose agent platform.
+
+00:00:02.927 --> 00:00:05.231
+You provide the goal and boundaries.
+
+00:00:05.231 --> 00:00:07.722
+Your agents provide the implementation.
+
+00:00:07.722 --> 00:00:13.825
+Follow real executions through routing, verification, failure, cancellation, and a
+remote agent.
+
+00:00:16.000 --> 00:00:17.908
+We begin with three real orders.
+
+00:00:17.908 --> 00:00:22.533
+Their amounts are twelve hundred, thirty five hundred, and eight hundred cents.
+
+00:00:22.533 --> 00:00:25.250
+The correct total is fifty five hundred cents.
+
+00:00:25.250 --> 00:00:28.430
+This deterministic example needs no model or API key.
+
+00:00:31.000 --> 00:00:33.601
+Two agents register different capabilities.
+
+00:00:33.601 --> 00:00:36.144
+The order analyst handles structured data.
+
+00:00:36.144 --> 00:00:38.331
+The report writer creates documents.
+
+00:00:38.331 --> 00:00:40.519
+Each has capacity for one execution.
+
+00:00:40.519 --> 00:00:45.130
+Their claims let the coordinator select the appropriate agent for each step.
+
+00:00:48.000 --> 00:00:51.263
+The mission describes an outcome and two ordered steps.
+
+00:00:51.263 --> 00:00:54.702
+First summarize the data, then write the verified summary.
+
+00:00:54.702 --> 00:00:57.907
+A shared maximum row constraint applies to both steps.
+
+00:00:57.907 --> 00:01:01.170
+The platform passes earlier results to the next agent.
+
+00:01:04.000 --> 00:01:05.500
+Now execute the mission.
+
+00:01:05.500 --> 00:01:11.078
+The coordinator selects the analyst, which computes the total and independently verifies
+it.
+
+00:01:11.078 --> 00:01:14.916
+The writer then creates a real Markdown file and reads it back.
+
+00:01:14.916 --> 00:01:19.475
+Both steps complete, with agent identity, attempts, and evidence recorded.
+
+00:01:22.000 --> 00:01:24.062
+Inspection reads the saved report.
+
+00:01:24.062 --> 00:01:28.069
+The output file contains three orders and fifty five hundred cents.
+
+00:01:28.069 --> 00:01:34.020
+A completed status is useful because we can follow it back to a concrete artifact and
+its evidence.
+
+00:01:37.000 --> 00:01:39.219
+Now change only the row limit to one.
+
+00:01:39.219 --> 00:01:41.379
+The same source contains three rows.
+
+00:01:41.379 --> 00:01:43.190
+The analyst rejects the input.
+
+00:01:43.190 --> 00:01:47.686
+The mission fails, the CLI exits with code one, and the writer never starts.
+
+00:01:47.686 --> 00:01:50.255
+We assert that no output file was created.
+
+00:01:53.000 --> 00:01:55.547
+An agent can also claim success incorrectly.
+
+00:01:55.547 --> 00:01:59.453
+Here it returns nine thousand nine hundred ninety nine as the total.
+
+00:01:59.453 --> 00:02:03.699
+The independent verifier expects fifty five hundred and rejects the claim.
+
+00:02:03.699 --> 00:02:07.435
+The platform retains the evidence and does not start the writer.
+
+00:02:10.000 --> 00:02:11.967
+Next, cancel a running mission.
+
+00:02:11.967 --> 00:02:17.807
+The worker observes its abort signal, and the platform prevents the second step from
+starting.
+
+00:02:17.807 --> 00:02:19.898
+This is cooperative cancellation.
+
+00:02:19.898 --> 00:02:23.955
+It cannot forcibly stop arbitrary code or undo external effects.
+
+00:02:26.000 --> 00:02:29.042
+The same platform also routes to remote Sentinels.
+
+00:02:29.042 --> 00:02:34.589
+Here a token authenticated agent connects over a real local WebSocket and counts four
+words.
+
+00:02:34.589 --> 00:02:37.572
+This capture uses one process with a real socket.
+
+00:02:37.572 --> 00:02:41.270
+The repository also includes a separate multi process proof.
+
+00:02:44.000 --> 00:02:46.783
+Restore the valid input and start a fresh run.
+
+00:02:46.783 --> 00:02:49.861
+Both agents complete and verify the artifact again.
+
+00:02:49.861 --> 00:02:51.638
+The run has a new identifier.
+
+00:02:51.638 --> 00:02:57.440
+This demonstrates recovery by correcting the input, not durable resume or an automatic
+rollback.
+
+00:03:00.000 --> 00:03:05.187
+Start with the included example, inspect the reports, then supply your own agents.
+
+00:03:05.187 --> 00:03:08.686
+Tools, models, and planning belong inside those agents.
+
+00:03:08.686 --> 00:03:11.123
+Starlight coordinates their execution.
+
+00:03:11.123 --> 00:03:17.310
+This alpha uses trusted code and in memory history, with clear outcomes and inspectable
+evidence.

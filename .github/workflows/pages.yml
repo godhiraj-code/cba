@@ -1,0 +1,71 @@
+name: Publish and verify website
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: node scripts/build-site.js
+      - run: node --test test/unit/site.test.js
+      - name: Validate served output
+        run: |
+          node scripts/serve-site.js > /tmp/starlight-site.log 2>&1 &
+          server=$!
+          trap 'kill "$server"' EXIT
+          for attempt in {1..10}; do
+            if curl --fail --silent http://127.0.0.1:4173/starlight/ > /dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/check-site.js http://127.0.0.1:4173/starlight/
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist/site
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - uses: actions/deploy-pages@v4
+        id: deployment
+
+  verify-public:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: node scripts/build-site.js
+      - name: Verify actual public URL and deployed assets
+        run: |
+          for attempt in {1..12}; do
+            if node scripts/check-site.js https://starlight-protocol.github.io/starlight/; then exit 0; fi
+            sleep 10
+          done
+          exit 1

@@ -1,15 +1,670 @@
 {
   "product": "Starlight",
   "version": "5.0.0-alpha.2",
-  "capturedAt": "2026-09-05T03:46:54.733Z",
-  "format": "walkthrough rendered from real CLI results",
+  "capturedAt": "2026-09-05T04:17:38.506Z",
+  "format": "Animated walkthrough of asserted CLI and SDK executions; synthetic narration",
   "assertions": {
     "success": true,
     "savedReport": true,
     "artifactReadBack": true,
-    "constraintFailure": true
+    "constraintFailure": true,
+    "verificationRejected": true,
+    "cancellation": true,
+    "authenticatedRemote": true,
+    "freshRecovery": true
   },
+  "reports": {
+    "success": {
+      "id": "b2bfa425-8d96-4f96-bfa2-d42a49c580b2",
+      "goal": "Produce a verified summary of the order data",
+      "status": "completed",
+      "startedAt": "2026-09-05T04:17:38.229Z",
+      "mission": {
+        "goal": "Produce a verified summary of the order data",
+        "context": {
+          "inputPath": "<workspace>\\examples\\data-report\\orders.json",
+          "outputPath": "<workspace>\\.starlight\\demo-video\\497a2037-3a57-432c-b96b-97dc18d8c923\\artifacts\\29689acd-21fe-4a99-8164-25793866e7b0.md"
+        },
+        "constraints": {
+          "maxRows": 1000
+        },
+        "steps": [
+          {
+            "goal": "Summarize the order data",
+            "context": {},
+            "constraints": {}
+          },
+          {
+            "goal": "Write the verified order summary",
+            "context": {},
+            "constraints": {}
+          }
+        ]
+      },
+      "steps": [
+        {
+          "index": 1,
+          "intentId": "b2bfa425-8d96-4f96-bfa2-d42a49c580b2:1",
+          "goal": "Summarize the order data",
+          "status": "completed",
+          "result": {
+            "intentId": "b2bfa425-8d96-4f96-bfa2-d42a49c580b2:1",
+            "goal": "Summarize the order data",
+            "status": "completed",
+            "sentinel": {
+              "id": "order-analyst",
+              "name": "order-analyst",
+              "version": "0.0.0",
+              "priority": 100,
+              "capacity": 1,
+              "active": 0,
+              "capabilities": [
+                "structured-data"
+              ]
+            },
+            "value": {
+              "count": 3,
+              "totalCents": 5500
+            },
+            "evidence": [
+              {
+                "kind": "source",
+                "ref": "workspace:/examples/data-report/orders.json"
+              }
+            ],
+            "attempts": [
+              {
+                "sentinel": {
+                  "id": "order-analyst",
+                  "name": "order-analyst",
+                  "version": "0.0.0",
+                  "priority": 100,
+                  "capacity": 1,
+                  "active": 0,
+                  "capabilities": [
+                    "structured-data"
+                  ]
+                },
+                "attempt": 1,
+                "status": "completed"
+              }
+            ],
+            "durationMs": 1
+          }
+        },
+        {
+          "index": 2,
+          "intentId": "b2bfa425-8d96-4f96-bfa2-d42a49c580b2:2",
+          "goal": "Write the verified order summary",
+          "status": "completed",
+          "result": {
+            "intentId": "b2bfa425-8d96-4f96-bfa2-d42a49c580b2:2",
+            "goal": "Write the verified order summary",
+            "status": "completed",
+            "sentinel": {
+              "id": "report-writer",
+              "name": "report-writer",
+              "version": "0.0.0",
+              "priority": 100,
+              "capacity": 1,
+              "active": 0,
+              "capabilities": [
+                "documents"
+              ]
+            },
+            "value": {
+              "path": "<workspace>\\.starlight\\demo-video\\497a2037-3a57-432c-b96b-97dc18d8c923\\artifacts\\29689acd-21fe-4a99-8164-25793866e7b0.md"
+            },
+            "evidence": [
+              {
+                "kind": "artifact",
+                "ref": "workspace:/.starlight/demo-video/497a2037-3a57-432c-b96b-97dc18d8c923/artifacts/29689acd-21fe-4a99-8164-25793866e7b0.md"
+              }
+            ],
+            "attempts": [
+              {
+                "sentinel": {
+                  "id": "report-writer",
+                  "name": "report-writer",
+                  "version": "0.0.0",
+                  "priority": 100,
+                  "capacity": 1,
+                  "active": 0,
+                  "capabilities": [
+                    "documents"
+                  ]
+                },
+                "attempt": 1,
+                "status": "completed"
+              }
+            ],
+            "durationMs": 3
+          }
+        }
+      ],
+      "finishedAt": "2026-09-05T04:17:38.235Z",
+      "durationMs": 5,
+      "reportPath": "<workspace>\\.starlight\\demo-video\\497a2037-3a57-432c-b96b-97dc18d8c923\\b2bfa425-8d96-4f96-bfa2-d42a49c580b2.json"
+    },
+    "constraintFailure": {
+      "id": "426574b4-0b31-4967-8e0f-16b86cde971c",
+      "goal": "Produce a verified summary of the order data",
+      "status": "failed",
+      "startedAt": "2026-09-05T04:17:38.390Z",
+      "mission": {
+        "goal": "Produce a verified summary of the order data",
+        "context": {
+          "inputPath": "<workspace>\\examples\\data-report\\orders.json",
+          "outputPath": "<workspace>\\.starlight\\demo-video\\497a2037-3a57-432c-b96b-97dc18d8c923\\must-not-exist.md"
+        },
+        "constraints": {
+          "maxRows": 1
+        },
+        "steps": [
+          {
+            "goal": "Summarize the order data",
+            "context": {},
+            "constraints": {}
+          },
+          {
+            "goal": "Write the verified order summary",
+            "context": {},
+            "constraints": {}
+          }
+        ]
+      },
+      "steps": [
+        {
+          "index": 1,
+          "intentId": "426574b4-0b31-4967-8e0f-16b86cde971c:1",
+          "goal": "Summarize the order data",
+          "status": "failed",
+          "error": {
+            "code": "INTENT_FAILED",
+            "message": "orders must have nonnegative integer amountCents and respect maxRows",
+            "details": {
+              "intentId": "426574b4-0b31-4967-8e0f-16b86cde971c:1",
+              "sentinel": {
+                "id": "order-analyst",
+                "name": "order-analyst",
+                "version": "0.0.0",
+                "priority": 100,
+                "capacity": 1,
+                "active": 0,
+                "capabilities": [
+                  "structured-data"
+                ]
+              },
+              "cause": {
+                "code": "AGENT_ERROR",
+                "message": "orders must have nonnegative integer amountCents and respect maxRows"
+              },
+              "attempts": [
+                {
+                  "sentinel": {
+                    "id": "order-analyst",
+                    "name": "order-analyst",
+                    "version": "0.0.0",
+                    "priority": 100,
+                    "capacity": 1,
+                    "active": 0,
+                    "capabilities": [
+                      "structured-data"
+                    ]
+                  },
+                  "attempt": 1,
+                  "status": "failed"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "error": {
+        "code": "INTENT_FAILED",
+        "message": "orders must have nonnegative integer amountCents and respect maxRows",
+        "details": {
+          "intentId": "426574b4-0b31-4967-8e0f-16b86cde971c:1",
+          "sentinel": {
+            "id": "order-analyst",
+            "name": "order-analyst",
+            "version": "0.0.0",
+            "priority": 100,
+            "capacity": 1,
+            "active": 0,
+            "capabilities": [
+              "structured-data"
+            ]
+          },
+          "cause": {
+            "code": "AGENT_ERROR",
+            "message": "orders must have nonnegative integer amountCents and respect maxRows"
+          },
+          "attempts": [
+            {
+              "sentinel": {
+                "id": "order-analyst",
+                "name": "order-analyst",
+                "version": "0.0.0",
+                "priority": 100,
+                "capacity": 1,
+                "active": 0,
+                "capabilities": [
+                  "structured-data"
+                ]
+              },
+              "attempt": 1,
+              "status": "failed"
+            }
+          ]
+        }
+      },
+      "finishedAt": "2026-09-05T04:17:38.394Z",
+      "durationMs": 3,
+      "reportPath": "<workspace>\\.starlight\\demo-video\\497a2037-3a57-432c-b96b-97dc18d8c923\\426574b4-0b31-4967-8e0f-16b86cde971c.json"
+    },
+    "verificationFailure": {
+      "id": "0d101702-8c78-43ad-8fc6-36280292e3ff",
+      "goal": "Reject incorrect work",
+      "status": "failed",
+      "startedAt": "2026-09-05T04:17:38.404Z",
+      "mission": {
+        "goal": "Reject incorrect work",
+        "context": {},
+        "constraints": {},
+        "steps": [
+          {
+            "goal": "Calculate",
+            "context": {},
+            "constraints": {}
+          },
+          {
+            "goal": "Write",
+            "context": {},
+            "constraints": {}
+          }
+        ]
+      },
+      "steps": [
+        {
+          "index": 1,
+          "intentId": "0d101702-8c78-43ad-8fc6-36280292e3ff:1",
+          "goal": "Calculate",
+          "status": "failed",
+          "error": {
+            "code": "INTENT_FAILED",
+            "message": "agent 'incorrect-analyst' failed completion verification",
+            "details": {
+              "intentId": "0d101702-8c78-43ad-8fc6-36280292e3ff:1",
+              "sentinel": {
+                "id": "incorrect-analyst",
+                "name": "incorrect-analyst",
+                "version": "0.0.0",
+                "priority": 100,
+                "capacity": 1,
+                "active": 0,
+                "capabilities": []
+              },
+              "cause": {
+                "code": "VERIFICATION_FAILED",
+                "message": "agent 'incorrect-analyst' failed completion verification"
+              },
+              "evidence": [
+                "claimed total: 9999"
+              ],
+              "attempts": [
+                {
+                  "sentinel": {
+                    "id": "incorrect-analyst",
+                    "name": "incorrect-analyst",
+                    "version": "0.0.0",
+                    "priority": 100,
+                    "capacity": 1,
+                    "active": 0,
+                    "capabilities": []
+                  },
+                  "attempt": 1,
+                  "status": "failed"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "error": {
+        "code": "INTENT_FAILED",
+        "message": "agent 'incorrect-analyst' failed completion verification",
+        "details": {
+          "intentId": "0d101702-8c78-43ad-8fc6-36280292e3ff:1",
+          "sentinel": {
+            "id": "incorrect-analyst",
+            "name": "incorrect-analyst",
+            "version": "0.0.0",
+            "priority": 100,
+            "capacity": 1,
+            "active": 0,
+            "capabilities": []
+          },
+          "cause": {
+            "code": "VERIFICATION_FAILED",
+            "message": "agent 'incorrect-analyst' failed completion verification"
+          },
+          "evidence": [
+            "claimed total: 9999"
+          ],
+          "attempts": [
+            {
+              "sentinel": {
+                "id": "incorrect-analyst",
+                "name": "incorrect-analyst",
+                "version": "0.0.0",
+                "priority": 100,
+                "capacity": 1,
+                "active": 0,
+                "capabilities": []
+              },
+              "attempt": 1,
+              "status": "failed"
+            }
+          ]
+        }
+      },
+      "finishedAt": "2026-09-05T04:17:38.406Z",
+      "durationMs": 2
+    },
+    "cancellation": {
+      "id": "c854779e-de59-432d-bfa0-8c8da75fbf6b",
+      "goal": "Work until cancelled",
+      "status": "cancelled",
+      "startedAt": "2026-09-05T04:17:38.406Z",
+      "mission": {
+        "goal": "Work until cancelled",
+        "context": {},
+        "constraints": {},
+        "steps": [
+          {
+            "goal": "Wait for input",
+            "context": {},
+            "constraints": {}
+          },
+          {
+            "goal": "Write result",
+            "context": {},
+            "constraints": {}
+          }
+        ]
+      },
+      "steps": [
+        {
+          "index": 1,
+          "intentId": "c854779e-de59-432d-bfa0-8c8da75fbf6b:1",
+          "goal": "Wait for input",
+          "status": "cancelled",
+          "error": {
+            "code": "CANCELLED",
+            "message": "run 'c854779e-de59-432d-bfa0-8c8da75fbf6b' was cancelled",
+            "details": {
+              "intentId": "c854779e-de59-432d-bfa0-8c8da75fbf6b:1",
+              "attempts": [
+                {
+                  "sentinel": {
+                    "id": "cooperative-worker",
+                    "name": "cooperative-worker",
+                    "version": "0.0.0",
+                    "priority": 100,
+                    "capacity": 1,
+                    "active": 0,
+                    "capabilities": []
+                  },
+                  "attempt": 1,
+                  "status": "error",
+                  "error": "execution cancelled"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "error": {
+        "code": "CANCELLED",
+        "message": "run 'c854779e-de59-432d-bfa0-8c8da75fbf6b' was cancelled",
+        "details": {
+          "intentId": "c854779e-de59-432d-bfa0-8c8da75fbf6b:1",
+          "attempts": [
+            {
+              "sentinel": {
+                "id": "cooperative-worker",
+                "name": "cooperative-worker",
+                "version": "0.0.0",
+                "priority": 100,
+                "capacity": 1,
+                "active": 0,
+                "capabilities": []
+              },
+              "attempt": 1,
+              "status": "error",
+              "error": "execution cancelled"
+            }
+          ]
+        }
+      },
+      "finishedAt": "2026-09-05T04:17:38.407Z",
+      "durationMs": 1
+    },
+    "remote": {
+      "id": "72557a21-5c08-40ae-9169-996d295a4be6",
+      "goal": "Count words remotely",
+      "status": "completed",
+      "startedAt": "2026-09-05T04:17:38.426Z",
+      "mission": {
+        "goal": "Count words remotely",
+        "context": {
+          "text": "Goals become observable results"
+        },
+        "constraints": {},
+        "steps": [
+          {
+            "goal": "Count words remotely",
+            "context": {},
+            "constraints": {}
+          }
+        ]
+      },
+      "steps": [
+        {
+          "index": 1,
+          "intentId": "72557a21-5c08-40ae-9169-996d295a4be6:1",
+          "goal": "Count words remotely",
+          "status": "completed",
+          "result": {
+            "intentId": "72557a21-5c08-40ae-9169-996d295a4be6:1",
+            "goal": "Count words remotely",
+            "status": "completed",
+            "sentinel": {
+              "id": "remote-word-counter",
+              "name": "remote-word-counter",
+              "version": "0.0.0",
+              "priority": 100,
+              "capacity": 1,
+              "active": 0,
+              "capabilities": []
+            },
+            "value": {
+              "words": 4
+            },
+            "evidence": [
+              "counted on authenticated WebSocket agent"
+            ],
+            "attempts": [
+              {
+                "sentinel": {
+                  "id": "remote-word-counter",
+                  "name": "remote-word-counter",
+                  "version": "0.0.0",
+                  "priority": 100,
+                  "capacity": 1,
+                  "active": 0,
+                  "capabilities": []
+                },
+                "attempt": 1,
+                "status": "completed"
+              }
+            ],
+            "durationMs": 1
+          }
+        }
+      ],
+      "finishedAt": "2026-09-05T04:17:38.427Z",
+      "durationMs": 1
+    },
+    "recovery": {
+      "id": "7d8fdab2-f89d-4c8f-b121-7e41df5b3c76",
+      "goal": "Produce a verified summary of the order data",
+      "status": "completed",
+      "startedAt": "2026-09-05T04:17:38.491Z",
+      "mission": {
+        "goal": "Produce a verified summary of the order data",
+        "context": {
+          "inputPath": "<workspace>\\examples\\data-report\\orders.json",
+          "outputPath": "<workspace>\\.starlight\\demo-video\\497a2037-3a57-432c-b96b-97dc18d8c923\\artifacts\\ebbfff94-af4b-4542-a3d5-417a5dfc08fd.md"
+        },
+        "constraints": {
+          "maxRows": 1000
+        },
+        "steps": [
+          {
+            "goal": "Summarize the order data",
+            "context": {},
+            "constraints": {}
+          },
+          {
+            "goal": "Write the verified order summary",
+            "context": {},
+            "constraints": {}
+          }
+        ]
+      },
+      "steps": [
+        {
+          "index": 1,
+          "intentId": "7d8fdab2-f89d-4c8f-b121-7e41df5b3c76:1",
+          "goal": "Summarize the order data",
+          "status": "completed",
+          "result": {
+            "intentId": "7d8fdab2-f89d-4c8f-b121-7e41df5b3c76:1",
+            "goal": "Summarize the order data",
+            "status": "completed",
+            "sentinel": {
+              "id": "order-analyst",
+              "name": "order-analyst",
+              "version": "0.0.0",
+              "priority": 100,
+              "capacity": 1,
+              "active": 0,
+              "capabilities": [
+                "structured-data"
+              ]
+            },
+            "value": {
+              "count": 3,
+              "totalCents": 5500
+            },
+            "evidence": [
+              {
+                "kind": "source",
+                "ref": "workspace:/examples/data-report/orders.json"
+              }
+            ],
+            "attempts": [
+              {
+                "sentinel": {
+                  "id": "order-analyst",
+                  "name": "order-analyst",
+                  "version": "0.0.0",
+                  "priority": 100,
+                  "capacity": 1,
+                  "active": 0,
+                  "capabilities": [
+                    "structured-data"
+                  ]
+                },
+                "attempt": 1,
+                "status": "completed"
+              }
+            ],
+            "durationMs": 1
+          }
+        },
+        {
+          "index": 2,
+          "intentId": "7d8fdab2-f89d-4c8f-b121-7e41df5b3c76:2",
+          "goal": "Write the verified order summary",
+          "status": "completed",
+          "result": {
+            "intentId": "7d8fdab2-f89d-4c8f-b121-7e41df5b3c76:2",
+            "goal": "Write the verified order summary",
+            "status": "completed",
+            "sentinel": {
+              "id": "report-writer",
+              "name": "report-writer",
+              "version": "0.0.0",
+              "priority": 100,
+              "capacity": 1,
+              "active": 0,
+              "capabilities": [
+                "documents"
+              ]
+            },
+            "value": {
+              "path": "<workspace>\\.starlight\\demo-video\\497a2037-3a57-432c-b96b-97dc18d8c923\\artifacts\\ebbfff94-af4b-4542-a3d5-417a5dfc08fd.md"
+            },
+            "evidence": [
+              {
+                "kind": "artifact",
+                "ref": "workspace:/.starlight/demo-video/497a2037-3a57-432c-b96b-97dc18d8c923/artifacts/ebbfff94-af4b-4542-a3d5-417a5dfc08fd.md"
+              }
+            ],
+            "attempts": [
+              {
+                "sentinel": {
+                  "id": "report-writer",
+                  "name": "report-writer",
+                  "version": "0.0.0",
+                  "priority": 100,
+                  "capacity": 1,
+                  "active": 0,
+                  "capabilities": [
+                    "documents"
+                  ]
+                },
+                "attempt": 1,
+                "status": "completed"
+              }
+            ],
+            "durationMs": 2
+          }
+        }
+      ],
+      "finishedAt": "2026-09-05T04:17:38.496Z",
+      "durationMs": 4,
+      "reportPath": "<workspace>\\.starlight\\demo-video\\497a2037-3a57-432c-b96b-97dc18d8c923\\7d8fdab2-f89d-4c8f-b121-7e41df5b3c76.json"
+    }
+  },
+  "artifact": "# Order summary\n\nOrders: 3\nTotal (cents): 5500\n",
   "scenes": [
+    {
+      "title": "From a goal to accountable execution",
+      "caption": "Starlight / General-purpose agent platform / 5.x alpha",
+      "command": "Mission → routing → agent → verification → report",
+      "lines": [
+        "You define the goal, context, constraints, and steps.",
+        "Agents supply tools, models, or deterministic code.",
+        "Starlight coordinates execution and records what happened.",
+        "This walkthrough uses real Node.js and WebSocket executions."
+      ],
+      "seconds": 16,
+      "narration": "Starlight is a general purpose agent platform. You provide the goal and boundaries. Your agents provide the implementation. Follow real executions through routing, verification, failure, cancellation, and a remote agent."
+    },
     {
       "title": "01 / Start with real data",
       "caption": "Three orders. No browser, API key, or model required.",
@@ -30,7 +685,8 @@
         "  }",
         "]"
       ],
-      "seconds": 10
+      "seconds": 15,
+      "narration": "We begin with three real orders. Their amounts are twelve hundred, thirty five hundred, and eight hundred cents. The correct total is fifty five hundred cents. This deterministic example needs no model or API key."
     },
     {
       "title": "02 / Discover the agents",
@@ -46,7 +702,8 @@
         "  capacity: 1",
         ""
       ],
-      "seconds": 9
+      "seconds": 17,
+      "narration": "Two agents register different capabilities. The order analyst handles structured data. The report writer creates documents. Each has capacity for one execution. Their claims let the coordinator select the appropriate agent for each step."
     },
     {
       "title": "03 / Express the mission",
@@ -60,14 +717,15 @@
         "1. Summarize the order data",
         "2. Write the verified order summary"
       ],
-      "seconds": 10
+      "seconds": 16,
+      "narration": "The mission describes an outcome and two ordered steps. First summarize the data, then write the verified summary. A shared maximum row constraint applies to both steps. The platform passes earlier results to the next agent."
     },
     {
       "title": "04 / Execute and verify",
       "caption": "The analyst verifies the total; the writer reads back its file.",
       "command": "starlight demo",
       "lines": [
-        "Run: fde52c0d-248d-46e9-bec0-241566f592f2",
+        "Run: b2bfa425-8d96-4f96-bfa2-d42a49c580b2",
         "Status: completed",
         "",
         "Step 1: completed",
@@ -81,12 +739,13 @@
         "",
         "Verified result: 3 orders / 5500 cents"
       ],
-      "seconds": 12
+      "seconds": 18,
+      "narration": "Now execute the mission. The coordinator selects the analyst, which computes the total and independently verifies it. The writer then creates a real Markdown file and reads it back. Both steps complete, with agent identity, attempts, and evidence recorded."
     },
     {
       "title": "05 / Inspect the saved result",
       "caption": "A saved JSON report retains identity, attempts, values, and evidence.",
-      "command": "starlight inspect fde52c0d-248d-46e9-bec0-241566f592f2",
+      "command": "starlight inspect b2bfa425-8d96-4f96-bfa2-d42a49c580b2",
       "lines": [
         "Saved report status: completed",
         "Artifact exists: true",
@@ -97,7 +756,8 @@
         "Orders: 3",
         "Total (cents): 5500"
       ],
-      "seconds": 10
+      "seconds": 15,
+      "narration": "Inspection reads the saved report. The output file contains three orders and fifty five hundred cents. A completed status is useful because we can follow it back to a concrete artifact and its evidence."
     },
     {
       "title": "06 / Prove the failure boundary",
@@ -114,7 +774,89 @@
         "",
         "Error: orders must have nonnegative integer amountCents and respect maxRows"
       ],
-      "seconds": 12
+      "seconds": 16,
+      "narration": "Now change only the row limit to one. The same source contains three rows. The analyst rejects the input. The mission fails, the CLI exits with code one, and the writer never starts. We assert that no output file was created."
+    },
+    {
+      "title": "07 / A success claim is not enough",
+      "caption": "The verifier rejects an incorrect total before the next step.",
+      "command": "agent.verify(intent, outcome) → false",
+      "lines": [
+        "Agent claimed: completed / totalCents: 9999",
+        "Independent expected total: 5500",
+        "Mission status: failed",
+        "Cause: VERIFICATION_FAILED",
+        "Agents executed: 1",
+        "Writer step: never started",
+        "Evidence retained: claimed total: 9999"
+      ],
+      "seconds": 17,
+      "narration": "An agent can also claim success incorrectly. Here it returns nine thousand nine hundred ninety nine as the total. The independent verifier expects fifty five hundred and rejects the claim. The platform retains the evidence and does not start the writer."
+    },
+    {
+      "title": "08 / Cancel work deliberately",
+      "caption": "Cancellation reaches a cooperating agent and stops the mission.",
+      "command": "const handle = platform.submit(mission); handle.cancel();",
+      "lines": [
+        "Before cancellation: running",
+        "Agent receives execution.signal abort: true",
+        "After cancellation: cancelled",
+        "Next step: never started",
+        "Cancellation is cooperative. It cannot undo external work."
+      ],
+      "seconds": 16,
+      "narration": "Next, cancel a running mission. The worker observes its abort signal, and the platform prevents the second step from starting. This is cooperative cancellation. It cannot forcibly stop arbitrary code or undo external effects."
+    },
+    {
+      "title": "09 / Cross a real network boundary",
+      "caption": "A Sentinel connects to a token-authenticated local WebSocket Hub.",
+      "command": "AgentPlatform → ProtocolHub ↔ Sentinel",
+      "lines": [
+        "Transport: JSON-RPC over WebSocket",
+        "Authentication: token checked by the Hub",
+        "Agent: remote-word-counter",
+        "Input: Goals become observable results",
+        "Returned value: 4 words",
+        "One process here; real socket transport. Multi-process proof also included."
+      ],
+      "seconds": 18,
+      "narration": "The same platform also routes to remote Sentinels. Here a token authenticated agent connects over a real local WebSocket and counts four words. This capture uses one process with a real socket. The repository also includes a separate multi process proof."
+    },
+    {
+      "title": "10 / Correct the input. Start a fresh run.",
+      "caption": "Restore the valid row limit and verify the resulting artifact again.",
+      "command": "starlight demo",
+      "lines": [
+        "Constraint: maxRows = 1000",
+        "New run ID: 7d8fdab2-f89d-4c8f-b121-7e41df5b3c76",
+        "Status: completed",
+        "Verified result: 3 orders / 5500 cents",
+        "Fresh run and artifact. No durable resume or automatic rollback."
+      ],
+      "seconds": 16,
+      "narration": "Restore the valid input and start a fresh run. Both agents complete and verify the artifact again. The run has a new identifier. This demonstrates recovery by correcting the input, not durable resume or an automatic rollback."
+    },
+    {
+      "title": "Build agents. Keep execution inspectable.",
+      "caption": "Run the examples, inspect the evidence, then supply your own agents.",
+      "command": "npm ci  →  npm run demo  →  npm run demo:walkthrough",
+      "lines": [
+        "Goal + context + constraints → independently routed steps",
+        "Agent identity + attempts + verification evidence → a run report",
+        "Tools and models belong inside your agents.",
+        "Alpha boundaries: trusted code, cooperative cancellation, in-memory SDK history.",
+        "starlight-protocol.github.io/starlight/"
+      ],
+      "seconds": 20,
+      "narration": "Start with the included example, inspect the reports, then supply your own agents. Tools, models, and planning belong inside those agents. Starlight coordinates their execution. This alpha uses trusted code and in memory history, with clear outcomes and inspectable evidence."
     }
-  ]
+  ],
+  "media": {
+    "seconds": 200,
+    "width": 1920,
+    "height": 1080,
+    "fps": 24,
+    "narration": "synthetic / libflite slt"
+  },
+  "pathNote": "Workspace prefixes are replaced with <workspace> and workspace: in the public recording. Run IDs and results are unchanged."
 }

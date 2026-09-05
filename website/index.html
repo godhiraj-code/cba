@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Starlight is a general-purpose Node.js agent platform for intent-driven missions, verified outcomes, and interoperable agents.">
+  <meta name="theme-color" content="#111b26">
+  <title>Starlight — General-purpose agent platform</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header><a class="brand" href="./" aria-label="Starlight home"><span aria-hidden="true">✳</span> starlight</a><nav aria-label="Main navigation"><a href="#demo">Demo</a><a href="#start">Quickstart</a><a href="#docs">Docs</a><a href="https://github.com/starlight-protocol/starlight">GitHub ↗</a></nav></header>
+  <main id="main">
+    <section class="hero">
+      <div><p class="eyebrow">GENERAL-PURPOSE AGENT PLATFORM <span>5.x alpha</span></p><h1>Give agents a goal.<br>Keep the evidence.</h1><p class="lead">Turn intent into accountable execution. Route mission steps to your agents, verify their work, and inspect the result.</p><p class="intro">Your agents bring the tools, models, and domain knowledge. Starlight brings a shared execution contract.</p><div class="actions"><a class="button" href="#demo">Watch the walkthrough <span>↓</span></a><a class="text-link" href="#start">Run it yourself ↗</a></div></div>
+      <div class="flow" aria-label="Execution flow: a mission passes through the coordinator to an agent, then verification, then a report"><div class="flow-head"><span>THE EXECUTION CONTRACT</span><span class="dot">●</span></div><div class="flow-row"><b>01</b><div><strong>Mission</strong><small>Goal · context · constraints · steps</small></div></div><div class="connector">↓</div><div class="flow-row"><b>02</b><div><strong>Coordinator → Agent</strong><small>Claims · selection · bounded execution</small></div></div><div class="connector">↓</div><div class="flow-row"><b>03</b><div><strong>Verify → Report</strong><small>Identity · attempts · results · evidence</small></div></div><p class="flow-note">Local agents or authenticated remote Sentinels.<br>One protocol. Explicit outcomes.</p></div>
+    </section>
+    <div class="principles"><p><b>Intent in</b><span>Describe the outcome you need.</span></p><p><b>Independent agents</b><span>Implementation stays with the agent.</span></p><p><b>Evidence out</b><span>A success claim can be verified.</span></p></div>
+    <section id="demo" class="section">
+      <div class="section-heading"><div><p class="eyebrow">SEE THE CONTRACT IN ACTION</p><h2>Success is only half the story.</h2></div><p>Follow real executions through a verified file, a rejected claim, cancellation, and a remote agent.</p></div>
+      <video id="walkthrough" controls playsinline preload="metadata" poster="assets/demo-poster.png" aria-label="Starlight narrated execution walkthrough"><source src="assets/starlight-demo.mp4" type="video/mp4"><track kind="captions" src="assets/demo-captions.vtt" srclang="en" label="English" default><p><a href="assets/starlight-demo.mp4">Download the walkthrough</a></p></video>
+      <div class="video-notes"><p>Animated walkthrough of captured CLI and SDK results, with synthetic narration. Playback is paced for explanation; it is not a live execution timer.</p><a href="assets/starlight-demo.mp4" download>Download video ↓</a></div>
+      <div id="chapters" class="chapters" aria-label="Video chapters"></div>
+      <div class="explorer"><div class="explorer-heading"><h3>Inspect the recorded runs</h3><span>CAPTURED EXECUTIONS · READ ONLY</span></div><p>These are the reports behind the video. Run the examples locally to execute your own agents.</p><div id="scenarios" class="scenario-buttons" role="group" aria-label="Recorded scenarios"></div><div id="run-summary" aria-live="polite">Loading captured results…</div><details><summary>Full JSON report</summary><pre id="run-json"></pre></details><a class="text-link" href="assets/demo-transcript.json">Download all reports and transcript ↗</a><noscript><p>JavaScript is required for the report explorer. The video and downloadable transcript work without it.</p></noscript></div>
+    </section>
+    <section id="start" class="section start"><div><p class="eyebrow">A SMALL, WORKING START</p><h2>Two agents.<br>One verified artifact.</h2><p>The included analyst reads three orders and verifies a total of 5500 cents. The writer creates a Markdown summary and reads it back.</p><p>Use Node.js 22 or newer. This alpha is available from the repository; these commands run the checked-out source.</p><a class="text-link" href="https://github.com/starlight-protocol/starlight/blob/main/examples/data-report/agents.cjs">Read the example agents ↗</a></div><div class="code-block"><div class="code-title">TERMINAL <span>FROM A FRESH CHECKOUT</span></div><pre><code>git clone https://github.com/starlight-protocol/starlight.git
+cd starlight
+npm ci
+npm run demo
+
+# Reproduce every scenario in the video
+npm run demo:walkthrough
+
+# Validate runtime and installed package
+npm run release:gate</code></pre><p>Each demo writes a fresh artifact and JSON report under <code>.starlight/runs/</code>.</p></div></section>
+    <section class="section contract"><div><p class="eyebrow">BUILD ON WHAT IS THERE</p><h2>A runtime with clear boundaries.</h2></div><div class="boundaries"><article><h3>What the platform provides</h3><p>Sequential missions, agent registration and routing, capacity limits, deadlines, cooperative cancellation, optional verification, and inspectable reports.</p><p>Remote agents use a token-authenticated JSON-RPC/WebSocket contract. “Sentinel” is the protocol name for an agent.</p></article><article><h3>What your agents provide</h3><p>Tools, model calls, planning, domain logic, and enforcement of business constraints. Starlight does not interpret arbitrary goals on their behalf.</p><p>Agents are trusted code. SDK history is in memory; saved CLI reports are records, not durable checkpoints. Cancellation cannot undo external work.</p></article></div></section>
+    <section id="docs" class="section"><p class="eyebrow">GO DEEPER</p><h2>Documentation, grounded in the code.</h2><div class="doc-links"><a href="https://github.com/starlight-protocol/starlight/blob/main/docs/AGENTS.md"><strong>Build an agent ↗</strong><span>Local registration, missions, CLI, and remote integration.</span></a><a href="https://github.com/starlight-protocol/starlight/blob/main/docs/OBJECTIVE.md"><strong>Read the objective ↗</strong><span>First principles, product scope, and what comes next.</span></a><a href="https://github.com/starlight-protocol/starlight/blob/main/spec/STARLIGHT_CORE_PROTOCOL.md"><strong>Protocol 1.0 ↗</strong><span>The interoperable wire contract and its semantics.</span></a><a href="https://github.com/starlight-protocol/starlight/blob/main/docs/AUDIT.md"><strong>Review the audit ↗</strong><span>Findings, verification evidence, and known limits.</span></a><a href="https://github.com/starlight-protocol/starlight/blob/main/docs/DEMO.md"><strong>Reproduce the demo ↗</strong><span>Scenario assertions, media generation, and captions.</span></a><a href="https://github.com/starlight-protocol/starlight/blob/main/spec/SECURITY_PROFILE.md"><strong>Network security ↗</strong><span>Authentication and deployment responsibilities.</span></a></div></section>
+  </main><footer><a class="brand" href="./">✳ starlight</a><p>Open source · MIT · Alpha software</p><a href="build-info.json">Deployment record ↗</a></footer>
+</body>
+</html>

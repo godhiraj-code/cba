@@ -11,8 +11,9 @@ This JavaScript/Node.js alpha includes an embeddable runtime, a local CLI, and a
 protocol for remote agents. You supply domain agents; arbitrary natural-language planning
 requires an agent that implements it. No model provider or browser is required.
 
-[![Watch the 63-second verified CLI demo](assets/demo-poster.png)](assets/starlight-demo.mp4)
+[![Watch the narrated execution walkthrough](assets/demo-poster.png)](https://starlight-protocol.github.io/starlight/#demo)
 
+[Website and interactive report explorer](https://starlight-protocol.github.io/starlight/) ·
 [Video and reproduction instructions](docs/DEMO.md) · [Technical audit](docs/AUDIT.md)
 
 ## Run something real

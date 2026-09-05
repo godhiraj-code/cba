@@ -56,13 +56,14 @@ default error fallback, while platform-created Coordinators stop on ambiguous ex
 | Extensibility | CommonJS/ESM agent modules and authenticated remote Sentinel integration |
 | Consumer contracts | TypeScript positive/negative consumer fixtures and installed root/core/platform exports |
 | Packaging | Production artifact contains only supported runtime/docs/examples; installed CLI/demo/E2E proof |
-| Video | 63 seconds, H.264, 1600×900, complete decode and visual inspection; transcript from real executions |
+| Video | 200 seconds, H.264/AAC, 1920×1080 at 24 fps, narration and captions; six captured execution reports; full decode and chapter-frame inspection |
+| Public website | Explicit static artifact, homepage and asset checks, actual HTTP response/hash verification, missing/stale/corrupt/wrong-type regressions |
 | Dependency security | Full npm audit, including development tools, is part of the gate; only ws is a runtime dependency |
 | Documentation | README, authoring, objective, migration, security, wire spec, TCK, governance, changelog, demo, contributor guide |
 
 ## Environment and final verification
 
-Local verification on Windows with Node.js 24.18.1 passed after a clean `npm ci`:
+The initial runtime audit on Windows with Node.js 24.18.1 passed after a clean `npm ci`:
 
 - 53 unit/integration tests, including the documented external Hub CLI profile.
 - 19 black-box protocol checks, with noncooperative remote capacity quarantine/recovery.
@@ -78,8 +79,36 @@ The implementation commit `9b34f2306a2056f4db0ff18a5dcf87cb6ace4099` passed the
 [GitHub Linux Node.js 22/24 release gate](https://github.com/starlight-protocol/starlight/actions/runs/33943471637).
 Both jobs completed clean installation, the full gate, and the repository-pollution check.
 The automatically triggered [Pages workflow](https://github.com/starlight-protocol/starlight/actions/runs/33943471321)
-also succeeded. The [workflow definition](../.github/workflows/starlight_ci.yml) remains the
-enforced verification path for subsequent commits. This evidence update changes documentation only.
+also succeeded, **but this did not establish public availability**. The root URL was not checked;
+the later live HTTP check returned 404. That was an incomplete deployment verification.
+
+## Website and demo follow-up
+
+The Pages API showed `build_type: legacy`, publishing `main:/docs`. The refactor had removed the
+homepage from that folder. A successful Jekyll build could therefore publish no root index.
+Local Markdown link validation and the recorded video checks did not exercise this public path.
+
+The correction adds a dedicated `website/` source and explicit static artifact, keeps the existing
+public URL, and uses the [Pages workflow](../.github/workflows/pages.yml) to build, deploy, and
+check the live homepage and all eight public files against their expected hashes and MIME types.
+Five HTTP scenarios verify a good deployment and detect a missing homepage, stale commit, corrupt
+asset, and incorrect video content type. The build normalizes text line endings so Windows and
+Linux compare the same published bytes.
+
+The replacement demo contains real CLI success/failure/inspection/fresh-run results plus SDK
+verification rejection, cooperative cancellation, and a token-authenticated local WebSocket agent.
+Eight assertions must pass before capture. It is a 200-second explanatory animation with synthetic
+narration and WebVTT captions. All 12 chapter frames were inspected and the full video decoded.
+
+The complete local release gate passed: 59 tests including website subtests, 19 TCK checks,
+lint/types/schema, the authenticated multi-process proof, all walkthrough assertions, static build,
+41-file installed package smoke test, and dependency audit with zero vulnerabilities. Browser
+checks cover all six recorded scenarios, report expansion, native playback, chapter seeking,
+caption loading, and a 390-pixel mobile viewport without horizontal page overflow.
+
+The current [runtime workflow](../.github/workflows/starlight_ci.yml) and Pages workflow enforce
+these checks for subsequent commits. See [website operations](WEBSITE.md) for reproduction and
+the deployment record served by the public site for its exact source commit.
 
 ## Remaining limits and risks
 
@@ -93,7 +122,8 @@ enforced verification path for subsequent commits. This evidence update changes 
    owner or external lock. Capacity alone does not discover shared resources.
 5. **Deployment security remains operator work.** TLS termination, credential scope/rotation,
    authorization, storage permissions, retention, and sandboxing require configuration.
-6. **No hosted UI or general planner is included.** The CLI/SDK support explicit missions and
+6. **No hosted execution UI or general planner is included.** The public website explores recorded
+   runs; it does not execute agents. The CLI/SDK support explicit missions and
    arbitrary agent implementations; they do not themselves select an LLM or generate plans.
 
 These are public alpha boundaries, not hidden claims of completed features. The next useful

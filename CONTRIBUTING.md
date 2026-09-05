@@ -29,7 +29,8 @@ npm run release:gate
 ```
 
 This runs all tests, lint, TypeScript consumer checks, schema alignment, 19 black-box protocol
-checks, an authenticated multi-process proof, neutral installed-package demo/inspection, and a
+checks, an authenticated multi-process proof, all walkthrough scenarios, the website build,
+neutral installed-package demo/inspection, and a
 production and development dependency audit. Packaging checks both CLI shims in a temporary path containing
 spaces and rejects legacy/test/build material. Registry access is needed for installation/audit.
 Caches are isolated or stored in ignored `.npm-cache/`.
@@ -40,6 +41,10 @@ does not substitute for that CI matrix.
 
 See [the demo guide](docs/DEMO.md) for optional media generation. Python, Pillow, and FFmpeg are
 media-authoring tools, not npm runtime dependencies.
+
+See [website publishing](docs/WEBSITE.md) for previewing and deploying the public site. The Pages
+workflow must verify the actual public URL and asset hashes after deployment. A green build alone
+does not establish that the homepage or video is available.
 
 Publishing to npm, tagging releases, and changing deployments require explicit maintainer
 authorization. A GitHub push does not publish the npm package.

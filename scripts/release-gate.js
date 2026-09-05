@@ -8,6 +8,8 @@ const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const commands = [
     [npm, ['test']],
     [npm, ['run', 'proof:e2e']],
+    [npm, ['run', 'demo:walkthrough']],
+    [npm, ['run', 'site:build']],
     [process.execPath, ['scripts/artifact-smoke.js']],
     [npm, ['audit', '--audit-level=low']]
 ];

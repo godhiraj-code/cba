@@ -2,6 +2,14 @@
 
 All notable changes to Starlight are documented here. The project follows Semantic Versioning.
 
+## Unreleased — website and demo correction
+
+- Fixed the public GitHub Pages 404 caused by publishing a `/docs` folder without a homepage.
+- Added a general-purpose platform website with a read-only explorer for six real execution reports.
+- Replaced the basic demo with a 3:20 narrated 1080p walkthrough covering verified output, constraint failure, rejected verification, cancellation, authenticated remote execution, and fresh recovery.
+- Added captions, chapter controls, reproducible media, and an explicit Pages build/deploy/live-verification workflow.
+- Added HTTP regression coverage for missing, stale, corrupt, and incorrectly served deployments; the release gate now executes all demo scenarios and builds the site.
+
 ## [5.0.0-alpha.2] - 2026-09-05
 
 ### Added
@@ -9,7 +17,7 @@ All notable changes to Starlight are documented here. The project follows Semant
 - General-purpose `AgentPlatform` runtime with agent registration, optional completion verification, sequential missions, result handoff, cancellation, bounded run history, and inspectable reports.
 - `starlight` CLI for loading CommonJS/ESM agents, running missions, and inspecting saved reports.
 - A working two-agent data/report demo, including real file output and read-back verification, exercised from the installed npm artifact.
-- Product objective, agent/migration guides, technical audit, and a reproducible 63-second demo rendered from real CLI results.
+- Product objective, agent/migration guides, technical audit, and an initial reproducible CLI demo (superseded by the narrated walkthrough above).
 
 ### Fixed
 
