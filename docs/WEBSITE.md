@@ -16,6 +16,8 @@ The repository's Pages setting must have `build_type: workflow`.
 The build requires an index, checks local assets and anchor targets, checks source documentation
 links, validates the six recorded reports and chapter duration, and writes `build-info.json`.
 The deployment record includes the source commit and SHA-256 hashes of the published files.
+Page assets also share a content-derived URL revision, including video, captions, and report
+data, so cached media does not get mixed with chapter timings from a newer release.
 
 CI serves the artifact at a project subpath before uploading it. After deployment, the checker
 requires the public root to return HTTP 200 and the expected title. It then compares the live

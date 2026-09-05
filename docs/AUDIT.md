@@ -56,7 +56,7 @@ default error fallback, while platform-created Coordinators stop on ambiguous ex
 | Extensibility | CommonJS/ESM agent modules and authenticated remote Sentinel integration |
 | Consumer contracts | TypeScript positive/negative consumer fixtures and installed root/core/platform exports |
 | Packaging | Production artifact contains only supported runtime/docs/examples; installed CLI/demo/E2E proof |
-| Video | 200 seconds, H.264/AAC, 1920×1080 at 24 fps, narration and captions; six captured execution reports; full decode and chapter-frame inspection |
+| Video | 216 seconds, H.264/AAC, 1920×1080 at 24 fps, conversational neural narration and speech-aligned captions; six captured execution reports |
 | Public website | Explicit static artifact, homepage and asset checks, actual HTTP response/hash verification, missing/stale/corrupt/wrong-type regressions |
 | Dependency security | Full npm audit, including development tools, is part of the gate; only ws is a runtime dependency |
 | Documentation | README, authoring, objective, migration, security, wire spec, TCK, governance, changelog, demo, contributor guide |
@@ -117,6 +117,15 @@ passed for that exact commit.
 The current [runtime workflow](../.github/workflows/starlight_ci.yml) and Pages workflow enforce
 these checks for subsequent commits. See [website operations](WEBSITE.md) for reproduction and
 the deployment record served by the public site for its exact source commit.
+
+The subsequent voice revision replaces libflite with Microsoft's Andrew multilingual neural
+voice and a more conversational script. Captions use speech-service sentence boundaries instead
+of estimating timings from character counts. The original six reports and execution assertions
+are preserved. Video, captions, chapter data, and browser assets share a content-derived URL
+revision to prevent browsers mixing old media with the new timing data.
+The 216-second replacement passed full audio/video decoding and local browser playback with
+captions loaded. Audio is normalized to a −16 LUFS target with a −1.5 dBTP ceiling; the encoded
+track's measured true peak was −1.7 dBFS. The six captured report objects are unchanged.
 
 ## Remaining limits and risks
 

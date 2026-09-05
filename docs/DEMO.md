@@ -4,25 +4,26 @@
 [Download MP4](../assets/starlight-demo.mp4) · [Captured reports](../assets/demo-transcript.json) ·
 [English captions](../assets/demo-captions.vtt)
 
-The **3:20, 1920×1080, 24 fps** walkthrough uses actual CLI and SDK executions, explanatory
-architecture animation, and synthetic narration (libflite's `slt` voice). It is a paced technical
+The **3:36, 1920×1080, 24 fps** walkthrough uses actual CLI and SDK executions, explanatory
+architecture animation, and conversational neural narration (Microsoft's `en-US-AndrewMultilingualNeural`
+voice at −3% rate, generated with `edge-tts`). It is a paced technical
 walkthrough, not a graphical product recording or a runtime-duration claim. The website's
 report explorer is read-only and displays the six captured reports behind the video.
 
 | Time | Demonstration |
 | --- | --- |
 | 00:00 | Mission, agent, verification, and report responsibilities |
-| 00:16 | Three real source orders: 1200 + 3500 + 800 cents |
-| 00:31 | Analyst and writer capabilities and execution capacities |
+| 00:14 | Three real source orders: 1200 + 3500 + 800 cents |
+| 00:32 | Analyst and writer capabilities and execution capacities |
 | 00:48 | Two ordered steps with a shared row constraint |
 | 01:04 | Routing, independently checked totals, file write and readback |
 | 01:22 | Saved report inspection and actual Markdown contents |
-| 01:37 | maxRows=1: failure, exit 1, no writer, no output file |
-| 01:53 | Incorrect completion claim rejected by the verifier |
-| 02:10 | Cancellation observed by a worker; subsequent step prevented |
-| 02:26 | Token-authenticated Sentinel over a real local WebSocket |
-| 02:44 | Corrected input, fresh run ID, verified artifact |
-| 03:00 | Reproduction commands and alpha boundaries |
+| 01:40 | maxRows=1: failure, exit 1, no writer, no output file |
+| 01:58 | Incorrect completion claim rejected by the verifier |
+| 02:16 | Cancellation observed by a worker; subsequent step prevented |
+| 02:33 | Token-authenticated Sentinel over a real local WebSocket |
+| 02:54 | Corrected input, fresh run ID, verified artifact |
+| 03:15 | Reproduction commands and alpha boundaries |
 
 ## What is asserted
 
@@ -57,7 +58,10 @@ without `--record` leaves the published recording unchanged. The agents and miss
 
 ## Recreate the media
 
-Python, Pillow, and FFmpeg with libflite are optional media-authoring tools, not runtime dependencies.
+Python, Pillow, FFmpeg, and `edge-tts` are optional media-authoring tools, not runtime dependencies.
+Install the speech tool with `python -m pip install edge-tts==7.2.7` if needed. Neural synthesis
+sends the public narration script to Microsoft's online speech service and requires network access.
+Generated speech and its timing are cached locally by voice, rate, and script content.
 
 ```bash
 node scripts/demo-walkthrough.js --record=assets/demo-transcript.json
@@ -66,8 +70,11 @@ ffprobe -v error -show_entries format=duration:stream=codec_name,width,height,sa
 ffmpeg -v error -i assets/starlight-demo.mp4 -f null -
 ```
 
-The renderer generates synthetic audio from the narrative, pads each chapter to accommodate it,
-and writes matching chapter durations, WebVTT captions, a poster, and inspection frames.
+The renderer uses a conversational script, generates neural audio, pads each chapter by roughly
+one second, and writes WebVTT captions from actual speech-service sentence timings. It also
+writes matching chapter durations, a poster, and inspection frames. Set `STARLIGHT_DEMO_VOICE`
+to another `edge-tts --list-voices` voice to change the narrator. Synthesis failures stop rendering;
+the renderer does not silently substitute the previous basic synthesizer.
 Update the chapter table above if narration timing changes. Inspection frames and intermediate
 audio stay under `.starlight/media-render/`; only final deliverables are versioned.
 

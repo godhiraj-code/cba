@@ -42,7 +42,8 @@ function renderReport(report, artifact) {
 }
 
 async function loadDemo() {
-    const response = await fetch('assets/demo-transcript.json');
+    const revision = document.querySelector('meta[name="starlight-release"]')?.content || 'development';
+    const response = await fetch('assets/demo-transcript.json?v=' + encodeURIComponent(revision));
     if (!response.ok) throw new Error('Recorded results are unavailable. Download the video or try again later.');
     const data = await response.json();
     const scenarios = document.querySelector('#scenarios');

@@ -4,6 +4,9 @@ All notable changes to Starlight are documented here. The project follows Semant
 
 ## Unreleased — website and demo correction
 
+- Replaced the monotonic demo narration with a conversational neural voice, revised spoken phrasing, and captions aligned to speech timings. The updated walkthrough runs 3:36.
+- Versioned public asset URLs together so viewers receive matching video, captions, and chapter data after updates.
+
 - Fixed the public GitHub Pages 404 caused by publishing a `/docs` folder without a homepage.
 - Added a general-purpose platform website with a read-only explorer for six real execution reports.
 - Replaced the basic demo with a 3:20 narrated 1080p walkthrough covering verified output, constraint failure, rejected verification, cancellation, authenticated remote execution, and fresh recovery.

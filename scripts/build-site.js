@@ -19,7 +19,16 @@ function copy(source, target) {
 for (const name of files) copy(path.join(root, 'website', name), path.join(output, name));
 for (const name of assets) copy(path.join(root, 'assets', name), path.join(output, 'assets', name));
 fs.writeFileSync(path.join(output, '.nojekyll'), '');
-const html = fs.readFileSync(path.join(output, 'index.html'), 'utf8');
+const release = crypto.createHash('sha256');
+for (const name of [...files.slice(1), ...assets.map(name => `assets/${name}`)]) {
+    release.update(fs.readFileSync(path.join(output, name)));
+}
+const revision = release.digest('hex').slice(0, 16);
+const html = fs.readFileSync(path.join(output, 'index.html'), 'utf8')
+    .replace('</head>', `  <meta name="starlight-release" content="${revision}">\n</head>`)
+    .replace(/(href|src|poster)="((?:assets\/[^"?]+|style\.css|app\.js|favicon\.svg))"/g,
+        `$1="$2?v=${revision}"`);
+fs.writeFileSync(path.join(output, 'index.html'), html);
 assert.match(html, /<title>Starlight — General-purpose agent platform<\/title>/);
 const localTargets = new Set();
 for (const [, target] of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
@@ -35,7 +44,7 @@ for (const [, target] of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     }
     if (target === './' || target === 'build-info.json') continue;
     assert(!target.startsWith('/'), `Root-relative path breaks project Pages: ${target}`);
-    assert(fs.existsSync(path.join(output, target)), `Missing public asset: ${target}`);
+    assert(fs.existsSync(path.join(output, target.split('?')[0])), `Missing public asset: ${target}`);
     localTargets.add(target);
 }
 const transcript = JSON.parse(fs.readFileSync(path.join(output, 'assets/demo-transcript.json'), 'utf8'));

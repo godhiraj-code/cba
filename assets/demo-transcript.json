@@ -662,8 +662,8 @@
         "Starlight coordinates execution and records what happened.",
         "This walkthrough uses real Node.js and WebSocket executions."
       ],
-      "seconds": 16,
-      "narration": "Starlight is a general purpose agent platform. You provide the goal and boundaries. Your agents provide the implementation. Follow real executions through routing, verification, failure, cancellation, and a remote agent."
+      "seconds": 14,
+      "narration": "Here's Starlight. Give it a goal and a few boundaries, then let your agents do the work. But how do you know the work is actually correct? Let's follow a real mission, and see what happens when things go wrong."
     },
     {
       "title": "01 / Start with real data",
@@ -685,8 +685,8 @@
         "  }",
         "]"
       ],
-      "seconds": 15,
-      "narration": "We begin with three real orders. Their amounts are twelve hundred, thirty five hundred, and eight hundred cents. The correct total is fifty five hundred cents. This deterministic example needs no model or API key."
+      "seconds": 18,
+      "narration": "We'll start small: three orders, with amounts stored in cents. Add twelve hundred, thirty-five hundred, and eight hundred. That's fifty-five hundred cents. Nothing simulated here. We're reading a real file, and we don't need a model or an API key."
     },
     {
       "title": "02 / Discover the agents",
@@ -702,8 +702,8 @@
         "  capacity: 1",
         ""
       ],
-      "seconds": 17,
-      "narration": "Two agents register different capabilities. The order analyst handles structured data. The report writer creates documents. Each has capacity for one execution. Their claims let the coordinator select the appropriate agent for each step."
+      "seconds": 16,
+      "narration": "Meet the two agents. The analyst understands the order data. The writer knows how to produce a document. Each can handle one execution at a time. When a step arrives, their claims tell the coordinator who's equipped to do the work."
     },
     {
       "title": "03 / Express the mission",
@@ -718,7 +718,7 @@
         "2. Write the verified order summary"
       ],
       "seconds": 16,
-      "narration": "The mission describes an outcome and two ordered steps. First summarize the data, then write the verified summary. A shared maximum row constraint applies to both steps. The platform passes earlier results to the next agent."
+      "narration": "The mission itself is simple. Summarize the orders, then write the verified summary. Both steps share a row limit. And the writer receives the analyst's result, so it can build on work that's already been checked."
     },
     {
       "title": "04 / Execute and verify",
@@ -740,7 +740,7 @@
         "Verified result: 3 orders / 5500 cents"
       ],
       "seconds": 18,
-      "narration": "Now execute the mission. The coordinator selects the analyst, which computes the total and independently verifies it. The writer then creates a real Markdown file and reads it back. Both steps complete, with agent identity, attempts, and evidence recorded."
+      "narration": "Let's run it. First, the analyst calculates the total and checks it independently. Then the writer creates a Markdown file and reads it back. Both steps finish successfully. We can see who ran each step, how many attempts it took, and the evidence they returned."
     },
     {
       "title": "05 / Inspect the saved result",
@@ -756,8 +756,8 @@
         "Orders: 3",
         "Total (cents): 5500"
       ],
-      "seconds": 15,
-      "narration": "Inspection reads the saved report. The output file contains three orders and fifty five hundred cents. A completed status is useful because we can follow it back to a concrete artifact and its evidence."
+      "seconds": 18,
+      "narration": "Now open the saved report. Here's the actual file: three orders, fifty-five hundred cents. That completed status has something concrete behind it. We can inspect the artifact and follow the evidence, instead of taking the agent's word for it."
     },
     {
       "title": "06 / Prove the failure boundary",
@@ -774,8 +774,8 @@
         "",
         "Error: orders must have nonnegative integer amountCents and respect maxRows"
       ],
-      "seconds": 16,
-      "narration": "Now change only the row limit to one. The same source contains three rows. The analyst rejects the input. The mission fails, the CLI exits with code one, and the writer never starts. We assert that no output file was created."
+      "seconds": 18,
+      "narration": "Let's break something. Set the row limit to one, but leave all three orders in the source. The analyst rejects the input. The command exits with an error, and the writer never starts. We also check the destination: no output file was created."
     },
     {
       "title": "07 / A success claim is not enough",
@@ -790,8 +790,8 @@
         "Writer step: never started",
         "Evidence retained: claimed total: 9999"
       ],
-      "seconds": 17,
-      "narration": "An agent can also claim success incorrectly. Here it returns nine thousand nine hundred ninety nine as the total. The independent verifier expects fifty five hundred and rejects the claim. The platform retains the evidence and does not start the writer."
+      "seconds": 18,
+      "narration": "What if an agent claims success, but gets the answer wrong? This one returns nine thousand nine hundred and ninety-nine cents. The verifier expects fifty-five hundred. It rejects the result, keeps the evidence, and prevents the writer from continuing."
     },
     {
       "title": "08 / Cancel work deliberately",
@@ -804,8 +804,8 @@
         "Next step: never started",
         "Cancellation is cooperative. It cannot undo external work."
       ],
-      "seconds": 16,
-      "narration": "Next, cancel a running mission. The worker observes its abort signal, and the platform prevents the second step from starting. This is cooperative cancellation. It cannot forcibly stop arbitrary code or undo external effects."
+      "seconds": 17,
+      "narration": "Sometimes you just need to stop. Cancel this mission, and the worker receives an abort signal. The next step never starts. There's an important limit here: the agent has to cooperate. Cancellation can't undo an external action that's already happened."
     },
     {
       "title": "09 / Cross a real network boundary",
@@ -819,8 +819,8 @@
         "Returned value: 4 words",
         "One process here; real socket transport. Multi-process proof also included."
       ],
-      "seconds": 18,
-      "narration": "The same platform also routes to remote Sentinels. Here a token authenticated agent connects over a real local WebSocket and counts four words. This capture uses one process with a real socket. The repository also includes a separate multi process proof."
+      "seconds": 21,
+      "narration": "Agents can connect remotely, too. This Sentinel authenticates with a token, then counts four words over a real local WebSocket. We're using one process for this recording, with an actual socket between components. A separate example proves the same exchange across multiple processes."
     },
     {
       "title": "10 / Correct the input. Start a fresh run.",
@@ -833,8 +833,8 @@
         "Verified result: 3 orders / 5500 cents",
         "Fresh run and artifact. No durable resume or automatic rollback."
       ],
-      "seconds": 16,
-      "narration": "Restore the valid input and start a fresh run. Both agents complete and verify the artifact again. The run has a new identifier. This demonstrates recovery by correcting the input, not durable resume or an automatic rollback."
+      "seconds": 21,
+      "narration": "Now fix the input and try again. With the valid row limit restored, both agents complete and verify a fresh artifact. Notice the new run identifier. This is a new execution after a correction. It isn't resuming an old run or rolling back earlier work."
     },
     {
       "title": "Build agents. Keep execution inspectable.",
@@ -847,16 +847,19 @@
         "Alpha boundaries: trusted code, cooperative cancellation, in-memory SDK history.",
         "starlight-protocol.github.io/starlight/"
       ],
-      "seconds": 20,
-      "narration": "Start with the included example, inspect the reports, then supply your own agents. Tools, models, and planning belong inside those agents. Starlight coordinates their execution. This alpha uses trusted code and in memory history, with clear outcomes and inspectable evidence."
+      "seconds": 21,
+      "narration": "That's the starting point. Run the example, inspect the reports, then bring your own agents. They can use tools, models, or ordinary code. Starlight coordinates the work and records the outcome. This is still an alpha: agents are trusted code, and runtime history lives in memory."
     }
   ],
   "media": {
-    "seconds": 200,
+    "seconds": 216,
     "width": 1920,
     "height": 1080,
     "fps": 24,
-    "narration": "synthetic / libflite slt"
+    "narration": "neural synthetic / Microsoft en-US-AndrewMultilingualNeural",
+    "voice": "en-US-AndrewMultilingualNeural",
+    "rate": "-3%",
+    "captions": "speech-service sentence boundaries"
   },
   "pathNote": "Workspace prefixes are replaced with <workspace> and workspace: in the public recording. Run IDs and results are unchanged."
 }

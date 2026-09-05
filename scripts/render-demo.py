@@ -1,26 +1,28 @@
 """Render asserted executions with architecture motion, synthetic narration and captions.
 Usage: python scripts/render-demo.py assets/demo-transcript.json assets/starlight-demo.mp4
-Optional authoring dependencies: Pillow and FFmpeg with libflite.
+Optional authoring dependencies: Pillow, FFmpeg and edge-tts. Neural synthesis needs network access.
 """
-import json, math, os, shutil, subprocess, sys, textwrap, wave
+import hashlib, json, math, os, re, shutil, subprocess, sys, textwrap, wave
 from functools import lru_cache
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 W,H,FPS=1920,1080,24
 BG,PANEL,TEXT,MUTED,ACCENT='#101b27','#192936','#edf2f1','#acbdc9','#a2e2c5'
+VOICE = os.environ.get('STARLIGHT_DEMO_VOICE', 'en-US-AndrewMultilingualNeural')
+RATE = '-3%'
 NARRATION=[
-'Starlight is a general purpose agent platform. You provide the goal and boundaries. Your agents provide the implementation. Follow real executions through routing, verification, failure, cancellation, and a remote agent.',
-'We begin with three real orders. Their amounts are twelve hundred, thirty five hundred, and eight hundred cents. The correct total is fifty five hundred cents. This deterministic example needs no model or API key.',
-'Two agents register different capabilities. The order analyst handles structured data. The report writer creates documents. Each has capacity for one execution. Their claims let the coordinator select the appropriate agent for each step.',
-'The mission describes an outcome and two ordered steps. First summarize the data, then write the verified summary. A shared maximum row constraint applies to both steps. The platform passes earlier results to the next agent.',
-'Now execute the mission. The coordinator selects the analyst, which computes the total and independently verifies it. The writer then creates a real Markdown file and reads it back. Both steps complete, with agent identity, attempts, and evidence recorded.',
-'Inspection reads the saved report. The output file contains three orders and fifty five hundred cents. A completed status is useful because we can follow it back to a concrete artifact and its evidence.',
-'Now change only the row limit to one. The same source contains three rows. The analyst rejects the input. The mission fails, the CLI exits with code one, and the writer never starts. We assert that no output file was created.',
-'An agent can also claim success incorrectly. Here it returns nine thousand nine hundred ninety nine as the total. The independent verifier expects fifty five hundred and rejects the claim. The platform retains the evidence and does not start the writer.',
-'Next, cancel a running mission. The worker observes its abort signal, and the platform prevents the second step from starting. This is cooperative cancellation. It cannot forcibly stop arbitrary code or undo external effects.',
-'The same platform also routes to remote Sentinels. Here a token authenticated agent connects over a real local WebSocket and counts four words. This capture uses one process with a real socket. The repository also includes a separate multi process proof.',
-'Restore the valid input and start a fresh run. Both agents complete and verify the artifact again. The run has a new identifier. This demonstrates recovery by correcting the input, not durable resume or an automatic rollback.',
-'Start with the included example, inspect the reports, then supply your own agents. Tools, models, and planning belong inside those agents. Starlight coordinates their execution. This alpha uses trusted code and in memory history, with clear outcomes and inspectable evidence.'
+"Here's Starlight. Give it a goal and a few boundaries, then let your agents do the work. But how do you know the work is actually correct? Let's follow a real mission, and see what happens when things go wrong.",
+"We'll start small: three orders, with amounts stored in cents. Add twelve hundred, thirty-five hundred, and eight hundred. That's fifty-five hundred cents. Nothing simulated here. We're reading a real file, and we don't need a model or an API key.",
+"Meet the two agents. The analyst understands the order data. The writer knows how to produce a document. Each can handle one execution at a time. When a step arrives, their claims tell the coordinator who's equipped to do the work.",
+"The mission itself is simple. Summarize the orders, then write the verified summary. Both steps share a row limit. And the writer receives the analyst's result, so it can build on work that's already been checked.",
+"Let's run it. First, the analyst calculates the total and checks it independently. Then the writer creates a Markdown file and reads it back. Both steps finish successfully. We can see who ran each step, how many attempts it took, and the evidence they returned.",
+"Now open the saved report. Here's the actual file: three orders, fifty-five hundred cents. That completed status has something concrete behind it. We can inspect the artifact and follow the evidence, instead of taking the agent's word for it.",
+"Let's break something. Set the row limit to one, but leave all three orders in the source. The analyst rejects the input. The command exits with an error, and the writer never starts. We also check the destination: no output file was created.",
+"What if an agent claims success, but gets the answer wrong? This one returns nine thousand nine hundred and ninety-nine cents. The verifier expects fifty-five hundred. It rejects the result, keeps the evidence, and prevents the writer from continuing.",
+"Sometimes you just need to stop. Cancel this mission, and the worker receives an abort signal. The next step never starts. There's an important limit here: the agent has to cooperate. Cancellation can't undo an external action that's already happened.",
+"Agents can connect remotely, too. This Sentinel authenticates with a token, then counts four words over a real local WebSocket. We're using one process for this recording, with an actual socket between components. A separate example proves the same exchange across multiple processes.",
+"Now fix the input and try again. With the valid row limit restored, both agents complete and verify a fresh artifact. Notice the new run identifier. This is a new execution after a correction. It isn't resuming an old run or rolling back earlier work.",
+"That's the starting point. Run the example, inspect the reports, then bring your own agents. They can use tools, models, or ordinary code. Starlight coordinates the work and records the outcome. This is still an alpha: agents are trusted code, and runtime history lives in memory."
 ]
 INSIGHTS=[
 ('A shared contract','Agents own the implementation.\nThe platform owns coordination.','GOAL → EVIDENCE'),
@@ -92,32 +94,46 @@ def frame(scene,elapsed,index,position,duration):
 def timestamp(seconds):
     m=round(seconds*1000)
     return f'{m//3600000:02d}:{m//60000%60:02d}:{m//1000%60:02d}.{m%1000:03d}'
+def srt_seconds(value):
+    hours,minutes,seconds,milliseconds=map(int,re.split('[:,]',value))
+    return hours*3600+minutes*60+seconds+milliseconds/1000
 def main():
     source,target=[Path(p).resolve() for p in sys.argv[1:3]]
     data=json.loads(source.read_text(encoding='utf8'))
     assert all(data['assertions'].values()) and len(data['scenes'])==len(NARRATION)
     exe=shutil.which('ffmpeg')
-    if not exe:raise RuntimeError('FFmpeg with libflite is required')
+    tts=shutil.which('edge-tts')
+    if not exe or not tts:raise RuntimeError('FFmpeg and edge-tts are required; no low-quality voice fallback is used')
     work=source.parent.parent/'.starlight'/'media-render';work.mkdir(parents=True,exist_ok=True)
     captions=['WEBVTT',''];offset=0
     for i,(scene,narration) in enumerate(zip(data['scenes'],NARRATION)):
-        (work/f'voice-{i}.txt').write_text(narration,encoding='utf8')
-        subprocess.run([exe,'-y','-v','error','-f','lavfi','-i',f'flite=textfile=voice-{i}.txt:voice=slt',f'voice-{i}.wav'],cwd=work,check=True)
+        key=hashlib.sha256((VOICE+RATE+narration).encode()).hexdigest()[:16]
+        stem=f'neural-{i}-{key}'
+        (work/f'{stem}.txt').write_text(narration,encoding='utf8')
+        if not all((work/f'{stem}.{ext}').exists() and (work/f'{stem}.{ext}').stat().st_size for ext in ('mp3','srt')):
+            subprocess.run([tts,'--voice',VOICE,f'--rate={RATE}','--file',f'{stem}.txt',
+                '--write-media',f'{stem}.mp3','--write-subtitles',f'{stem}.srt'],cwd=work,check=True,timeout=120)
+        subprocess.run([exe,'-y','-v','error','-i',f'{stem}.mp3',f'voice-{i}.wav'],cwd=work,check=True)
         with wave.open(str(work/f'voice-{i}.wav')) as audio:length=audio.getnframes()/audio.getframerate()
-        scene['seconds']=max(scene['seconds'],math.ceil(length+2));scene['narration']=narration
-        spoken=0
-        for sentence in narration.split('. '):
-            end=spoken+length*(len(sentence)+2)/(len(narration)+2)
-            captions.extend([f'{timestamp(offset+spoken)} --> {timestamp(offset+min(end,length))}','\n'.join(textwrap.wrap(sentence.rstrip('.')+'.',width=88)),'']);spoken=end
+        scene['seconds']=max(10,math.ceil(length+1));scene['narration']=narration
+        cues=re.findall(r'([\d:,]+) --> ([\d:,]+)\n(.+?)(?=\n\n|\Z)',(work/f'{stem}.srt').read_text(encoding='utf8').strip(),re.S)
+        assert cues, 'Neural narration must include synchronized captions'
+        previous=0
+        for start,end,sentence in cues:
+            start,end=srt_seconds(start),srt_seconds(end)
+            assert previous<=start<end<=length+0.1, 'Invalid speech boundary timing'
+            captions.extend([f'{timestamp(offset+start)} --> {timestamp(offset+end)}','\n'.join(textwrap.wrap(sentence,width=88)),''])
+            previous=end
         subprocess.run([exe,'-y','-v','error','-i',f'voice-{i}.wav','-af',f'apad,atrim=duration={scene["seconds"]}','-ar','48000','-ac','2',f'padded-{i}.wav'],cwd=work,check=True)
         offset+=scene['seconds']
     (work/'audio-list.txt').write_text('\n'.join(f"file 'padded-{i}.wav'" for i in range(len(NARRATION))),encoding='utf8')
     subprocess.run([exe,'-y','-v','error','-f','concat','-safe','0','-i','audio-list.txt','-c','copy','narration.wav'],cwd=work,check=True)
     target.with_name('demo-captions.vtt').write_text('\n'.join(captions),encoding='utf8')
     data['format']='Animated walkthrough of asserted CLI and SDK executions; synthetic narration'
-    data['media']={'seconds':offset,'width':W,'height':H,'fps':FPS,'narration':'synthetic / libflite slt'}
+    data['media']={'seconds':offset,'width':W,'height':H,'fps':FPS,'narration':f'neural synthetic / Microsoft {VOICE}',
+        'voice':VOICE,'rate':RATE,'captions':'speech-service sentence boundaries'}
     source.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n',encoding='utf8')
-    command=[exe,'-y','-hide_banner','-loglevel','error','-f','rawvideo','-pixel_format','rgb24','-video_size',f'{W}x{H}','-framerate',str(FPS),'-i','-','-i',str(work/'narration.wav'),'-c:a','aac','-b:a','128k','-c:v','libx264','-preset','fast','-crf','22','-pix_fmt','yuv420p','-movflags','+faststart','-shortest',str(target)]
+    command=[exe,'-y','-hide_banner','-loglevel','error','-f','rawvideo','-pixel_format','rgb24','-video_size',f'{W}x{H}','-framerate',str(FPS),'-i','-','-i',str(work/'narration.wav'),'-af','loudnorm=I=-16:TP=-1.5:LRA=11','-ar','48000','-c:a','aac','-b:a','128k','-c:v','libx264','-preset','fast','-crf','22','-pix_fmt','yuv420p','-movflags','+faststart','-shortest',str(target)]
     process=subprocess.Popen(command,stdin=subprocess.PIPE);position=0
     try:
         for i,scene in enumerate(data['scenes']):
