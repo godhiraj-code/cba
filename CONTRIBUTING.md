@@ -48,3 +48,9 @@ does not establish that the homepage or video is available.
 
 Publishing to npm, tagging releases, and changing deployments require explicit maintainer
 authorization. A GitHub push does not publish the npm package.
+
+An approved GitHub release must tag the exact clean commit that passed both CI jobs, attach
+the verified npm tarball and its SHA-256 checksum, and describe migration and alpha limits.
+Use a prerelease for `-alpha` versions and link it explicitly from the README and website;
+GitHub's stable-only Latest badge can otherwise point to an older generation. A GitHub release
+does not itself publish the package to the npm registry.

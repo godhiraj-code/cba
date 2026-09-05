@@ -2,7 +2,9 @@
 
 All notable changes to Starlight are documented here. The project follows Semantic Versioning.
 
-## Unreleased — website and demo correction
+## [5.0.0-alpha.2] - 2026-09-05
+
+### Website and demo
 
 - Replaced the monotonic demo narration with a conversational neural voice, revised spoken phrasing, and captions aligned to speech timings. The updated walkthrough runs 3:36.
 - Versioned public asset URLs together so viewers receive matching video, captions, and chapter data after updates.
@@ -12,8 +14,6 @@ All notable changes to Starlight are documented here. The project follows Semant
 - Replaced the basic demo with a 3:20 narrated 1080p walkthrough covering verified output, constraint failure, rejected verification, cancellation, authenticated remote execution, and fresh recovery.
 - Added captions, chapter controls, reproducible media, and an explicit Pages build/deploy/live-verification workflow.
 - Added HTTP regression coverage for missing, stale, corrupt, and incorrectly served deployments; the release gate now executes all demo scenarios and builds the site.
-
-## [5.0.0-alpha.2] - 2026-09-05
 
 ### Added
 
