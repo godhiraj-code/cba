@@ -1,7 +1,9 @@
-# Starlight
+> [!IMPORTANT]
+> **Current platform: [v5.0.0-alpha.2](https://github.com/starlight-protocol/starlight/releases/tag/v5.0.0-alpha.2) — Node.js 22+ preview.**
+> GitHub's **Latest** badge points to **legacy v1.3.4**, the old browser implementation.
+> For the current general-purpose agent platform, use the **5.x alpha linked above**.
 
-**Current platform release: [v5.0.0-alpha.2](https://github.com/starlight-protocol/starlight/releases/tag/v5.0.0-alpha.2)**
-— a preview release for Node.js 22+. The older 1.x releases belong to the legacy browser implementation.
+# Starlight
 
 **A general-purpose agent platform for turning goals into inspectable outcomes.**
 
